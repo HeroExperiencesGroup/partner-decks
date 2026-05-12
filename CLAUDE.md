@@ -1,8 +1,9 @@
 # CLAUDE.md — Working Context
 
-**Working context version:** v4.1 (PRD remains at v4)
+**Working context version:** v4.2 (PRD at v4.1)
 **Last updated:** May 12, 2026
 
+**v4.2 changes:** Phase C complete; PRD bumped to v4.1 with source-pack verifications from hero-experiences.com/why-us screenshots; canonical source pack created at `/reference/source-pack.md`; Slide 5b restructured to two groupings (travel + sustainability).
 **v4.1 changes:** Added Execution model section — Opus 4.7 as supervisor, Haiku 4.5 as worker for structured generation. Includes which slides Opus drafts directly vs. which get Haiku-then-review.
 
 ## Project
@@ -21,10 +22,10 @@ Hosted at `partners.hero-experiences.com/natgeo-<suffix>/` (subdomain pending He
 - [x] PRD v2 — hosted HTML locked as canonical format
 - [x] PRD v3 — source pack with verification status, Why-Now and The-Ask slides, Cloudflare Access locked
 - [x] PRD v4 — aesthetic direction locked as Editorial Cinematic; Land Rovers minimised; coverage of original 11 narrative pillars verified; new slides 3.5 (Why Arabia) and 8.5 (Conservation/Culture/Education)
-- [ ] **Phase C — Copy pass** (17 section files under `/natgeo/copy/`)
+- [x] **Phase C — Copy pass** (18 section files under `/natgeo/copy/`; awaiting final approval before B1)
 - [ ] **Phase B1 — HTML foundation** (slides 1–5b, builds `/shared/` design system)
 - [ ] Phase B2 — Full HTML build (slides 6 through 13)
-- [ ] Source pack verification — Jcamp confirms each pending/needs-source claim
+- [~] Source pack verification — partial (2026-05-12: award years verified via hero-experiences.com/why-us screenshots; awarding-body citation links still pending; needs-source items #8 ecotourism cert, #14 Michelin chef outstanding)
 - [ ] PDF export validated from print stylesheet
 - [ ] Subdomain DNS approved by Hero IT
 - [ ] Cloudflare Access configured per-path
@@ -210,10 +211,20 @@ This preserves the audit trail of which content originated where, which is usefu
 - ✅ Aesthetic locked as Editorial Cinematic
 - ✅ Land Rovers de-emphasised per Hero preference
 - ✅ Original 11 narrative pillars cross-checked against slide flow (see PRD 2.5)
+- ✅ Phase C copy pass complete (18 files under `/natgeo/copy/`, drafted 2026-05-12)
+- ✅ Source pack — award years verified via hero-experiences.com/why-us screenshots (2026-05-12); canonical source pack at `/reference/source-pack.md`
 
 ## Open questions (for Jcamp)
 
-1. **Source pack verification** — every `pending` or `needs-source` claim needs Jcamp input. Priority: current guest count, exact award years, Michelin chef name, ecotourism certifying body.
+1. **Source pack verification (further refined 2026-05-12)** — Two rounds of verification completed today:
+   - Round 1 — screenshots of hero-experiences.com/why-us confirmed initial award years
+   - Round 2 — third-party citation URLs supplied for WTA Desert Safari (2016–2024 with 2021 gap), WTA Middle East Balloon (2020–2025), Layalina (corrected: Editor's Choice for The Dubai Balloon 2024, not "Best Luxury Cultural Adventure Experience"), and Luxury Lifestyle Awards (Luxury Travel Dubai, 2025)
+
+   Still outstanding:
+   - (a) Third-party citations for #4b WTA World's Leading Balloon (currently self-source via screenshot), #7a/b/c TripAdvisor, #17 Dubai Sustainable Tourism, #18 Dubai Green Tourism, #19 International Sustainable Luxury Awards 2023, #20 Gulf Sustainability & CSR 2018
+   - (d) Michelin chef name (#14, needs-source)
+   - (e) Whether Dubai Sustainable Tourism (#17) or Dubai Green Tourism (#18) is the certifying body for source-pack #8 "ecotourism-certified desert safari" (Slide 5a ship blocker)
+   - (f) Current guest count figure (#15)
 2. **Named Nat Geo partnership target** — even a hypothetical name strengthens Slides 4 and 12.5.
 3. **Photography Hero already owns** — determines real vs. placeholder imagery.
 4. **Final subdomain name** — working assumption `partners.hero-experiences.com`. Alternatives: `pitch.`, `proposals.`, `expedition.`
@@ -228,3 +239,5 @@ This preserves the audit trail of which content originated where, which is usefu
 | 2026-05-12 | PRD v3 — Unique Lodges softened, audience broadened, source pack, Why-Now and The-Ask slides, Cloudflare Access locked. |
 | 2026-05-12 | PRD v4 — Editorial Cinematic locked as aesthetic. Land Rovers minimised. Slide 3.5 (Why Arabia) and 8.5 (Conservation/Culture/Education) added to cover original narrative pillars properly. Per-slide Immersive/Restrained mode specified. Color shifted from black/gold to desert palette. 17 slides total. |
 | 2026-05-12 | CLAUDE.md v4.1 — Execution model added. Opus 4.7 as supervisor, Haiku 4.5 as worker for structured slides. Opus drafts strategic/rhetorical slides directly (2, 3, 3.5, 6.5, 12, 12.5, 13). Two-retry rule before supervisor takes over a failing subagent task. |
+| 2026-05-12 | Phase C complete. All 18 copy files drafted in `/natgeo/copy/`. PRD bumped to v4.1: source pack verified from hero-experiences.com/why-us awards screenshots; WTA Desert Safari years 2016–2022; WTA Balloon Operator split into two distinct awards; TripAdvisor framing corrected; four sustainability awards added; Slide 5b restructured into two groupings (travel + sustainability). Canonical source pack created at `/reference/source-pack.md`. Slide 5a needs-source flag (#8 ecotourism certification) may resolve via #17/#18 — pending Jcamp confirmation. |
+| 2026-05-12 | Source pack round 2 — third-party citation URLs received from Jcamp. WTA Desert Safari refined to 8 wins between 2016–2024 (2021 omitted); WTA Middle East Balloon extended to 2020–2025; Layalina category corrected to "Editor's Choice — The Dubai Balloon 2024" (prior "Best Luxury Cultural Adventure Experience" wording was wrong); Luxury Lifestyle Awards category clarified to "Luxury Travel Dubai 2025". Status upgraded from `verified (self-source)` to `verified` for these four entries. WTA World's Leading Balloon (#4b), TripAdvisor, and sustainability awards still pending third-party links. |

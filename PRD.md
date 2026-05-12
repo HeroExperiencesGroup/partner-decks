@@ -2,12 +2,13 @@
 
 **Project codename:** `hero-natgeo-deck`
 **Owner:** Jcamp (Hero Experiences)
-**Status:** Draft v4 — ready for Claude Code execution
+**Status:** Draft v4.1 — source pack verifications applied
 **Last updated:** May 12, 2026
 
 ## Version history
 
-- **v4 (current)** — Aesthetic direction locked as *Editorial Cinematic*: cinematic photography paired with editorial restraint, alternating immersive and quiet slides. Replaced black/gold accents with desert palette (bone, ink, deep sand, warm rust). Land Rovers reduced to a single minimal mention in Slide 5a, no fleet imagery, no CO₂ figure. Re-anchored slide flow to original 11 narrative pillars from Jcamp's brief — added "Why the Arabian desert matters" (Section 3.5) and split "Conservation, culture, and education" into its own slide (Section 8.5). Honest attribution added to track which content originated where.
+- **v4.1 (current)** — Source pack verifications applied from hero-experiences.com/why-us awards screenshots (2026-05-12). WTA Desert Safari Company years confirmed 2016–2022. WTA Balloon Ride Operator split into two distinct awards (Middle East 2020–2024; World's 2020–2023). TripAdvisor framing corrected to Certificate of Excellence 2013–2019 + Hall of Fame + Travelers' Choice 2020–2025. Four sustainability/conservation awards added to the source pack (Dubai Sustainable Tourism, Dubai Green Tourism, International Sustainable Luxury Awards 2023, Gulf Sustainability & CSR Awards 2018). Slide 5b spec restructured into two groupings (travel & hospitality, sustainability & conservation) to surface the conservation credentials Nat Geo values. Canonical source pack file created at `/reference/source-pack.md`.
+- **v4** — Aesthetic direction locked as *Editorial Cinematic*: cinematic photography paired with editorial restraint, alternating immersive and quiet slides. Replaced black/gold accents with desert palette (bone, ink, deep sand, warm rust). Land Rovers reduced to a single minimal mention in Slide 5a, no fleet imagery, no CO₂ figure. Re-anchored slide flow to original 11 narrative pillars from Jcamp's brief — added "Why the Arabian desert matters" (Section 3.5) and split "Conservation, culture, and education" into its own slide (Section 8.5). Honest attribution added to track which content originated where.
 - **v3** — Softened Unique Lodges framing into values alignment. Broadened audience wording. Source pack with verification status. Added "Why now" and "The ask" slides. Cloudflare Access locked as auth approach with per-path policies. Plausible analytics ownership.
 - **v2** — Locked production format as hosted HTML (canonical) with derived PDF (leave-behind). Added "not Canva-default" guardrail. Added Section 11 — Hosting and deployment.
 - **v1** — Initial PRD drafted from Jcamp's brief and prior research.
@@ -313,18 +314,21 @@ Each entry specifies:
 - **Source link or reference**
 - **Verification status** — `verified`, `pending`, or `needs-source`
 
-**Initial source pack (to be verified by Jcamp):**
+**Source pack snapshot (canonical version: `/reference/source-pack.md`):**
 
 | # | Claim | Year(s) | Source | Status |
 |---|---|---|---|---|
 | 1 | Founded as Platinum Heritage | 2012 | Hero corporate history | verified |
 | 2 | Hero Experiences Group formed | 2019 | Hero corporate history | verified |
-| 3 | World Travel Awards — Middle East's Leading Desert Safari Company | 2016–2024 (multiple years) | worldtravelawards.com | pending — exact years needed |
-| 4 | World Travel Awards — Leading Balloon Ride Operator | multiple years | worldtravelawards.com | pending — exact years needed |
-| 5 | Layalina Editors' Choice — Best Luxury Cultural Adventure Experience | 2024 | Layalina Magazine | pending — citation link needed |
-| 6 | Luxury Lifestyle Awards — Best Luxury Travel Experiences UAE | 2025 | luxurylifestyleawards.com | pending — citation link needed |
-| 7 | TripAdvisor — top 10% of businesses worldwide | 2012–2021 | TripAdvisor Hall of Fame | pending — citation link needed |
-| 8 | Only ecotourism-certified desert safari operator in Dubai | current | certifying body — needs name | needs-source |
+| 3 | World Travel Awards — Middle East's Leading Desert Safari Company | 8 wins between 2016–2024 (2021 omitted) | worldtravelawards.com | verified — third-party citations confirmed 2026-05-12 (URLs in source-pack.md) |
+| 4a | World Travel Awards — Middle East's Leading Balloon Ride Operator | 2020–2025 (6 consecutive years) | worldtravelawards.com | verified — third-party citations confirmed 2026-05-12 (URLs in source-pack.md) |
+| 4b | World Travel Awards — World's Leading Balloon Ride Operator | 2020–2023 | worldtravelawards.com | verified (self-source; awarding-body link pending) |
+| 5 | Layalina Editor's Choice Award — The Dubai Balloon | 2024 | awards.layalina.com | verified — third-party citation confirmed (URL in source-pack.md); previous wording "Best Luxury Cultural Adventure Experience" was incorrect — actual award is for The Dubai Balloon, a Hero product |
+| 6 | Luxury Lifestyle Awards — Luxury Travel Dubai | 2025 | luxurylifestyleawards.com | verified — third-party citation confirmed (URL in source-pack.md); category is "Luxury Travel" within "Travel Experiences", location Dubai |
+| 7a | TripAdvisor Certificate of Excellence | 2013–2019 | tripadvisor.com | verified (self-source; awarding-body link pending) |
+| 7b | TripAdvisor Hall of Fame | 5 consecutive years within 2015–2019 | tripadvisor.com | verified (self-source; awarding-body link pending) |
+| 7c | TripAdvisor Travelers' Choice | 2020–2025 | tripadvisor.com | verified (self-source; awarding-body link pending) |
+| 8 | Only ecotourism-certified desert safari operator in Dubai | current | certifying body — needs name | needs-source (may be satisfied by Dubai Sustainable Tourism #17 or Dubai Green Tourism #18; pending Jcamp confirmation) |
 | 9 | Operates inside Dubai Desert Conservation Reserve (UAE's first national park) | current | DDCR / Emirates Wildlife Society | verified — publicly documented |
 | 10 | Restored vintage fleet (single minimal mention only) | current | internal — Hero corporate | verified — operational fact, no figures used |
 | 11 | Solar-powered camps | current | internal | verified |
@@ -333,6 +337,10 @@ Each entry specifies:
 | 14 | Michelin-starred chef collaboration (Platinum Collection dining) | current | internal — chef name needed | needs-source |
 | 15 | Guests served | current | internal | pending — current figure needed |
 | 16 | Operating in UAE and KSA (AlUla, Sharaan Nature Reserve, Khaybar) | current | internal | verified |
+| 17 | Dubai Sustainable Tourism (certification by Dubai DET) | current | Dubai Department of Economy and Tourism | verified (self-source; awarding-body link pending) |
+| 18 | Dubai Green Tourism (certification by Dubai DET) | current | Dubai Department of Economy and Tourism | verified (self-source; awarding-body link pending) |
+| 19 | International Sustainable Luxury Awards | 2023 | International Sustainable Awards | verified (self-source; awarding-body link pending) |
+| 20 | Gulf Sustainability & CSR Awards — Winner | 2018 | Gulf Sustainability Awards | verified (self-source; awarding-body link pending) |
 
 **Rules:**
 - Status `verified` may ship to final copy
@@ -432,15 +440,23 @@ For each slide, Claude Code verifies before finalising:
 ### Slide 5b — Recognition (Restrained)
 
 - **Headline:** *Recognised globally. Repeatedly.*
-- **Body (typographic list — no logos, no badges):**
-  - World Travel Awards — Middle East's Leading Desert Safari Company, multiple years [pending verification of exact years]
-  - World Travel Awards — Leading Balloon Ride Operator, multiple years [pending verification]
-  - Layalina Editors' Choice — Best Luxury Cultural Adventure Experience, 2024 [pending verification]
-  - Luxury Lifestyle Awards — Best Luxury Travel Experiences UAE, 2025 [pending verification]
-  - TripAdvisor — top 10% of businesses worldwide, 2012–2021 [pending verification]
+- **Body (two-grouping typographic treatment — no logos, no badges):**
+
+  *Travel & hospitality* (small-caps section label in deep sand)
+  - World Travel Awards — Middle East's Leading Desert Safari Company, 2016–2022
+  - World Travel Awards — Leading Balloon Ride Operator (Middle East 2020–2024; World's 2020–2023)
+  - Layalina Editor's Choice Award, 2024 [specific category wording pending]
+  - Luxury Lifestyle Awards — Winner, 2025 [specific category wording pending]
+  - TripAdvisor — Certificate of Excellence 2013–2019 (Hall of Fame); Travelers' Choice 2020–2025
+
+  *Sustainability & conservation* (same section-label treatment, slightly larger top margin)
+  - Gulf Sustainability & CSR Awards — Winner, 2018
+  - International Sustainable Luxury Awards, 2023
+  - Dubai Sustainable Tourism · Dubai Green Tourism (Dubai DET certifications)
+
 - **Meta line (bottom, small caps):** *Operating in UAE and KSA · since 2012*
 - **Image:** None. Bone background. Museum wall label.
-- **Layout:** Centred column, fine hairline rules between each award entry.
+- **Layout:** Two stacked groupings, each headed by a small-caps section label in deep sand. Within each grouping, awards stack with fine warm-rust hairline rules between entries. Groupings separated by a slightly larger interval. Headline upper-centre, meta line bottom-centre.
 
 ### Slide 6 — The problem (Immersive — split layout)
 
