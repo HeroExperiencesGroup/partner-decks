@@ -22,10 +22,11 @@ Hosted at `partners.hero-experiences.com/natgeo-<suffix>/` (subdomain pending He
 - [x] PRD v2 — hosted HTML locked as canonical format
 - [x] PRD v3 — source pack with verification status, Why-Now and The-Ask slides, Cloudflare Access locked
 - [x] PRD v4 — aesthetic direction locked as Editorial Cinematic; Land Rovers minimised; coverage of original 11 narrative pillars verified; new slides 3.5 (Why Arabia) and 8.5 (Conservation/Culture/Education)
-- [x] **Phase C — Copy pass** (18 section files under `/natgeo/copy/`; awaiting final approval before B1)
-- [ ] **Phase B1 — HTML foundation** (slides 1–5b, builds `/shared/` design system)
-- [ ] Phase B2 — Full HTML build (slides 6 through 13)
-- [~] Source pack verification — partial (2026-05-12: award years verified via hero-experiences.com/why-us screenshots; awarding-body citation links still pending; needs-source items #8 ecotourism cert, #14 Michelin chef outstanding)
+- [x] **Phase C — Copy pass** (18 section files under `/natgeo/copy/`; committed locally as b094668)
+- [ ] **Phase B1 — HTML foundation** — decisions locked 2026-05-12; branch `b1-natgeo-foundation` created; next session executes
+- [ ] Phase B2 — Full HTML build (sections 6 through 13)
+- [~] Source pack verification — partial (round 2 2026-05-12: third-party citations confirmed for #3 #4a #5 #6; still pending #4b WTA World's Balloon, #7a/b/c TripAdvisor, #17–20 sustainability; needs-source #8 ecotourism cert, #14 Michelin chef outstanding)
+- [ ] GitHub remote unresolved — push to `HeroExperiencesGroup/partner-decks` returned 404 (2026-05-12); Jcamp to create the repo or update remote URL
 - [ ] PDF export validated from print stylesheet
 - [ ] Subdomain DNS approved by Hero IT
 - [ ] Cloudflare Access configured per-path
@@ -34,30 +35,15 @@ Hosted at `partners.hero-experiences.com/natgeo-<suffix>/` (subdomain pending He
 
 ## Active task
 
-**Phase C — Copy pass.** Generate one Markdown file per slide under `/natgeo/copy/`, conforming to PRD Section 8.
+**Phase B1 — HTML foundation.** Build sections 1 through 5b in `natgeo/index.html` as a single scrolling editorial document, with the design system in `/shared/`. Validates the editorial-cinematic direction before B2 (sections 6 through 13).
 
-Execution order (17 slides):
+Phase C copy (18 files under `natgeo/copy/`) is complete and committed locally as `b094668`. The HTML build consumes those copy files as the source of slide content.
 
-1. `01-cover.md`
-2. `02-paradox.md`
-3. `03-vision.md`
-4. `03-5-why-arabia.md` ← new in v4
-5. `04-why-natgeo.md`
-6. `05a-why-hero.md`
-7. `05b-recognition.md`
-8. `06-problem.md`
-9. `06-5-why-now.md`
-10. `07-solution.md`
-11. `08-experience-framework.md`
-12. `08-5-conservation-culture-education.md` ← new in v4
-13. `09-unmatched.md`
-14. `10-commercial-value.md`
-15. `11-implementation.md`
-16. `12-big-idea.md`
-17. `12-5-the-ask.md`
-18. `13-closing.md`
+**Branch:** `b1-natgeo-foundation` (created 2026-05-12). Do not push to `main` directly per Jcamp's instruction — open for visual review before merge.
 
-After each file, run the alignment checklist (PRD Section 7). Stop and confirm with Jcamp after `01-cover.md` before continuing.
+**Remote:** `origin` points at `https://github.com/HeroExperiencesGroup/partner-decks.git` but returned 404 on push attempt 2026-05-12. Repo creation / auth resolution is a separate Jcamp action; B1 proceeds locally in the meantime.
+
+See the "Phase B1 — decisions locked" section below for the binding constraints.
 
 ## Execution model — supervisor + worker
 
@@ -173,6 +159,50 @@ This preserves the audit trail of which content originated where, which is usefu
 - **Auth:** Cloudflare Access, per-path policies, email one-time PIN
 - **Analytics:** Cloudflare Access logs (who/when) + Plausible (what they did inside)
 
+## Phase B1 — decisions locked (next session executes)
+
+Locked by Jcamp 2026-05-12. Binding constraints for the next session's B1 build.
+
+### Architecture
+
+- **Document shape:** single scrolling editorial document with keyboard navigation between sections. Not multi-file. Not slideshow-style.
+- **Webfonts:** self-host Playfair Display (display serif) + Inter (body sans). Use **token-based CSS variables** for font families in `shared/css/tokens.css` so commercial fonts (GT Super, Söhne, Tiempos) can swap in later by editing tokens only — no section-level changes.
+
+### Source-pack flag handling (UI pattern)
+
+- Implement `body[data-review="true"]` review mode in `shared/js/deck.js`.
+- **Normal mode:** deck reads clean. No `[SOURCE PENDING]` or status markers visible in the designed copy.
+- **Review mode:** source-status markers, pending citations, and audit annotations appear as visible side notes or in-margin annotations — never inline within designed copy.
+
+### Per-section overrides (B1 scope)
+
+- **Section 5a (Who Hero is):** ship safe-fallback copy (no ecotourism claim) until source-pack #8 resolves. The copy spec in `natgeo/copy/05a-why-hero.md` is now the safe-fallback version; restoration wording is captured in that file's notes.
+- **Section 5b (Recognition):** ship clean award copy in normal mode. Source-status markers (`verified (self-source)`, third-party-link pending, etc.) appear in review mode only.
+- **Sections 2 (Paradox) and 6.5 (Why now):** implement both image variants as CSS classes — e.g. `section[data-image="none"]` vs. `section[data-image="sparse"]`. Default to the no-image variant in B1; toggle during Jcamp's visual review.
+
+### Imagery
+
+- Placeholder imagery acceptable for B1.
+- Every placeholder documented in `natgeo/assets/README.md` with source URL and intended replacement direction (per PRD 9.7).
+
+### Git workflow
+
+- Work on branch `b1-natgeo-foundation`.
+- **Do NOT push to `main` directly.** Pause for Jcamp's visual review before merge/deploy.
+- Remote situation pending — see Active task note.
+
+### Recommended B1 build order
+
+1. `shared/fonts/` — self-host Playfair Display + Inter (woff2)
+2. `shared/css/tokens.css` — colour, type scale, spacing, font-family variables
+3. `shared/css/base.css` — reset, typography, mobile-first scaffold
+4. `shared/css/components.css` — section containers, full-bleed image, two-column, pull quote, museum-wall, review-mode annotations
+5. `shared/css/print.css` — A4 landscape PDF stylesheet
+6. `shared/js/deck.js` — keyboard navigation between sections, scroll-snap, review-mode toggle, lazy image loading
+7. `natgeo/index.html` — single scrolling document, sections 1 through 5b (Cover, Paradox, Vision, Why Arabia, Why Nat Geo, Who Hero is, Recognition)
+8. `natgeo/assets/images/` + `natgeo/assets/README.md` — placeholder dune photos with documented sources
+9. Pause for Jcamp visual review before B2 (sections 6 through 13)
+
 ## Hard rules (do not violate)
 
 - No marketing adjectives (PRD 6.1 banned list — includes *immersive* unless earned by imagery)
@@ -211,8 +241,9 @@ This preserves the audit trail of which content originated where, which is usefu
 - ✅ Aesthetic locked as Editorial Cinematic
 - ✅ Land Rovers de-emphasised per Hero preference
 - ✅ Original 11 narrative pillars cross-checked against slide flow (see PRD 2.5)
-- ✅ Phase C copy pass complete (18 files under `/natgeo/copy/`, drafted 2026-05-12)
-- ✅ Source pack — award years verified via hero-experiences.com/why-us screenshots (2026-05-12); canonical source pack at `/reference/source-pack.md`
+- ✅ Phase C copy pass complete (18 files under `/natgeo/copy/`, drafted 2026-05-12; committed as b094668)
+- ✅ Source pack — round 1 verified via hero-experiences.com/why-us screenshots, round 2 third-party citations for #3 #4a #5 #6 (2026-05-12); canonical at `/reference/source-pack.md`
+- ✅ Phase B1 decisions locked (2026-05-12): scrolling document + keyboard nav, self-hosted Playfair Display + Inter with token variables, review-mode `body[data-review="true"]` for source-pack flags, Slide 5a safe-fallback wording, image variants as CSS classes for sections 2 and 6.5
 
 ## Open questions (for Jcamp)
 
@@ -241,3 +272,4 @@ This preserves the audit trail of which content originated where, which is usefu
 | 2026-05-12 | CLAUDE.md v4.1 — Execution model added. Opus 4.7 as supervisor, Haiku 4.5 as worker for structured slides. Opus drafts strategic/rhetorical slides directly (2, 3, 3.5, 6.5, 12, 12.5, 13). Two-retry rule before supervisor takes over a failing subagent task. |
 | 2026-05-12 | Phase C complete. All 18 copy files drafted in `/natgeo/copy/`. PRD bumped to v4.1: source pack verified from hero-experiences.com/why-us awards screenshots; WTA Desert Safari years 2016–2022; WTA Balloon Operator split into two distinct awards; TripAdvisor framing corrected; four sustainability awards added; Slide 5b restructured into two groupings (travel + sustainability). Canonical source pack created at `/reference/source-pack.md`. Slide 5a needs-source flag (#8 ecotourism certification) may resolve via #17/#18 — pending Jcamp confirmation. |
 | 2026-05-12 | Source pack round 2 — third-party citation URLs received from Jcamp. WTA Desert Safari refined to 8 wins between 2016–2024 (2021 omitted); WTA Middle East Balloon extended to 2020–2025; Layalina category corrected to "Editor's Choice — The Dubai Balloon 2024" (prior "Best Luxury Cultural Adventure Experience" wording was wrong); Luxury Lifestyle Awards category clarified to "Luxury Travel Dubai 2025". Status upgraded from `verified (self-source)` to `verified` for these four entries. WTA World's Leading Balloon (#4b), TripAdvisor, and sustainability awards still pending third-party links. |
+| 2026-05-12 | Phase C committed locally as b094668. Push to origin (HeroExperiencesGroup/partner-decks) failed: repo not found — remote setup pending Jcamp. Phase B1 decisions locked: (1) single scrolling editorial document with keyboard nav; (2) self-hosted Playfair Display + Inter with token-based font variables for future commercial-font swap; (3) source-pack flags handled via `body[data-review="true"]`, never in normal-mode copy; (4) Slide 5a ships safe-fallback wording (ecotourism claim removed) until #8 resolved; (5) Sections 2 and 6.5 implement both image variants as CSS classes; (6) placeholder imagery documented in `natgeo/assets/README.md`; (7) B1 work on branch `b1-natgeo-foundation`, do not push to main directly. Slide 5a copy file (`natgeo/copy/05a-why-hero.md`) updated to safe-fallback wording; ship blocker removed; restoration wording preserved in file notes. Branch `b1-natgeo-foundation` created locally. Next session executes B1. |
