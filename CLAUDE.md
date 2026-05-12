@@ -1,5 +1,10 @@
 # CLAUDE.md — Working Context
 
+**Working context version:** v4.1 (PRD remains at v4)
+**Last updated:** May 12, 2026
+
+**v4.1 changes:** Added Execution model section — Opus 4.7 as supervisor, Haiku 4.5 as worker for structured generation. Includes which slides Opus drafts directly vs. which get Haiku-then-review.
+
 ## Project
 
 `partner-decks` — Hero Experiences partner-portal repo. First build: pitch deck proposing a partnership between Hero Experiences (Dubai) and National Geographic to create the world's definitive desert expedition.
@@ -52,6 +57,100 @@ Execution order (17 slides):
 18. `13-closing.md`
 
 After each file, run the alignment checklist (PRD Section 7). Stop and confirm with Jcamp after `01-cover.md` before continuing.
+
+## Execution model — supervisor + worker
+
+Claude Code operates as **Opus 4.7 supervising Haiku 4.5 subagents** for this project. The pattern is cost-efficient and parallelisable, but only works because the PRD is tight enough that workers can execute against a clear spec.
+
+### Roles
+
+**Opus 4.7 (supervisor):**
+- Reads PRD.md and this file every session
+- Plans the work, spawns subagents, reviews their output
+- Makes all judgement calls: PRD interpretation, strategic positioning, editorial voice, source-pack decisions
+- Drafts the strategic/rhetorical slides directly (see "Opus drafts directly" below)
+- Final reviewer on every artifact before it's shown to Jcamp
+
+**Haiku 4.5 (worker subagents):**
+- Spawned with a specific, scoped task and the relevant PRD section as context
+- Generates structured copy or HTML following an established pattern
+- Returns output for supervisor review
+- Does not make interpretive decisions — escalates ambiguity back to supervisor
+
+### Workflow — Phase C (copy pass)
+
+For each slide, **except those listed under "Opus drafts directly":**
+
+1. Supervisor reads the PRD spec for that slide (Section 8) and the source pack rules (Section 6.4)
+2. Supervisor spawns a Haiku subagent with:
+   - The exact slide spec from PRD Section 8
+   - The relevant approved facts from `/reference/source-pack.md`
+   - PRD Section 6 (content rules) and Section 7 (alignment checklist)
+3. Subagent writes the Markdown file to `/natgeo/copy/`
+4. Supervisor reviews the output against:
+   - PRD Section 6.1 banned-word and voice rules
+   - PRD Section 7 alignment checklist (every item)
+   - PRD Section 6.4 source-pack compliance (every claim cited or flagged)
+   - PRD Section 6.5 Land Rover rule
+5. If violations: supervisor returns specific corrections to subagent, re-runs (max 2 retries)
+6. If clean after retries: supervisor presents to Jcamp for approval
+7. If still violating after 2 retries: supervisor drafts directly and notes the pattern for review
+
+### Workflow — Phase B (HTML build)
+
+**B1 (foundation) — Opus-led, no subagents.** The design system decisions (tokens, components, layout primitives) are too consequential to delegate. Supervisor builds slides 1–5b directly, establishes `/shared/`, gets Jcamp approval on the visual direction.
+
+**B2 (full build) — supervisor + workers, parallel.** Once `/shared/` is locked, subagents implement individual slides against the established system. Supervisor reviews each slide for visual rhythm (immersive vs. restrained per PRD 3.5), design system compliance, and image discipline.
+
+### Opus drafts directly (no Haiku)
+
+These slides carry rhetorical weight where every word matters. Supervisor writes them directly:
+
+- Slide 2 — The paradox
+- Slide 3 — The vision
+- Slide 3.5 — Why the Arabian desert matters
+- Slide 6.5 — Why now
+- Slide 12 — The big idea (pull quote)
+- Slide 12.5 — The ask
+- Slide 13 — Closing
+
+Subagent-eligible slides (structured generation, clear pattern):
+
+- Slide 1 — Cover (templated)
+- Slide 4 — Why Nat Geo (list)
+- Slide 5a — Who Hero is
+- Slide 5b — Recognition (list of awards)
+- Slide 6 — The problem (parallel-column structure)
+- Slide 7 — The solution (three-line list)
+- Slide 8 — Experience framework (five-pillar list)
+- Slide 8.5 — Conservation, culture, education (three-paragraph spread)
+- Slide 9 — Unmatched (parallel-column structure)
+- Slide 10 — Commercial value (list)
+- Slide 11 — Implementation (three-phase list)
+
+### Escalation triggers — supervisor only
+
+Any of these stop subagent work and route to Opus directly:
+
+- PRD interpretation ambiguity
+- Source-pack claim with status `needs-source` referenced
+- Editorial voice question the alignment checklist can't resolve
+- Any conflict between PRD sections
+- Two consecutive subagent failures on the same task
+- Any decision that would change a locked v4 direction (aesthetic, slide flow, narrative architecture)
+
+### Parallelism
+
+Supervisor may spawn multiple Haiku subagents in parallel for independent slides during B2 build, but **not during Phase C copy pass**. Copy generation stays sequential per the original plan (Jcamp confirms each slide before the next begins) — parallelism here would defeat the per-slide review loop.
+
+### What to write in commit messages
+
+Supervisor commits, not subagents. Commit messages note who drafted:
+
+- `Slide 1: cover copy (Haiku draft, Opus review)`
+- `Slide 12: big idea (Opus direct)`
+
+This preserves the audit trail of which content originated where, which is useful for retrospectives.
 
 ## Aesthetic — Editorial Cinematic (locked v4)
 
@@ -128,3 +227,4 @@ After each file, run the alignment checklist (PRD Section 7). Stop and confirm w
 | 2026-05-12 | PRD v2 — hosted HTML as canonical format, partner-portal repo structure, Section 11 hosting added. |
 | 2026-05-12 | PRD v3 — Unique Lodges softened, audience broadened, source pack, Why-Now and The-Ask slides, Cloudflare Access locked. |
 | 2026-05-12 | PRD v4 — Editorial Cinematic locked as aesthetic. Land Rovers minimised. Slide 3.5 (Why Arabia) and 8.5 (Conservation/Culture/Education) added to cover original narrative pillars properly. Per-slide Immersive/Restrained mode specified. Color shifted from black/gold to desert palette. 17 slides total. |
+| 2026-05-12 | CLAUDE.md v4.1 — Execution model added. Opus 4.7 as supervisor, Haiku 4.5 as worker for structured slides. Opus drafts strategic/rhetorical slides directly (2, 3, 3.5, 6.5, 12, 12.5, 13). Two-retry rule before supervisor takes over a failing subagent task. |
