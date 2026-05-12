@@ -1,0 +1,26 @@
+# OS noise
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Build artifacts
+node_modules/
+dist/
+build/
+
+# Local-only secrets — never commit these
+.env
+.env.local
+*.key
+
+# Drafts and scratch
+scratch/
+*-draft.*
+
+# Original brief (keep local, don't push)
+Nat_Geo_Hero_Safari_Partnership.docx
