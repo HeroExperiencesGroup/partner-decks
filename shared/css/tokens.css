@@ -1,0 +1,198 @@
+/* tokens.css — design tokens for partner-decks
+ *
+ * Single source of truth for colour, type, spacing, and font families.
+ * No layout or component rules live here. Section-level CSS must not
+ * hard-code values that exist as tokens.
+ *
+ * Font-family variables exist so commercial fonts (GT Super, Söhne,
+ * Tiempos, etc.) can swap in by editing this file alone — per the
+ * locked B1 decision (CLAUDE.md, 2026-05-12).
+ */
+
+/* --- webfonts (self-hosted) --- */
+
+@font-face {
+  font-family: "Playfair Display";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/playfair-display-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Playfair Display";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/playfair-display-400-italic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Playfair Display";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../fonts/playfair-display-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Playfair Display";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../fonts/playfair-display-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Playfair Display";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/playfair-display-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Playfair Display";
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/playfair-display-700-italic.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/inter-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/inter-400-italic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../fonts/inter-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../fonts/inter-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/inter-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/inter-700-italic.woff2") format("woff2");
+}
+
+:root {
+  /* --- colour palette (PRD 3.4) --- */
+  --bone: #f4efe6;          /* primary background */
+  --ink: #1c1c1a;           /* primary text, dark surfaces */
+  --deep-sand: #b89968;     /* section dividers, fine rules, small caps meta */
+  --warm-rust: #8b4a2b;     /* accent, pull-quote hairlines (used sparingly) */
+  --oxblood: #6b2a24;       /* one high-emphasis pull quote per deck max */
+
+  /* surface roles */
+  --surface-default: var(--bone);
+  --surface-dark: var(--ink);
+  --text-default: var(--ink);
+  --text-on-dark: var(--bone);
+  --rule-fine: var(--warm-rust);
+  --meta: var(--deep-sand);
+
+  /* --- font families (commercial fonts swap by editing these only) --- */
+  --font-display: "Playfair Display", "Georgia", "Times New Roman", serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Helvetica Neue", Arial, sans-serif;
+  --font-meta: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Helvetica Neue", Arial, sans-serif;
+
+  /* --- type scale (mobile-first; scaled up at breakpoints in base.css) --- */
+  --type-meta: 0.6875rem;       /* 11px — small caps metadata */
+  --type-body-sm: 0.875rem;     /* 14px — captions, list detail */
+  --type-body: 1rem;            /* 16px — body */
+  --type-body-lg: 1.125rem;     /* 18px — emphasis body */
+  --type-display-sm: 1.5rem;    /* 24px — pull line / sublabel */
+  --type-display: 2rem;         /* 32px — headline (mobile) */
+  --type-display-lg: 2.75rem;   /* 44px — large headline (mobile) */
+  --type-display-xl: 3.5rem;    /* 56px — pull quote (mobile) */
+
+  --leading-tight: 1.1;
+  --leading-snug: 1.25;
+  --leading-normal: 1.5;
+  --leading-loose: 1.7;
+
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.02em;
+  --tracking-meta: 0.16em;      /* small-caps tracking */
+
+  /* --- spacing scale (rem-based, mobile-first) --- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+  --space-10: 8rem;
+
+  /* layout containers */
+  --measure-narrow: 28rem;      /* tight text column for pull lines, asks */
+  --measure: 36rem;             /* default body measure */
+  --measure-wide: 48rem;        /* feature paragraphs, captions */
+  --gutter: var(--space-5);
+  --section-padding-y: var(--space-7);
+
+  /* --- rules and hairlines --- */
+  --rule-hairline: 1px;
+
+  /* --- motion --- */
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --duration-quick: 180ms;
+  --duration-normal: 320ms;
+}
+
+/* Tablet — 640px and up */
+@media (min-width: 40em) {
+  :root {
+    --type-display: 2.5rem;
+    --type-display-lg: 3.5rem;
+    --type-display-xl: 4.5rem;
+    --section-padding-y: var(--space-8);
+  }
+}
+
+/* Laptop — 1024px and up */
+@media (min-width: 64em) {
+  :root {
+    --type-display: 3rem;
+    --type-display-lg: 4.5rem;
+    --type-display-xl: 5.5rem;
+    --section-padding-y: var(--space-9);
+  }
+}
+
+/* Wide — 1440px and up */
+@media (min-width: 90em) {
+  :root {
+    --type-display: 3.5rem;
+    --type-display-lg: 5rem;
+    --type-display-xl: 6.5rem;
+  }
+}

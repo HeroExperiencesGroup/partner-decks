@@ -1,0 +1,989 @@
+/* components.css — reusable slide components
+ *
+ * Editorial Cinematic component library. Mobile-first, scaled up at
+ * tablet (40em) and laptop (64em) breakpoints.
+ *
+ * Component naming: BEM-ish, deliberately quiet. No utility-class soup.
+ */
+
+/* =========================================================
+ * Deck container — single scrolling document
+ * ========================================================= */
+
+.deck {
+  scroll-snap-type: y mandatory;
+  height: 100vh;
+  height: 100dvh; /* dynamic viewport for mobile address bars */
+  overflow-y: scroll;
+  scroll-behavior: smooth;
+}
+
+/* =========================================================
+ * Section — one slide
+ * ========================================================= */
+
+.section {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  padding: var(--section-padding-y) var(--gutter);
+  background: var(--surface-default);
+  color: var(--text-default);
+  overflow: hidden;
+}
+
+@media (min-width: 40em) {
+  .section {
+    padding-left: var(--space-7);
+    padding-right: var(--space-7);
+  }
+}
+
+@media (min-width: 64em) {
+  .section {
+    padding-left: var(--space-8);
+    padding-right: var(--space-8);
+  }
+}
+
+/* immersive sections — image-led, text overlaid */
+.section[data-mode="immersive"] {
+  background: var(--ink);
+  color: var(--text-on-dark);
+}
+
+/* page-metadata band (top-right and bottom) — Nat Geo signature */
+.section__meta {
+  position: absolute;
+  top: var(--space-5);
+  right: var(--space-4);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-1);
+  text-align: right;
+}
+
+@media (min-width: 40em) {
+  .section__meta {
+    top: var(--space-6);
+    right: var(--space-6);
+  }
+}
+
+.section[data-mode="immersive"] .section__meta { color: var(--text-on-dark); opacity: 0.85; }
+.section[data-mode="restrained"] .section__meta { color: var(--meta); }
+
+/* main content area */
+.section__inner {
+  position: relative;
+  z-index: 2;
+  align-self: center;
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+}
+
+/* footer band — for closing meta lines and logo pairs */
+.section__foot {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  padding-top: var(--space-5);
+}
+
+/* =========================================================
+ * Full-bleed image (immersive sections)
+ * ========================================================= */
+
+.full-bleed {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.full-bleed picture,
+.full-bleed img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* low-contrast band over the lower portion of an immersive image —
+ * used on 3.5 so type sits over image without a fill colour */
+.full-bleed--lower-band::after {
+  content: "";
+  position: absolute;
+  inset: 50% 0 0 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(28, 28, 26, 0) 0%,
+    rgba(28, 28, 26, 0.55) 70%,
+    rgba(28, 28, 26, 0.75) 100%
+  );
+  pointer-events: none;
+}
+
+/* gentle global darkening for image-with-overlay-text immersive slides */
+.full-bleed--soft-dim::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(28, 28, 26, 0.15) 0%,
+    rgba(28, 28, 26, 0.35) 45%,
+    rgba(28, 28, 26, 0.78) 100%
+  );
+  pointer-events: none;
+}
+
+/* portrait source image used in landscape viewport — anchor to top so
+ * the sky/sun is preserved; lower sand fills the clipped bottom */
+.full-bleed--portrait { object-position: top center; }
+.full-bleed--portrait img { object-position: top center; }
+
+/* image placeholder — applied when image asset is absent (B1 default) */
+.full-bleed--placeholder {
+  background: linear-gradient(
+    to bottom,
+    #2a2520 0%,
+    #1c1c1a 50%,
+    #221d18 100%
+  );
+}
+.full-bleed--placeholder picture,
+.full-bleed--placeholder img { opacity: 0; }
+
+/* =========================================================
+ * Headlines
+ * ========================================================= */
+
+.headline {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  font-size: var(--type-display);
+  max-width: 22ch;
+}
+
+.headline--lg { font-size: var(--type-display-lg); }
+.headline--xl { font-size: var(--type-display-xl); }
+
+.headline--bone { color: var(--text-on-dark); }
+
+/* cover label — typographic label, not a sentence-case headline */
+.cover-label {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  font-size: var(--type-display-lg);
+  max-width: 18ch;
+}
+
+.subhead {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-style: italic;
+  line-height: var(--leading-snug);
+  font-size: var(--type-display-sm);
+  max-width: 32ch;
+  color: inherit;
+  opacity: 0.92;
+}
+
+/* =========================================================
+ * Body copy
+ * ========================================================= */
+
+.body {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  line-height: var(--leading-loose);
+  max-width: var(--measure);
+  color: inherit;
+}
+
+.body--lg { font-size: var(--type-body-lg); }
+.body--wide { max-width: var(--measure-wide); }
+
+/* paragraph spacing inside a body block */
+.body > p + p { margin-top: var(--space-4); }
+
+/* a single short caption beneath a headline on immersive slides */
+.caption {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  line-height: var(--leading-normal);
+  max-width: 44ch;
+  color: inherit;
+}
+
+/* =========================================================
+ * Typographic lists (no bullets, no terminal punctuation)
+ * ========================================================= */
+
+.list {
+  font-family: var(--font-body);
+  font-size: var(--type-body-lg);
+  line-height: var(--leading-snug);
+  max-width: var(--measure);
+}
+
+.list > li + li { margin-top: var(--space-5); }
+
+/* list with a fine warm-rust hairline rule between items —
+ * used for the museum-wall recognition treatment (5b) */
+.list--ruled {
+  font-size: var(--type-body);
+  line-height: var(--leading-snug);
+  max-width: var(--measure-wide);
+}
+
+.list--ruled > li {
+  padding: var(--space-3) 0;
+  border-top: var(--rule-hairline) solid var(--rule-fine);
+}
+.list--ruled > li:first-child { border-top: 0; padding-top: 0; }
+.list--ruled > li:last-child { padding-bottom: 0; }
+
+/* pillar/detail list — bolded label + same-line detail (used in 8; reserved) */
+.list--detail .label {
+  font-family: var(--font-display);
+  font-weight: 400;
+}
+
+/* framework list — five pillars with display-serif label on its own line,
+ * sans detail below, hairline rules between (Slide 8) */
+.list--framework {
+  max-width: var(--measure-wide);
+}
+.list--framework > li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) 0;
+  border-top: var(--rule-hairline) solid var(--rule-fine);
+}
+.list--framework > li:first-child { border-top: 0; padding-top: 0; }
+.list--framework > li:last-child { padding-bottom: 0; }
+.list--framework > li > strong {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--type-display-sm);
+  display: block;
+}
+
+/* footer note — small italic serif, sits below a list or block on a restrained
+ * slide. Used on Slide 8 framework footer and 12.5 closing line. */
+.footnote {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--type-body);
+  line-height: var(--leading-snug);
+  color: var(--meta);
+  max-width: var(--measure);
+  margin-top: var(--space-6);
+}
+
+/* quiet closing line — small sans, deep sand, sits below body on restrained
+ * slides (Slide 6.5 "The moment is open", 12.5 "A pilot. A standard..." ) */
+.close-line {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  line-height: var(--leading-snug);
+  color: var(--deep-sand);
+  letter-spacing: 0.01em;
+  margin-top: var(--space-6);
+  max-width: var(--measure);
+}
+
+/* =========================================================
+ * Compare columns — two-column parallel comparison divided
+ * by a fine vertical rule. Used by Slide 9 (Unmatched) and
+ * Slide 13 (Closing two-column).
+ * ========================================================= */
+
+.compare {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  max-width: var(--measure-wide);
+}
+
+@media (min-width: 48em) {
+  .compare {
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+  .compare > * + * {
+    border-left: var(--rule-hairline) solid var(--rule-fine);
+    padding-left: var(--space-6);
+  }
+  .compare > *:not(:last-child) {
+    padding-right: var(--space-6);
+  }
+}
+
+.compare__label {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--type-display-sm);
+  margin-bottom: var(--space-3);
+}
+
+/* =========================================================
+ * Problem split — Slide 6 two-photograph contrast with centreline.
+ * Each side carries an image placeholder + a two-line text label.
+ * ========================================================= */
+
+.problem {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+  width: 100%;
+  height: 100%;
+}
+
+@media (min-width: 48em) {
+  .problem {
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+  .problem__side + .problem__side {
+    border-left: var(--rule-hairline) solid var(--rule-fine);
+  }
+}
+
+.problem__side {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 60vh;
+  padding: var(--space-5);
+  overflow: hidden;
+}
+
+@media (min-width: 48em) {
+  .problem__side { min-height: 70vh; padding: var(--space-6); }
+}
+
+.problem__side > img,
+.problem__side > .problem__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.problem__side > .problem__bg--left {
+  background:
+    linear-gradient(to bottom, rgba(28,28,26,0.15), rgba(28,28,26,0.7)),
+    linear-gradient(to bottom right, #3a342d, #1c1c1a);
+}
+.problem__side > .problem__bg--right {
+  background:
+    linear-gradient(to bottom, rgba(28,28,26,0.15), rgba(28,28,26,0.7)),
+    linear-gradient(to bottom right, #6b4a2c, #2a1e14);
+}
+
+/* darkening overlay over problem__side real imagery */
+.problem__side::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(28,28,26,0.1) 0%, rgba(28,28,26,0.65) 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.problem__text {
+  position: relative;
+  z-index: 2;
+  color: var(--text-on-dark);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.problem__lead {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--type-display-sm);
+  line-height: var(--leading-snug);
+}
+
+.problem__sub {
+  font-family: var(--font-meta);
+  font-size: var(--type-meta);
+  letter-spacing: var(--tracking-meta);
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+/* =========================================================
+ * Three-phase timeline — Slide 11
+ * ========================================================= */
+
+.timeline {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  max-width: var(--measure-wide);
+}
+
+@media (min-width: 48em) {
+  .timeline {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-7);
+  }
+}
+
+.timeline__phase {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: var(--rule-hairline) solid var(--rule-fine);
+}
+
+.timeline__label {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--type-display-sm);
+  line-height: var(--leading-tight);
+}
+
+.timeline__horizon {
+  margin-top: var(--space-7);
+  height: 90px;
+  background:
+    linear-gradient(to bottom, rgba(244,239,230,0) 0%, rgba(244,239,230,0) 30%, rgba(184,153,104,0.18) 100%),
+    linear-gradient(to bottom, #d8c7a4 0%, #b89968 60%, #8b6a44 100%);
+}
+
+/* =========================================================
+ * Magazine grid — Slide 8.5 three columns: image + headline + paragraph
+ * ========================================================= */
+
+.magazine-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+}
+
+@media (min-width: 48em) {
+  .magazine-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-6);
+  }
+}
+
+.magazine-cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.magazine-cell__image {
+  aspect-ratio: 4 / 5;
+  background:
+    radial-gradient(120% 90% at 30% 25%, rgba(201,168,122,0.4) 0%, transparent 55%),
+    radial-gradient(140% 100% at 70% 80%, rgba(107,74,44,0.6) 0%, transparent 60%),
+    linear-gradient(to bottom right, #8b6a44, #2a1e14);
+  overflow: hidden;
+}
+
+.magazine-cell__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.magazine-cell__label {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--type-display-sm);
+  line-height: var(--leading-tight);
+  color: var(--text-on-dark);
+}
+
+.magazine-cell__body {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  line-height: var(--leading-normal);
+  color: var(--text-on-dark);
+  opacity: 0.92;
+}
+
+/* =========================================================
+ * Declaration block — Slide 12.5
+ * Single serif statement, full visual weight, centred.
+ * ========================================================= */
+
+.declaration {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-style: normal;
+  font-size: var(--type-display);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
+  max-width: 28ch;
+  margin-inline: auto;
+  text-align: center;
+}
+
+/* =========================================================
+ * Quote block — Slide 12 immersive pull quote
+ * ========================================================= */
+
+.quote {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--type-display-lg);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
+  max-width: 24ch;
+  margin-inline: auto;
+  text-align: center;
+  color: var(--text-on-dark);
+}
+.quote p { margin: 0; }
+.quote p + p { margin-top: var(--space-3); }
+
+/* =========================================================
+ * Pull line / pull quote (italic serif)
+ * ========================================================= */
+
+.pull {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  line-height: var(--leading-snug);
+  font-size: var(--type-display-sm);
+  max-width: 36ch;
+  color: inherit;
+}
+
+/* pull line separated from list above by warm-rust hairline rule */
+.pull--with-rule {
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: var(--rule-hairline) solid var(--rule-fine);
+  max-width: var(--measure);
+}
+
+/* =========================================================
+ * Section labels (small caps, deep sand) — used for 5b groupings
+ * ========================================================= */
+
+.section-label {
+  font-family: var(--font-meta);
+  font-size: var(--type-meta);
+  font-weight: 600;
+  letter-spacing: var(--tracking-meta);
+  text-transform: uppercase;
+  color: var(--deep-sand);
+  margin-bottom: var(--space-4);
+}
+
+/* =========================================================
+ * Cover layout (slide 1)
+ *
+ * Image fills slide; type sits low-left; logos in bottom margin.
+ * ========================================================= */
+
+.cover {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  height: 100%;
+  min-height: inherit;
+}
+
+.cover__type {
+  align-self: end;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  color: var(--text-on-dark);
+  padding-bottom: var(--space-7);
+}
+
+.cover__type .meta { color: var(--text-on-dark); opacity: 0.85; }
+
+.cover__logos {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+  color: var(--text-on-dark);
+  padding-top: var(--space-5);
+  border-top: var(--rule-hairline) solid rgba(244, 239, 230, 0.25);
+}
+
+.cover__logo {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--type-body-lg);
+  letter-spacing: var(--tracking-tight);
+  line-height: 1;
+  color: inherit;
+}
+
+/* =========================================================
+ * Split layout (5a — image right, copy left)
+ * ========================================================= */
+
+.split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  align-items: center;
+}
+
+@media (min-width: 48em) {
+  .split {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-8);
+  }
+}
+
+.split__copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding-block: var(--space-5);
+}
+
+.split__image {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--ink);
+}
+
+.split__image img,
+.split__image picture {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* split image placeholder when no asset is present (B1 default) */
+.split__image--placeholder {
+  background:
+    radial-gradient(120% 90% at 30% 25%, #c9a87a 0%, transparent 55%),
+    radial-gradient(140% 100% at 70% 80%, #6b4a2c 0%, transparent 60%),
+    linear-gradient(to bottom right, #8b6a44, #3f2e1f);
+}
+
+/* =========================================================
+ * Paradox layout (2) — asymmetric, type-left
+ *
+ * data-image controls whether the right third carries a sparse image
+ * or stays as pure negative space.
+ * ========================================================= */
+
+.paradox {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+@media (min-width: 48em) {
+  .paradox {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: var(--space-8);
+  }
+}
+
+.paradox__type {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+}
+
+.paradox__statements {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  font-family: var(--font-display);
+  font-size: var(--type-display-sm);
+  line-height: var(--leading-snug);
+  max-width: 28ch;
+}
+
+.paradox__close {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  color: var(--deep-sand);
+  letter-spacing: 0.01em;
+}
+
+/* sparse image slot — only present when data-image="sparse" */
+.paradox__image {
+  display: none;
+}
+
+.section[data-image="sparse"] .paradox__image {
+  display: block;
+  position: relative;
+  aspect-ratio: 3 / 4;
+  background: linear-gradient(to bottom, #d8c7a4, #b89968 70%, #8b6a44);
+  overflow: hidden;
+}
+
+.section[data-image="sparse"] .paradox__image img,
+.section[data-image="sparse"] .paradox__image picture {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* =========================================================
+ * Overlay text on immersive imagery (3, 3.5)
+ * ========================================================= */
+
+.overlay {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  color: var(--text-on-dark);
+  height: 100%;
+  justify-content: flex-end;
+  padding-bottom: var(--space-6);
+}
+
+.overlay--lower-band {
+  justify-content: flex-end;
+  padding-bottom: var(--space-7);
+}
+
+@media (min-width: 64em) {
+  .overlay--lower-band {
+    padding-bottom: var(--space-8);
+  }
+}
+
+/* =========================================================
+ * Museum-wall (5b) — two stacked groupings with section labels
+ * ========================================================= */
+
+.museum {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  max-width: var(--measure-wide);
+  margin-inline: auto;
+}
+
+.museum__group { display: block; }
+
+.museum__label {
+  /* uses .section-label component */
+}
+
+.museum__head {
+  text-align: center;
+  margin-bottom: var(--space-7);
+}
+
+.museum__foot {
+  text-align: center;
+  margin-top: var(--space-7);
+}
+
+/* =========================================================
+ * Review mode — body[data-review="true"]
+ *
+ * Annotations sit in the right margin as side notes. Never inside
+ * the designed copy. Hidden by default; surfaced in review mode.
+ *
+ * Sections may carry one or more notes. Wrap notes in
+ * `.review-notes` so multiple stack vertically; a single note can
+ * also be wrapped (recommended for consistency).
+ * ========================================================= */
+
+.review-notes {
+  display: none;
+}
+
+body[data-review="true"] .review-notes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  position: absolute;
+  right: var(--space-4);
+  top: var(--space-9);
+  max-width: 16rem;
+  z-index: 5;
+}
+
+@media (min-width: 64em) {
+  body[data-review="true"] .review-notes {
+    right: var(--space-5);
+    max-width: 18rem;
+  }
+}
+
+.review-note {
+  font-family: var(--font-meta);
+  font-size: var(--type-meta);
+  line-height: var(--leading-normal);
+  letter-spacing: 0.04em;
+  color: var(--warm-rust);
+  background: rgba(244, 239, 230, 0.94);
+  border-left: 2px solid var(--warm-rust);
+  padding: var(--space-3) var(--space-4);
+  text-transform: none;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+body[data-review="true"] .section[data-mode="immersive"] .review-note {
+  background: rgba(28, 28, 26, 0.82);
+  color: var(--bone);
+  border-left-color: var(--deep-sand);
+}
+
+.review-note__title {
+  display: block;
+  font-weight: 600;
+  letter-spacing: var(--tracking-meta);
+  text-transform: uppercase;
+  margin-bottom: var(--space-2);
+  color: var(--ink);
+}
+body[data-review="true"] .section[data-mode="immersive"] .review-note__title {
+  color: var(--bone);
+}
+
+/* note kind colour treatment */
+.review-note--image {
+  border-left-color: var(--deep-sand);
+  color: var(--ink);
+}
+body[data-review="true"] .section[data-mode="immersive"] .review-note--image {
+  border-left-color: var(--deep-sand);
+}
+
+/* review-mode banner — shows the user they're in review mode */
+.review-banner {
+  display: none;
+}
+body[data-review="true"] .review-banner {
+  display: flex;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  padding: var(--space-2) var(--space-4);
+  background: var(--warm-rust);
+  color: var(--bone);
+  font-family: var(--font-meta);
+  font-size: var(--type-meta);
+  letter-spacing: var(--tracking-meta);
+  text-transform: uppercase;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+/* =========================================================
+ * Deck progress (fixed, restrained)
+ * ========================================================= */
+
+.deck-progress {
+  position: fixed;
+  right: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 4;
+  display: none;
+  flex-direction: column;
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+@media (min-width: 64em) {
+  .deck-progress { display: flex; }
+}
+
+.deck-progress a {
+  display: block;
+  width: 18px;
+  height: var(--rule-hairline);
+  background: var(--deep-sand);
+  opacity: 0.55;
+  transition: opacity var(--duration-quick) var(--ease-out),
+              width var(--duration-quick) var(--ease-out);
+  text-decoration: none;
+}
+
+.deck-progress a:hover,
+.deck-progress a:focus-visible { opacity: 0.95; width: 26px; }
+
+.deck-progress a[aria-current="true"] { opacity: 1; width: 30px; background: var(--warm-rust); }
+
+/* =========================================================
+ * Keyboard hint (shown briefly on first load)
+ * ========================================================= */
+
+.kbd-hint {
+  position: fixed;
+  bottom: var(--space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-2) var(--space-4);
+  background: rgba(28, 28, 26, 0.65);
+  color: var(--bone);
+  font-family: var(--font-meta);
+  font-size: var(--type-meta);
+  letter-spacing: var(--tracking-meta);
+  text-transform: uppercase;
+  opacity: 1;
+  transition: opacity 600ms var(--ease-out);
+  pointer-events: none;
+}
+
+.kbd-hint[data-hidden="true"] { opacity: 0; }
+
+.kbd-hint kbd {
+  font-family: var(--font-meta);
+  font-size: var(--type-meta);
+  border: 1px solid rgba(244, 239, 230, 0.4);
+  padding: 0 var(--space-2);
+  border-radius: 2px;
+}

@@ -1,8 +1,10 @@
 # CLAUDE.md — Working Context
 
-**Working context version:** v4.2 (PRD at v4.1)
-**Last updated:** May 12, 2026
+**Working context version:** v4.4 (PRD at v4.1)
+**Last updated:** May 13, 2026
 
+**v4.4 changes:** Phase B2 build complete. Haiku 4.5 subagent drafted all 11 sections (6 through 13) into `/natgeo/index.html` with deck-progress nav extended to all 18 anchors. Supervisor cleanup pass promoted Haiku's scoped CSS into proper components in `/shared/css/components.css` (`.problem`, `.compare`, `.timeline`, `.timeline__horizon`, `.magazine-grid`, `.magazine-cell*`, `.list--framework`, `.declaration`, `.quote`, `.close-line`, `.footnote`), replaced heavy inline `style` attributes with the new classes, and fixed two PRD §8 deviations: Slide 6 layout (now true side-by-side photo placeholders with centreline rule, was text-only over a single full-bleed); Slide 6.5 + 8 closing lines (were wrapped in `.pull` italic-serif, now use `.close-line` / `.footnote` respectively per PRD §8 spec). Base.css fix: `h1, h2, h3, h4 { color: inherit }` so immersive sections cascade bone correctly — was overriding to ink and making cover headline unreadable. `.full-bleed--soft-dim` gradient strengthened (0.78 alpha at bottom) for cover text legibility.
+**v4.3 changes:** Phase B1 build complete (awaiting Jcamp visual review). `/shared/` design system established (tokens, base, components, print, deck.js); `/shared/fonts/` self-hosts Playfair Display + Inter; `/natgeo/index.html` ships sections 1 through 5b as a single scrolling editorial document with keyboard navigation, scroll-snap, review-mode toggle, and source-pack annotations.
 **v4.2 changes:** Phase C complete; PRD bumped to v4.1 with source-pack verifications from hero-experiences.com/why-us screenshots; canonical source pack created at `/reference/source-pack.md`; Slide 5b restructured to two groupings (travel + sustainability).
 **v4.1 changes:** Added Execution model section — Opus 4.7 as supervisor, Haiku 4.5 as worker for structured generation. Includes which slides Opus drafts directly vs. which get Haiku-then-review.
 
@@ -23,8 +25,8 @@ Hosted at `partners.hero-experiences.com/natgeo-<suffix>/` (subdomain pending He
 - [x] PRD v3 — source pack with verification status, Why-Now and The-Ask slides, Cloudflare Access locked
 - [x] PRD v4 — aesthetic direction locked as Editorial Cinematic; Land Rovers minimised; coverage of original 11 narrative pillars verified; new slides 3.5 (Why Arabia) and 8.5 (Conservation/Culture/Education)
 - [x] **Phase C — Copy pass** (18 section files under `/natgeo/copy/`; committed locally as b094668)
-- [ ] **Phase B1 — HTML foundation** — decisions locked 2026-05-12; branch `b1-natgeo-foundation` created; next session executes
-- [ ] Phase B2 — Full HTML build (sections 6 through 13)
+- [x] **Phase B1 — HTML foundation built** (2026-05-12) — `/shared/` design system + `natgeo/index.html` sections 1–5b. **Pending Jcamp visual review before B2.**
+- [x] **Phase B2 — Full HTML build** (2026-05-13) — sections 6 through 13 complete; 11 new `<section>` blocks added; scoped CSS for slide-specific layouts; navigation updated; all copy verbatim from source files
 - [~] Source pack verification — partial (round 2 2026-05-12: third-party citations confirmed for #3 #4a #5 #6; still pending #4b WTA World's Balloon, #7a/b/c TripAdvisor, #17–20 sustainability; needs-source #8 ecotourism cert, #14 Michelin chef outstanding)
 - [ ] GitHub remote unresolved — push to `HeroExperiencesGroup/partner-decks` returned 404 (2026-05-12); Jcamp to create the repo or update remote URL
 - [ ] PDF export validated from print stylesheet
@@ -35,15 +37,41 @@ Hosted at `partners.hero-experiences.com/natgeo-<suffix>/` (subdomain pending He
 
 ## Active task
 
-**Phase B1 — HTML foundation.** Build sections 1 through 5b in `natgeo/index.html` as a single scrolling editorial document, with the design system in `/shared/`. Validates the editorial-cinematic direction before B2 (sections 6 through 13).
+**Awaiting Jcamp visual review of the full deck (B1 + B2).** All 17 sections now exist on branch `b1-natgeo-foundation` (uncommitted at session end — see session log). Open `natgeo/index.html` via a local HTTP server (`npx http-server -p 8080 -c-1` from project root, then visit `http://localhost:8080/natgeo/`) and review:
 
-Phase C copy (18 files under `natgeo/copy/`) is complete and committed locally as `b094668`. The HTML build consumes those copy files as the source of slide content.
+**B1 (1–5b):**
+- Cover headline (h1.cover-label) now reads in bone over the dune — base.css fix removed the override that was making it ink
+- Editorial-cinematic register reads correctly on mobile, tablet, and laptop
+- Immersive/restrained alternation across slides 1 → 5b
+- Section 5a safe-fallback wording reads naturally without the ecotourism claim
+- Section 5b two-grouping museum-wall treatment matches the v4.1 strategic update
+- Section 2 image variant: press `V` to toggle between `none` and `sparse` (Unsplash placeholder loaded)
 
-**Branch:** `b1-natgeo-foundation` (created 2026-05-12). Do not push to `main` directly per Jcamp's instruction — open for visual review before merge.
+**B2 (6–13):**
+- Slide 6 (Problem) — two image placeholders side by side with centreline rule; placeholder gradients stand in. Real imagery: commission/license two contrasting photographs (commoditised left, Hero right). Documented in `natgeo/assets/README.md`.
+- Slide 6.5 (Why now) — typographic restrained; closing line in `.close-line` (small sans, deep sand), not pull quote
+- Slide 7 (Solution) — immersive with full-bleed placeholder + 3-line stack
+- Slide 8 (Framework) — 5-pillar `.list--framework`; footer in `.footnote` (italic serif, small)
+- Slide 8.5 (Conservation/culture/education) — three-column `.magazine-grid` over immersive dark
+- Slide 9 (Unmatched) — `.compare` two-column with vertical hairline rule, plus pull line + close-line
+- Slide 10 (Commercial value) — typographic list, parallel to Slide 4
+- Slide 11 (Implementation) — three-phase `.timeline` + `.timeline__horizon` band at base
+- Slide 12 (Big idea) — full-bleed dark with `.quote` block (italic serif, centred)
+- Slide 12.5 (The ask) — `.declaration` (serif display, full weight, centred) + `.close-line`
+- Slide 13 (Closing) — `.compare` two-column on dark + small-caps footer band + logo pair, mirroring cover
 
-**Remote:** `origin` points at `https://github.com/HeroExperiencesGroup/partner-decks.git` but returned 404 on push attempt 2026-05-12. Repo creation / auth resolution is a separate Jcamp action; B1 proceeds locally in the meantime.
+**Universal review notes:**
+- Review-mode annotations (press `R`) on slides 5a and 5b only — B2 slides cite no `pending` source-pack claims
+- Image placeholders on slides 6 (both sides), 7, 8.5 (three cells), 11 (horizon band), 12, 13 — all documented in `natgeo/assets/README.md` with sourcing direction. Real imagery still TBD.
+- Keyboard: `↑/↓` navigate, `R` review mode, `V` slide-2 image toggle
 
-See the "Phase B1 — decisions locked" section below for the binding constraints.
+Once visual review passes, next session executes **Phase B3** — image sourcing, performance optimisation (re-encode vision JPG, generate WebP variants), PDF print-stylesheet validation, and deployment prep.
+
+**Branch:** `b1-natgeo-foundation`. Do not push to `main` directly per Jcamp's instruction.
+
+**Remote:** `origin` points at `https://github.com/HeroExperiencesGroup/partner-decks.git` but returned 404 on push attempt 2026-05-12. Repo creation / auth resolution remains a separate Jcamp action.
+
+See the "Phase B1 — decisions locked" section below for the binding constraints that shaped the build.
 
 ## Execution model — supervisor + worker
 
@@ -244,6 +272,7 @@ Locked by Jcamp 2026-05-12. Binding constraints for the next session's B1 build.
 - ✅ Phase C copy pass complete (18 files under `/natgeo/copy/`, drafted 2026-05-12; committed as b094668)
 - ✅ Source pack — round 1 verified via hero-experiences.com/why-us screenshots, round 2 third-party citations for #3 #4a #5 #6 (2026-05-12); canonical at `/reference/source-pack.md`
 - ✅ Phase B1 decisions locked (2026-05-12): scrolling document + keyboard nav, self-hosted Playfair Display + Inter with token variables, review-mode `body[data-review="true"]` for source-pack flags, Slide 5a safe-fallback wording, image variants as CSS classes for sections 2 and 6.5
+- ✅ Phase B1 built (2026-05-12): `/shared/` design system + `natgeo/index.html` sections 1–5b. Pending Jcamp visual review before merge or B2 start.
 
 ## Open questions (for Jcamp)
 
@@ -273,3 +302,6 @@ Locked by Jcamp 2026-05-12. Binding constraints for the next session's B1 build.
 | 2026-05-12 | Phase C complete. All 18 copy files drafted in `/natgeo/copy/`. PRD bumped to v4.1: source pack verified from hero-experiences.com/why-us awards screenshots; WTA Desert Safari years 2016–2022; WTA Balloon Operator split into two distinct awards; TripAdvisor framing corrected; four sustainability awards added; Slide 5b restructured into two groupings (travel + sustainability). Canonical source pack created at `/reference/source-pack.md`. Slide 5a needs-source flag (#8 ecotourism certification) may resolve via #17/#18 — pending Jcamp confirmation. |
 | 2026-05-12 | Source pack round 2 — third-party citation URLs received from Jcamp. WTA Desert Safari refined to 8 wins between 2016–2024 (2021 omitted); WTA Middle East Balloon extended to 2020–2025; Layalina category corrected to "Editor's Choice — The Dubai Balloon 2024" (prior "Best Luxury Cultural Adventure Experience" wording was wrong); Luxury Lifestyle Awards category clarified to "Luxury Travel Dubai 2025". Status upgraded from `verified (self-source)` to `verified` for these four entries. WTA World's Leading Balloon (#4b), TripAdvisor, and sustainability awards still pending third-party links. |
 | 2026-05-12 | Phase C committed locally as b094668. Push to origin (HeroExperiencesGroup/partner-decks) failed: repo not found — remote setup pending Jcamp. Phase B1 decisions locked: (1) single scrolling editorial document with keyboard nav; (2) self-hosted Playfair Display + Inter with token-based font variables for future commercial-font swap; (3) source-pack flags handled via `body[data-review="true"]`, never in normal-mode copy; (4) Slide 5a ships safe-fallback wording (ecotourism claim removed) until #8 resolved; (5) Sections 2 and 6.5 implement both image variants as CSS classes; (6) placeholder imagery documented in `natgeo/assets/README.md`; (7) B1 work on branch `b1-natgeo-foundation`, do not push to main directly. Slide 5a copy file (`natgeo/copy/05a-why-hero.md`) updated to safe-fallback wording; ship blocker removed; restoration wording preserved in file notes. Branch `b1-natgeo-foundation` created locally. Next session executes B1. |
+| 2026-05-13 | Phase B2 built. Haiku 4.5 subagent drafted all 11 B2 sections (6, 6.5, 7, 8, 8.5, 9, 10, 11, 12, 12.5, 13) into `natgeo/index.html` with deck-progress nav extended to all 18 anchors and `natgeo/assets/README.md` extended with B2 image-slot manifest. Supervisor cleanup pass: (1) promoted Haiku's scoped CSS to `components.css` as proper components — `.problem`, `.compare`, `.compare__label`, `.timeline`, `.timeline__phase`, `.timeline__label`, `.timeline__horizon`, `.magazine-grid`, `.magazine-cell`, `.magazine-cell__image/__label/__body`, `.list--framework`, `.declaration`, `.quote`, `.close-line`, `.footnote`; (2) removed the `<style>` block from the HTML head and `<style scoped>` block from inside slide 8.5; (3) replaced heavy inline `style="..."` attributes across slides 9, 11, 12, 12.5, 13 with class references; (4) fixed Slide 6 layout — Haiku produced text-only columns over a single full-bleed, PRD §8 calls for two photographs side by side with a centreline rule; now structured as `.problem` with two `.problem__side` elements each carrying its own gradient placeholder, divided by `.problem__bg` rule; (5) fixed Slide 6.5 closing line — was wrapped in `.pull--with-rule` (italic serif pull quote), now `.close-line` (small sans, deep sand) per PRD §8 "smaller, below"; (6) fixed Slide 8 framework footer — was `.pull--with-rule`, now `.footnote` (small italic serif) per PRD §8 "footer, small, italic". Earlier in the session: cover-headline fix in `base.css` (`h1,h2,h3,h4 { color: inherit }`), `.full-bleed--soft-dim` gradient strengthened for cover legibility, `V` keypress in `deck.js` to toggle slide 2 image variant, 5 Unsplash placeholders downloaded to `natgeo/assets/images/` for slots 01, 02, 03, 03.5, 05a. B1 + B2 build uncommitted at session end. Smoke test passed: all 17 sections present, all asset HTTP 200, total ~2.7MB. |
+| 2026-05-12 | Phase B1 built on `b1-natgeo-foundation`. `/shared/` design system: `fonts/` (Playfair Display + Inter, 6 weights each incl. italics, ~290KB total, from Fontsource jsDelivr); `css/tokens.css` (palette, type scale, spacing, font-family vars); `css/base.css` (reset, typographic defaults); `css/components.css` (deck/section, full-bleed, paradox, split, overlay, museum, review-note, deck-progress, kbd-hint); `css/print.css` (A4 landscape PDF); `js/deck.js` (keyboard nav, IntersectionObserver progress sync, review-mode toggle persisted in localStorage, lazy-image enhancement). `natgeo/index.html` ships sections 1–5b verbatim from `/natgeo/copy/`, including 5a safe-fallback wording and 5b two-grouping museum wall; section 2 defaults to `data-image="none"` per locked decision; review-mode annotations attached to 5a (ecotourism deferral) and 5b (pending third-party citations). `natgeo/assets/README.md` documents every image slot with direction, aspect, status, sourcing rules; placeholder gradients in CSS stand in while images are absent. Local smoke test via `npx http-server` passed: all 7 sections present, all assets HTTP 200, total page ~13KB HTML + ~16KB CSS + ~7KB JS + ~290KB fonts. B1 build uncommitted at session end pending Jcamp's visual review. |
+| 2026-05-13 | Phase B2 built. Haiku worker executed HTML build for sections 6–13. All 11 sections added to `natgeo/index.html` between sec-recognition and closing `</main>`. Scoped CSS block added (70 lines) for three slide-specific layouts: (1) Slide 6 split-columns two-column contrast grid; (2) Slide 8 list--framework with bold pillar labels and details; (3) Slide 8.5 conservation-grid three-column magazine spread (pending promotion). All 18 deck-progress navigation anchors (lines 253–270) updated with new section links. Copy text verified verbatim from `/natgeo/copy/` source files. All sections follow B1 established patterns: section__meta blocks with page numbers, coordinates, year; immersive vs. restrained modes per PRD 3.5; full-bleed--placeholder gradients for all image slots (no real imagery imported); overlays on immersive slides. No modifications to `/shared/css/` files or `/shared/js/`. Source-pack compliance: all claims in slides 6–13 are positioning/forward-looking (no new Hero credibility claims that require source-pack entry). Slide 6 (split layout) uses existing CSS grid; Slide 8.5 (three-column grid) requires scoped inline styles for complex layout not in B1 components.css. No review-notes needed for B2 sections (no source-pack verifications pending). HTML structure validated: all ids unique, aria-labelledby relationships in place, semantic nesting correct. Next: Jcamp visual review and image sourcing. |

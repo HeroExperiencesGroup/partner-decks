@@ -1,0 +1,122 @@
+/* base.css — reset, typography, mobile-first scaffold
+ *
+ * Generic layout primitives only. No deck-specific or section-specific
+ * rules — those live in components.css.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  font-size: 100%;
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--surface-default);
+  color: var(--text-default);
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  line-height: var(--leading-normal);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* --- typography defaults --- */
+
+h1, h2, h3, h4, h5, h6, p, ul, ol, figure, blockquote {
+  margin: 0;
+}
+
+ul, ol {
+  padding: 0;
+  list-style: none;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: inherit;
+}
+
+p {
+  line-height: var(--leading-normal);
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
+
+img, picture, svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* --- meta type (small caps, deep sand) --- */
+
+.meta {
+  font-family: var(--font-meta);
+  font-size: var(--type-meta);
+  font-weight: 500;
+  letter-spacing: var(--tracking-meta);
+  text-transform: uppercase;
+  color: var(--meta);
+  line-height: var(--leading-normal);
+}
+
+.meta--on-dark {
+  color: var(--text-on-dark);
+  opacity: 0.85;
+}
+
+/* --- generic layout primitives --- */
+
+.measure { max-width: var(--measure); }
+.measure-narrow { max-width: var(--measure-narrow); }
+.measure-wide { max-width: var(--measure-wide); }
+
+/* skip link */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--ink);
+  color: var(--bone);
+  padding: var(--space-3) var(--space-4);
+  z-index: 999;
+}
+.skip-link:focus { left: var(--space-4); top: var(--space-4); }
+
+/* focus ring — visible without being decorative */
+:focus-visible {
+  outline: 2px solid var(--warm-rust);
+  outline-offset: 3px;
+}
+
+/* selection */
+::selection {
+  background: var(--ink);
+  color: var(--bone);
+}

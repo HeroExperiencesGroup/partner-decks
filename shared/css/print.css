@@ -1,0 +1,87 @@
+/* print.css — PDF leave-behind stylesheet
+ *
+ * Used when the user prints the deck (Cmd+P / Ctrl+P → Save as PDF).
+ * Goal: clean A4 landscape, one section per page, no interactive chrome.
+ *
+ * Per PRD 4.3: derived PDF is the emailed follow-up. Quality matters.
+ */
+
+@page {
+  size: A4 landscape;
+  margin: 0;
+}
+
+@media print {
+  html, body {
+    background: var(--bone) !important;
+    color: var(--ink) !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    color-adjust: exact;
+  }
+
+  /* disable scroll-snap container; let each section flow as a page */
+  .deck {
+    height: auto !important;
+    overflow: visible !important;
+    scroll-snap-type: none !important;
+  }
+
+  /* each section becomes one printed page */
+  .section {
+    page-break-after: always;
+    break-after: page;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    min-height: auto;
+    height: 100vh; /* approximate one landscape page */
+    width: 100%;
+    padding: 1.5cm 2cm;
+    overflow: hidden;
+  }
+
+  .section:last-of-type {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  /* hide interactive chrome */
+  .skip-link,
+  .deck-progress,
+  .kbd-hint,
+  .review-banner {
+    display: none !important;
+  }
+
+  /* review-mode annotations never print */
+  .review-note {
+    display: none !important;
+  }
+
+  /* immersive section gradients/overlays still render */
+  .section[data-mode="immersive"] {
+    background: var(--ink) !important;
+    color: var(--bone) !important;
+  }
+
+  /* keep imagery; print-quality JPGs preferred */
+  .full-bleed picture,
+  .full-bleed img,
+  .split__image img,
+  .split__image picture {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* widow / orphan control on body copy */
+  p, li, .pull, .body, .caption {
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* links — print URL after the text would be noisy; suppress */
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}

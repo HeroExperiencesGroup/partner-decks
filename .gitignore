@@ -23,4 +23,6 @@ scratch/
 *-draft.*
 
 # Original brief (keep local, don't push)
-Nat_Geo_Hero_Safari_Partnership.docx
+Nat_Geo_Hero_Safari_Partnership.docxnode_modules/
+package-lock.json
+package.json
