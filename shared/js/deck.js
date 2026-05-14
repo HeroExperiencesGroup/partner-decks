@@ -175,23 +175,48 @@
   }
 
   /* -------------------------------------------------
-   * Rotate-to-landscape hint (mobile portrait only)
+   * Rotate-to-landscape hint + post-rotation fullscreen prompt
    *
-   * Shows once per session on mobile portrait viewports. Auto-hides
-   * when the user rotates to landscape OR dismisses. The CSS handles
-   * the visibility condition (max-width 48em + orientation: portrait);
-   * the JS just toggles the body attribute and persists dismissal.
+   * State machine on body[data-rotate-hint]:
+   *   "portrait"  — initial state on mobile portrait, asks user to rotate
+   *   "landscape" — shown after user rotates from portrait → landscape,
+   *                 offers fullscreen via tap (user-gesture requirement)
+   *   (unset)     — dismissed
+   *
+   * Persistence: dismissal saved in sessionStorage; doesn't re-prompt
+   * within the same session. Fullscreen requires a tap because every
+   * major browser requires a user gesture to enter fullscreen.
    * ------------------------------------------------- */
 
   var ROTATE_HINT_KEY = "partner-decks:rotate-hint-dismissed";
 
-  function isMobilePortrait() {
-    return window.matchMedia("(max-width: 48em) and (orientation: portrait)").matches;
+  function isMobile() {
+    return window.matchMedia("(max-width: 48em)").matches;
+  }
+  function isPortrait() {
+    return window.matchMedia("(orientation: portrait)").matches;
   }
 
   function dismissRotateHint() {
     body.removeAttribute("data-rotate-hint");
     try { sessionStorage.setItem(ROTATE_HINT_KEY, "1"); } catch (e) {}
+  }
+
+  function requestFullscreenSafe() {
+    var el = doc.documentElement;
+    var req = el.requestFullscreen ||
+              el.webkitRequestFullscreen ||
+              el.mozRequestFullScreen ||
+              el.msRequestFullscreen;
+    if (!req) return;
+    try {
+      var p = req.call(el);
+      if (p && typeof p.then === "function") p.catch(function () {});
+    } catch (e) {
+      // iOS Safari < 16.4 and some others don't support fullscreen on
+      // arbitrary elements. Silently ignore — user-gesture dismiss the
+      // overlay regardless.
+    }
   }
 
   function initRotateHint() {
@@ -201,11 +226,11 @@
     var dismissed = false;
     try { dismissed = sessionStorage.getItem(ROTATE_HINT_KEY) === "1"; } catch (e) {}
 
-    if (!dismissed && isMobilePortrait()) {
-      body.setAttribute("data-rotate-hint", "visible");
+    if (!dismissed && isMobile() && isPortrait()) {
+      body.setAttribute("data-rotate-hint", "portrait");
     }
 
-    // dismiss button
+    // dismiss buttons (work in both views)
     qsa("[data-rotate-hint-dismiss]").forEach(function (btn) {
       btn.addEventListener("click", function (e) {
         e.preventDefault();
@@ -213,17 +238,28 @@
       });
     });
 
-    // auto-dismiss on rotation to landscape
-    var orientationMq = window.matchMedia("(orientation: landscape)");
-    function onOrient() {
-      if (orientationMq.matches && body.getAttribute("data-rotate-hint") === "visible") {
+    // fullscreen button (landscape view only)
+    qsa("[data-rotate-hint-fullscreen]").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        requestFullscreenSafe();
         dismissRotateHint();
+      });
+    });
+
+    // when user rotates from portrait → landscape while the rotate
+    // prompt is showing, transition to the fullscreen prompt
+    var landscapeMq = window.matchMedia("(orientation: landscape)");
+    function onOrient() {
+      var state = body.getAttribute("data-rotate-hint");
+      if (state === "portrait" && landscapeMq.matches && isMobile()) {
+        body.setAttribute("data-rotate-hint", "landscape");
       }
     }
-    if (orientationMq.addEventListener) {
-      orientationMq.addEventListener("change", onOrient);
-    } else if (orientationMq.addListener) {
-      orientationMq.addListener(onOrient); // older Safari
+    if (landscapeMq.addEventListener) {
+      landscapeMq.addEventListener("change", onOrient);
+    } else if (landscapeMq.addListener) {
+      landscapeMq.addListener(onOrient); // older Safari
     }
   }
 

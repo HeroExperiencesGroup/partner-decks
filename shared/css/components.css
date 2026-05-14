@@ -988,8 +988,8 @@ body[data-review="true"] .review-banner {
   display: none;
 }
 
-@media (max-width: 48em) and (orientation: portrait) {
-  body[data-rotate-hint="visible"] .rotate-hint {
+@media (max-width: 48em) {
+  body[data-rotate-hint] .rotate-hint {
     display: flex;
     position: fixed;
     inset: 0;
@@ -998,21 +998,34 @@ body[data-review="true"] .review-banner {
     color: var(--bone);
     align-items: center;
     justify-content: center;
-    flex-direction: column;
-    text-align: center;
     padding: var(--space-7) var(--space-5);
-    gap: var(--space-5);
   }
 
-  body[data-rotate-hint="visible"] .deck {
-    overflow: hidden;
-  }
+  body[data-rotate-hint] .deck { overflow: hidden; }
+}
+
+/* Two views inside the overlay — toggled by body state */
+.rotate-hint__view {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  text-align: center;
+}
+
+body[data-rotate-hint="portrait"] .rotate-hint__view[data-rotate-view="portrait"],
+body[data-rotate-hint="landscape"] .rotate-hint__view[data-rotate-view="landscape"] {
+  display: flex;
 }
 
 .rotate-hint__icon {
   width: 64px;
   height: 64px;
   color: var(--deep-sand);
+}
+
+/* Tilting phone icon — only animated in the rotate-prompt state */
+body[data-rotate-hint="portrait"] .rotate-hint__icon--rotate {
   animation: rotate-hint-tilt 2.4s ease-in-out infinite;
 }
 
@@ -1039,7 +1052,8 @@ body[data-review="true"] .review-banner {
   margin: 0;
 }
 
-.rotate-hint__dismiss {
+.rotate-hint__dismiss,
+.rotate-hint__action {
   background: transparent;
   border: 1px solid rgba(244, 239, 230, 0.55);
   color: var(--bone);
@@ -1055,11 +1069,40 @@ body[data-review="true"] .review-banner {
               border-color var(--duration-quick) var(--ease-out);
 }
 
+.rotate-hint__action {
+  background: var(--warm-rust);
+  border-color: var(--warm-rust);
+}
+
 .rotate-hint__dismiss:hover,
 .rotate-hint__dismiss:focus-visible {
   background: rgba(244, 239, 230, 0.08);
   border-color: var(--bone);
 }
+
+.rotate-hint__action:hover,
+.rotate-hint__action:focus-visible {
+  background: var(--oxblood);
+  border-color: var(--oxblood);
+}
+
+.rotate-hint__skip {
+  background: transparent;
+  border: 0;
+  color: var(--bone);
+  opacity: 0.6;
+  font-family: var(--font-meta);
+  font-size: var(--type-meta);
+  letter-spacing: var(--tracking-meta);
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: var(--space-2);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.rotate-hint__skip:hover,
+.rotate-hint__skip:focus-visible { opacity: 1; }
 
 /* =========================================================
  * Keyboard hint (shown briefly on first load)
