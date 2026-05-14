@@ -175,6 +175,59 @@
   }
 
   /* -------------------------------------------------
+   * Rotate-to-landscape hint (mobile portrait only)
+   *
+   * Shows once per session on mobile portrait viewports. Auto-hides
+   * when the user rotates to landscape OR dismisses. The CSS handles
+   * the visibility condition (max-width 48em + orientation: portrait);
+   * the JS just toggles the body attribute and persists dismissal.
+   * ------------------------------------------------- */
+
+  var ROTATE_HINT_KEY = "partner-decks:rotate-hint-dismissed";
+
+  function isMobilePortrait() {
+    return window.matchMedia("(max-width: 48em) and (orientation: portrait)").matches;
+  }
+
+  function dismissRotateHint() {
+    body.removeAttribute("data-rotate-hint");
+    try { sessionStorage.setItem(ROTATE_HINT_KEY, "1"); } catch (e) {}
+  }
+
+  function initRotateHint() {
+    var hint = qs(".rotate-hint");
+    if (!hint) return;
+
+    var dismissed = false;
+    try { dismissed = sessionStorage.getItem(ROTATE_HINT_KEY) === "1"; } catch (e) {}
+
+    if (!dismissed && isMobilePortrait()) {
+      body.setAttribute("data-rotate-hint", "visible");
+    }
+
+    // dismiss button
+    qsa("[data-rotate-hint-dismiss]").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        dismissRotateHint();
+      });
+    });
+
+    // auto-dismiss on rotation to landscape
+    var orientationMq = window.matchMedia("(orientation: landscape)");
+    function onOrient() {
+      if (orientationMq.matches && body.getAttribute("data-rotate-hint") === "visible") {
+        dismissRotateHint();
+      }
+    }
+    if (orientationMq.addEventListener) {
+      orientationMq.addEventListener("change", onOrient);
+    } else if (orientationMq.addListener) {
+      orientationMq.addListener(onOrient); // older Safari
+    }
+  }
+
+  /* -------------------------------------------------
    * Keyboard hint chip
    * ------------------------------------------------- */
 
@@ -205,6 +258,7 @@
     window.addEventListener("keydown", handleKey);
     setupSectionObserver();
     initReviewMode();
+    initRotateHint();
     initLazyImages();
     initKbdHint();
 
