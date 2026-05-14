@@ -29,12 +29,16 @@ Image manifest for the Hero × Nat Geo deck. Every image used in the build is li
 | 08.5 Culture | Hero archive — Bedouin Breakfast (2), guide + guests in tent | ✅ Final-ready |
 | 08.5 Education | Hero archive — Stargazing (16), guide with laser pointer + guests | ✅ Final-ready |
 | 11 Horizon | Hero archive — DDCR (52), wide landscape with horizon line and ghaf scrub | ✅ Final-ready |
-| 12 Big idea | Hero archive — Platinum Heritage (30) blue hour, colour adjusted | ✅ Final-ready |
+| 12 Big idea | Hero archive — Desert Dunes (38), figure walking toward hazy sun, deep-dim overlay applied | ✅ Final-ready — figure-exception applies |
 | 13 Closing | Hero archive — Platinum Heritage (32) | ✅ Final-ready |
 
-## Slide 7 — figure exception
+## Slide 7 + 12 — figure exception (PRD §8 relaxed)
 
-PRD §8 originally said "no figures" for Slide 7 (Solution). Exception granted 2026-05-14: a single small figure walking the dune ridge toward sun, with footprints leading to horizon. The figure reads as documentary scale-element, not advertising-model — exactly the editorial register Nat Geo Traveler uses for opener shots. The "no figures" rule was a defensive choice that gets relaxed when the available real photograph is stronger than any figure-less alternative.
+PRD §8 originally said "no figures" for Slide 7 (Solution) AND Slide 12 (Big Idea). Exception granted 2026-05-14 for both: a single small figure walking the dune ridge toward sun, with footprints leading to horizon. The figure reads as documentary scale-element, not advertising-model — exactly the editorial register Nat Geo Traveler uses for feature opener shots and emotional-peak moments.
+
+The "no figures" rule was a defensive choice written before we knew what imagery would be available. Hero's strongest real photographs have figures providing scale. The exception was relaxed in favour of authenticity — better to ship real photography with a figure than synthetic imagery without one. AI-enhanced/synthesized alternatives were explicitly rejected as a path forward; Nat Geo's photo editors would catch AI tells (missing ghaf scrub, over-smooth dune patterns, synthetic atmosphere).
+
+Slide 12 uses Desert Dunes (38) with a heavier darkening overlay (`.full-bleed--deep-dim` in `shared/css/components.css`) so the image reads near-twilight monochrome, satisfying the brief's "blue hour, almost monochrome" register. The figure becomes a silhouette, the sun a small focal point.
 
 ## Manifest
 
