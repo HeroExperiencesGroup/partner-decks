@@ -16,6 +16,8 @@
   height: 100dvh; /* dynamic viewport for mobile address bars */
   overflow-y: scroll;
   scroll-behavior: smooth;
+  overscroll-behavior: contain; /* keep browser chrome out of pull-down gestures */
+  -webkit-overflow-scrolling: touch;
 }
 
 /* =========================================================
@@ -1137,4 +1139,60 @@ body[data-rotate-hint="portrait"] .rotate-hint__icon--rotate {
   border: 1px solid rgba(244, 239, 230, 0.4);
   padding: 0 var(--space-2);
   border-radius: 2px;
+}
+
+/* Hide keyboard hint on touch / coarse-pointer devices — keys irrelevant */
+@media (pointer: coarse), (hover: none) {
+  .kbd-hint { display: none !important; }
+}
+
+/* =========================================================
+ * Mobile landscape / short viewport refinements
+ *
+ * Phones in landscape are wide but very short (e.g. 844x390).
+ * Default desktop sizing overflows. These overrides compact
+ * type, padding, and the cover layout so every slide fits.
+ * ========================================================= */
+
+@media (max-height: 30em) and (orientation: landscape) {
+  :root {
+    --type-display: 1.5rem;
+    --type-display-lg: 2rem;
+    --type-display-xl: 2.5rem;
+    --type-display-sm: 1.125rem;
+    --section-padding-y: var(--space-5);
+  }
+
+  /* Tighten cover stack and logo footer */
+  .cover-label { font-size: 2rem; max-width: 26ch; }
+  .subhead { font-size: 1rem; }
+  .cover__type {
+    gap: var(--space-3);
+    padding-bottom: var(--space-4);
+  }
+  .cover__logos {
+    padding-top: var(--space-3);
+  }
+
+  /* Page metadata gets smaller margins so it doesn't push content */
+  .section__meta {
+    top: var(--space-3);
+    right: var(--space-3);
+    gap: 2px;
+  }
+
+  /* Section internal padding */
+  .section {
+    padding-top: var(--space-5);
+    padding-bottom: var(--space-5);
+  }
+}
+
+/* Paradox sparse image — keep clear of top-right page metadata zone.
+ * The meta sits at top-right; without offset the image overlaps it. */
+@media (min-width: 48em) {
+  .section[data-image="sparse"] .paradox__image {
+    margin-top: var(--space-7);
+    margin-right: var(--space-5);
+  }
 }

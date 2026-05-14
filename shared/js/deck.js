@@ -211,11 +211,25 @@
     if (!req) return;
     try {
       var p = req.call(el);
-      if (p && typeof p.then === "function") p.catch(function () {});
+      var lockLandscape = function () {
+        // Try to keep landscape after entering fullscreen so the
+        // browser chrome can't reappear on orientation change.
+        if (screen.orientation && screen.orientation.lock) {
+          try {
+            var lp = screen.orientation.lock("landscape");
+            if (lp && lp.catch) lp.catch(function () {});
+          } catch (e) {}
+        }
+      };
+      if (p && typeof p.then === "function") {
+        p.then(lockLandscape).catch(function () {});
+      } else {
+        // older API returns undefined; lock after a tick
+        setTimeout(lockLandscape, 100);
+      }
     } catch (e) {
-      // iOS Safari < 16.4 and some others don't support fullscreen on
-      // arbitrary elements. Silently ignore — user-gesture dismiss the
-      // overlay regardless.
+      // iOS Safari < 16.4 etc. don't support fullscreen on arbitrary
+      // elements. Silently ignore — overlay still dismisses.
     }
   }
 
