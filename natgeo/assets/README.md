@@ -11,26 +11,30 @@ Image manifest for the Hero × Nat Geo deck. Every image used in the build is li
 - Documentary register only. Never advertising-lit. No vehicles in frame (PRD 6.5). No people in cover, vision, or Arabia slides.
 - Target weight: cover under 800KB; each subsequent image under 600KB. (Current vision image is 1.1MB — acceptable for B1 placeholder; will be re-sized or replaced with commissioned imagery for final.)
 
-## Image status (2026-05-13)
+## Image status (2026-05-14)
 
-**9 of 14 slots wired with real photography.** 6 from Hero's own Platinum Heritage archive (DDCR), 1 kept Unsplash (Slide 3, approved by Jcamp), 2 Hero archive (Slides 6 left/right). All images compressed via sharp (mozjpeg) — total 1.6MB for all wired images.
-
-**Still pending:** Slides 7 (Solution), 8.5 (×3 Conservation/Culture/Education), 11 (horizon band). CSS gradient placeholders active for these slots.
+**All 14 slots now wired with real photography.** 13 from Hero's own Platinum Heritage / DDCR archive, 1 kept Unsplash (Slide 3 vision, approved by Jcamp). All images compressed via sharp (mozjpeg) — total ~2.5MB for all wired images.
 
 | Slot | Source | Status |
 |---|---|---|
 | 01 Cover | Hero archive — Platinum Heritage (30) landscape, colour graded | ✅ Final-ready |
-| 02 Paradox sparse | Unsplash — Noemi Talina | Placeholder; decision on sparse variant pending |
+| 02 Paradox sparse | Hero archive — Platinum Heritage (32), same as Slide 13 | ✅ Final-ready (sparse variant set as default) |
 | 03 Vision | Unsplash — Chanbora Chhun (re-encoded 244KB) | Approved by Jcamp; replace if Hero archive available |
 | 03.5 Arabia | Hero archive — Platinum Heritage (23), colour graded | ✅ Final-ready |
 | 05a Hero | Hero archive — Platinum Heritage (26) | ✅ Final-ready |
 | 06 Left | Hero archive — 06-left (commoditised camp aerial) | ✅ Final-ready |
 | 06 Right | Hero archive — 06-right (campfire scene) | ✅ Final-ready |
-| 07 Solution | None — CSS gradient placeholder | Pending |
-| 08.5 ×3 | None — CSS gradient placeholder | Pending |
-| 11 Horizon | None — CSS gradient placeholder | Pending |
+| 07 Solution | Hero archive — Desert Dunes (10), figure walking dune ridge toward sun | ✅ Final-ready — figure-exception granted by Jcamp 2026-05-14 |
+| 08.5 Conservation | Hero archive — Nature Drive (6), Arabian gazelles in DDCR | ✅ Final-ready |
+| 08.5 Culture | Hero archive — Bedouin Breakfast (2), guide + guests in tent | ✅ Final-ready |
+| 08.5 Education | Hero archive — Stargazing (16), guide with laser pointer + guests | ✅ Final-ready |
+| 11 Horizon | Hero archive — DDCR (52), wide landscape with horizon line and ghaf scrub | ✅ Final-ready |
 | 12 Big idea | Hero archive — Platinum Heritage (30) blue hour, colour adjusted | ✅ Final-ready |
 | 13 Closing | Hero archive — Platinum Heritage (32) | ✅ Final-ready |
+
+## Slide 7 — figure exception
+
+PRD §8 originally said "no figures" for Slide 7 (Solution). Exception granted 2026-05-14: a single small figure walking the dune ridge toward sun, with footprints leading to horizon. The figure reads as documentary scale-element, not advertising-model — exactly the editorial register Nat Geo Traveler uses for opener shots. The "no figures" rule was a defensive choice that gets relaxed when the available real photograph is stronger than any figure-less alternative.
 
 ## Manifest
 
