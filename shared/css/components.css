@@ -917,6 +917,368 @@ body[data-review="true"] .section[data-mode="immersive"] .review-note--image {
   border-left-color: var(--deep-sand);
 }
 
+/* intent note — editorial reasoning for the slide ("why we made it
+ * the way we did"). Visually distinct from default review-notes
+ * (warm-rust) and image-sourcing notes (deep-sand) by using oxblood
+ * as the border accent. Should appear FIRST in the .review-notes
+ * stack so readers see the why before the source-pack and image
+ * details. */
+.review-note--intent {
+  border-left-color: var(--oxblood);
+  color: var(--ink);
+}
+body[data-review="true"] .section[data-mode="immersive"] .review-note--intent {
+  border-left-color: var(--oxblood);
+}
+
+/* =========================================================
+ * Editorial tabs — Slides 8, 14, 18 (added 2026-05-15)
+ *
+ * Hairline-underline tab pattern. Not pill, not filled, not rounded.
+ * Tab labels in small-caps meta sans (matches .section-label register);
+ * active tab gets a warm-rust hairline underline + ink colour. On
+ * immersive (dark) slides, colors invert and the underline becomes
+ * deep sand. Panels crossfade on switch via a 320ms ease-out fade.
+ *
+ * Markup pattern:
+ *   <div class="tabs-editorial" role="tablist" data-tabs-editorial>
+ *     <button class="tab-btn-editorial is-active" data-tab="a">…</button>
+ *     <button class="tab-btn-editorial"           data-tab="b">…</button>
+ *   </div>
+ *   <div class="tab-panel-editorial is-active" data-tab="a">…</div>
+ *   <div class="tab-panel-editorial"           data-tab="b">…</div>
+ * ========================================================= */
+
+.tabs-editorial {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-7);
+  align-items: flex-end;
+  border-bottom: var(--rule-hairline) solid var(--rule-fine);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-3);
+}
+
+.tab-btn-editorial {
+  background: transparent;
+  border: 0;
+  padding: 0 0 var(--space-3);
+  margin-bottom: calc(var(--space-3) * -1 - var(--rule-hairline));
+  font-family: var(--font-meta);
+  font-size: var(--type-meta);
+  font-weight: 500;
+  letter-spacing: var(--tracking-meta);
+  text-transform: uppercase;
+  color: var(--meta);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color var(--duration-quick) var(--ease-out),
+              border-color var(--duration-quick) var(--ease-out);
+}
+
+.tab-btn-editorial:hover {
+  color: var(--ink);
+}
+
+.tab-btn-editorial.is-active {
+  color: var(--ink);
+  border-bottom-color: var(--warm-rust);
+}
+
+/* Immersive (dark) override — colors invert for dark slides */
+.section[data-mode="immersive"] .tabs-editorial {
+  border-bottom-color: rgba(244, 239, 230, 0.22);
+}
+.section[data-mode="immersive"] .tab-btn-editorial {
+  color: var(--text-on-dark);
+  opacity: 0.55;
+}
+.section[data-mode="immersive"] .tab-btn-editorial:hover {
+  opacity: 0.85;
+}
+.section[data-mode="immersive"] .tab-btn-editorial.is-active {
+  color: var(--text-on-dark);
+  opacity: 1;
+  border-bottom-color: var(--deep-sand);
+}
+
+/* Tab panels — only the active one is laid out. Crossfade on switch. */
+.tab-panel-editorial {
+  display: none;
+  animation: tab-fade-in 320ms var(--ease-out);
+}
+.tab-panel-editorial.is-active { display: block; }
+
+@keyframes tab-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================================
+ * Top-right nav widget — replaces .deck-progress on desktop.
+ *
+ * Two states share the same anchor (top-right corner):
+ *  · Static (default): a small pill with just the page counter.
+ *  · Full   (mouse near): a wider pill with prev/next + dots +
+ *    counter — fades in and overlays the static pill.
+ *
+ * Theme-aware: when the currently-visible section's data-mode is
+ * "immersive", the widget swaps to a dark-translucent treatment via
+ * .top-nav[data-theme="dark"]. JS observes which section is active
+ * (IntersectionObserver) and writes the data-theme attribute.
+ *
+ * Hidden on mobile (<64em) and coarse-pointer / no-hover devices —
+ * keyboard / swipe / scroll already cover those input modes, and a
+ * fixed top-right widget eats valuable mobile screen real estate.
+ * ========================================================= */
+
+.top-nav {
+  position: fixed;
+  top: var(--space-4);
+  right: var(--space-4);
+  z-index: 5;
+  pointer-events: none;
+  display: none;
+}
+
+@media (min-width: 64em) {
+  .top-nav { display: block; }
+}
+
+@media (pointer: coarse), (hover: none) {
+  .top-nav { display: none !important; }
+}
+
+/* State 1 — static counter pill (visible by default) */
+.top-nav__static {
+  background: var(--bone);
+  border: 1px solid rgba(28, 28, 26, 0.14);
+  border-radius: 999px;
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-meta);
+  font-size: var(--type-meta);
+  font-weight: 500;
+  letter-spacing: var(--tracking-meta);
+  color: var(--warm-rust);
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+  transition: opacity 220ms var(--ease-out),
+              background 320ms var(--ease-out),
+              color 320ms var(--ease-out),
+              border-color 320ms var(--ease-out);
+  pointer-events: auto;
+  white-space: nowrap;
+}
+
+/* Theme: when current section is immersive, static pill flips dark */
+.top-nav[data-theme="dark"] .top-nav__static {
+  background: rgba(28, 28, 26, 0.78);
+  border-color: rgba(244, 239, 230, 0.18);
+  color: var(--bone);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.top-nav.is-near .top-nav__static { opacity: 0; pointer-events: none; }
+
+/* State 2 — full nav pill (proximity-revealed) */
+.top-nav__full {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: rgba(244, 239, 230, 0.96);
+  border: 1px solid rgba(28, 28, 26, 0.14);
+  border-radius: 999px;
+  padding: 6px var(--space-3);
+  opacity: 0;
+  transform: translateX(8px);
+  transition: opacity 220ms var(--ease-out),
+              transform 220ms var(--ease-out),
+              background 320ms var(--ease-out),
+              border-color 320ms var(--ease-out);
+  pointer-events: none;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.top-nav.is-near .top-nav__full {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.top-nav[data-theme="dark"] .top-nav__full {
+  background: rgba(28, 28, 26, 0.78);
+  border-color: rgba(244, 239, 230, 0.18);
+}
+
+.top-nav__arrow {
+  background: transparent;
+  border: 1px solid rgba(28, 28, 26, 0.22);
+  color: var(--ink);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--duration-quick) var(--ease-out),
+              border-color var(--duration-quick) var(--ease-out);
+}
+
+.top-nav__arrow:hover {
+  background: rgba(28, 28, 26, 0.06);
+  border-color: var(--warm-rust);
+}
+
+.top-nav[data-theme="dark"] .top-nav__arrow {
+  border-color: rgba(244, 239, 230, 0.3);
+  color: var(--bone);
+}
+.top-nav[data-theme="dark"] .top-nav__arrow:hover {
+  background: rgba(244, 239, 230, 0.08);
+  border-color: var(--deep-sand);
+}
+
+.top-nav__dots {
+  display: flex;
+  gap: 6px;
+  padding: 0 var(--space-2);
+}
+
+.top-nav__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(28, 28, 26, 0.22);
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  transition: all 220ms var(--ease-out);
+}
+.top-nav__dot:hover {
+  background: rgba(28, 28, 26, 0.5);
+}
+.top-nav__dot.is-active {
+  background: var(--warm-rust);
+  width: 22px;
+  border-radius: 3px;
+}
+
+.top-nav[data-theme="dark"] .top-nav__dot {
+  background: rgba(244, 239, 230, 0.28);
+}
+.top-nav[data-theme="dark"] .top-nav__dot:hover {
+  background: rgba(244, 239, 230, 0.55);
+}
+.top-nav[data-theme="dark"] .top-nav__dot.is-active {
+  background: var(--deep-sand);
+}
+
+.top-nav__counter {
+  font-family: var(--font-meta);
+  font-size: var(--type-meta);
+  font-weight: 500;
+  letter-spacing: var(--tracking-meta);
+  color: var(--warm-rust);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  padding: 0 var(--space-2);
+}
+
+.top-nav[data-theme="dark"] .top-nav__counter {
+  color: var(--deep-sand);
+}
+
+/* =========================================================
+ * Thread spread — Slide 14 per-tab layout.
+ *
+ * Each tab on the Conservation/Culture/Education slide is one editorial
+ * thread shown at full slide width: image left, label + body + facts
+ * strip on the right. Replaces the v4 three-column magazine grid for
+ * the tabbed (v5.1) treatment so each thread gets its own moment.
+ *
+ * Used inside .tab-panel-editorial on the immersive Slide 14 only.
+ * ========================================================= */
+
+.thread-spread {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  align-items: center;
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+}
+
+@media (min-width: 48em) {
+  .thread-spread {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: var(--space-8);
+  }
+}
+
+.thread-spread__image {
+  aspect-ratio: 4 / 3;
+  background: var(--ink);
+  overflow: hidden;
+}
+
+.thread-spread__image img,
+.thread-spread__image picture {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thread-spread__copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  color: var(--text-on-dark);
+}
+
+.thread-spread__label {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--type-display);
+  line-height: var(--leading-tight);
+  color: var(--text-on-dark);
+}
+
+.thread-spread__body {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  line-height: var(--leading-loose);
+  color: var(--text-on-dark);
+  opacity: 0.92;
+}
+
+.thread-spread__facts {
+  list-style: none;
+  padding: var(--space-4) 0 0;
+  margin: var(--space-3) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border-top: var(--rule-hairline) solid rgba(244, 239, 230, 0.18);
+}
+
+.thread-spread__facts li {
+  font-family: var(--font-meta);
+  font-size: var(--type-meta);
+  letter-spacing: var(--tracking-meta);
+  text-transform: uppercase;
+  color: var(--deep-sand);
+  opacity: 0.88;
+}
+
 /* review-mode banner — shows the user they're in review mode */
 .review-banner {
   display: none;
@@ -1195,4 +1557,405 @@ body[data-rotate-hint="portrait"] .rotate-hint__icon--rotate {
     margin-top: var(--space-7);
     margin-right: var(--space-5);
   }
+}
+
+/* =========================================================
+ * v5 components — added 2026-05-15 for the 21-slide restructure.
+ *
+ * - .spec-table          — Slide 9 (Hero vs typical Dubai operator)
+ * - .collections-intro   — Slide 10 (Heritage / Platinum side-by-side)
+ * - .collections-detail  — Slide 15 (experience-card magazine spread)
+ * - .image-placeholder-note — in-placeholder image direction, visible only in review mode
+ * ========================================================= */
+
+/* ---- .spec-table — Slide 9 ----
+ * Three-column comparison (attribute | typical | Hero) in editorial
+ * fact-box register. Real <table> for semantics + accessibility.
+ * Mobile-collapses to card-per-attribute via display:block on rows. */
+
+.spec-table {
+  width: 100%;
+  max-width: var(--measure-wide);
+  margin-top: var(--space-6);
+  border-collapse: collapse;
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  line-height: var(--leading-snug);
+}
+
+.spec-table thead th {
+  text-align: left;
+  vertical-align: bottom;
+  font-family: var(--font-meta);
+  font-size: var(--type-meta);
+  font-weight: 600;
+  letter-spacing: var(--tracking-meta);
+  text-transform: uppercase;
+  color: var(--deep-sand);
+  padding: 0 var(--space-3) var(--space-3);
+  border-bottom: var(--rule-hairline) solid var(--rule-fine);
+}
+
+.spec-table tbody td,
+.spec-table tbody th {
+  text-align: left;
+  vertical-align: top;
+  padding: var(--space-4) var(--space-3);
+  border-top: var(--rule-hairline) solid var(--rule-fine);
+}
+
+.spec-table tbody tr:first-child td,
+.spec-table tbody tr:first-child th {
+  border-top: 0;
+}
+
+.spec-table__attribute {
+  font-family: var(--font-meta);
+  font-size: var(--type-meta);
+  font-weight: 600;
+  letter-spacing: var(--tracking-meta);
+  text-transform: uppercase;
+  color: var(--deep-sand);
+  width: 22%;
+}
+
+.spec-table__typical {
+  color: var(--meta);
+  width: 32%;
+}
+
+.spec-table__hero {
+  color: var(--ink);
+  width: 46%;
+}
+
+.spec-table__close {
+  margin-top: var(--space-5);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--type-body-lg);
+  line-height: var(--leading-snug);
+  color: var(--meta);
+  max-width: var(--measure);
+}
+
+.spec-table__footer {
+  margin-top: var(--space-5);
+  font-family: var(--font-meta);
+  font-size: var(--type-meta);
+  letter-spacing: var(--tracking-meta);
+  text-transform: uppercase;
+  color: var(--deep-sand);
+  text-align: right;
+  opacity: 0.8;
+}
+
+@media (max-width: 48em) {
+  .spec-table,
+  .spec-table thead,
+  .spec-table tbody,
+  .spec-table tr,
+  .spec-table th,
+  .spec-table td {
+    display: block;
+    width: 100%;
+  }
+  .spec-table thead { display: none; }
+  .spec-table tbody tr {
+    padding: var(--space-4) 0;
+    border-top: var(--rule-hairline) solid var(--rule-fine);
+  }
+  .spec-table tbody tr:first-child { border-top: 0; padding-top: 0; }
+  .spec-table__attribute {
+    padding: 0 0 var(--space-2);
+    border-top: 0;
+  }
+  .spec-table__typical,
+  .spec-table__hero {
+    padding: var(--space-1) 0;
+    border-top: 0;
+  }
+  .spec-table__typical::before,
+  .spec-table__hero::before {
+    display: block;
+    font-family: var(--font-meta);
+    font-size: var(--type-meta);
+    font-weight: 600;
+    letter-spacing: var(--tracking-meta);
+    text-transform: uppercase;
+    color: var(--deep-sand);
+    margin-bottom: var(--space-1);
+  }
+  .spec-table__typical::before { content: "Typical Dubai operator"; }
+  .spec-table__hero::before { content: "Hero"; }
+}
+
+/* ---- .collections-intro — Slide 10 ----
+ * Two-photograph side-by-side intro to Heritage and Platinum tiers.
+ * Same split-photo structure as .problem but with a three-line text
+ * stack per side plus a centred closing line below both columns. */
+
+.collections-intro {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+  width: 100%;
+}
+
+@media (min-width: 48em) {
+  .collections-intro {
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+  .collections-intro__side + .collections-intro__side {
+    border-left: var(--rule-hairline) solid var(--rule-fine);
+  }
+}
+
+.collections-intro__side {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 60vh;
+  padding: var(--space-5);
+  overflow: hidden;
+}
+
+@media (min-width: 48em) {
+  .collections-intro__side { min-height: 64vh; padding: var(--space-6); }
+}
+
+.collections-intro__side > img,
+.collections-intro__side > .collections-intro__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.collections-intro__side > .collections-intro__bg--heritage {
+  background:
+    linear-gradient(to bottom, rgba(28,28,26,0.12), rgba(28,28,26,0.78)),
+    linear-gradient(to bottom right, #7a5538, #2a1e14);
+}
+.collections-intro__side > .collections-intro__bg--platinum {
+  background:
+    linear-gradient(to bottom, rgba(28,28,26,0.18), rgba(28,28,26,0.85)),
+    linear-gradient(to bottom right, #3a342d, #1c1c1a);
+}
+
+.collections-intro__side::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(28,28,26,0.08) 0%, rgba(28,28,26,0.7) 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.collections-intro__text {
+  position: relative;
+  z-index: 2;
+  color: var(--text-on-dark);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.collections-intro__tier {
+  font-family: var(--font-meta);
+  font-size: var(--type-meta);
+  font-weight: 600;
+  letter-spacing: var(--tracking-meta);
+  text-transform: uppercase;
+  opacity: 0.9;
+  margin-bottom: var(--space-3);
+}
+
+.collections-intro__lead {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--type-display-sm);
+  line-height: var(--leading-snug);
+}
+
+.collections-intro__detail {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  line-height: var(--leading-snug);
+  opacity: 0.92;
+}
+
+.collections-intro__price {
+  font-family: var(--font-meta);
+  font-size: var(--type-meta);
+  letter-spacing: var(--tracking-meta);
+  text-transform: uppercase;
+  color: var(--deep-sand);
+  margin-top: var(--space-3);
+}
+
+.collections-intro__close {
+  margin-top: var(--space-6);
+  text-align: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--type-body-lg);
+  line-height: var(--leading-snug);
+  color: var(--text-on-dark);
+  opacity: 0.95;
+  max-width: 44ch;
+  margin-inline: auto;
+}
+
+/* ---- .collections-detail — Slide 15 ----
+ * Two-column magazine spread listing Heritage and Platinum experiences.
+ * Each column carries a tier heading and a stack of experience cards.
+ * Hairline rules between cards. */
+
+.collections-detail {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-7);
+  width: 100%;
+  max-width: var(--measure-wide);
+  margin-top: var(--space-6);
+}
+
+@media (min-width: 48em) {
+  .collections-detail {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-8);
+  }
+}
+
+.collections-detail__column {
+  display: flex;
+  flex-direction: column;
+}
+
+.collections-detail__tier {
+  font-family: var(--font-meta);
+  font-size: var(--type-meta);
+  font-weight: 600;
+  letter-spacing: var(--tracking-meta);
+  text-transform: uppercase;
+  color: var(--deep-sand);
+  margin-bottom: var(--space-4);
+}
+
+.collections-detail__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) 0;
+  border-top: var(--rule-hairline) solid var(--rule-fine);
+}
+
+.collections-detail__card:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.collections-detail__card-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--type-display-sm);
+  line-height: var(--leading-tight);
+}
+
+.collections-detail__card-desc {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  line-height: var(--leading-snug);
+  color: var(--ink);
+}
+
+.collections-detail__card-meta {
+  font-family: var(--font-meta);
+  font-size: var(--type-meta);
+  letter-spacing: var(--tracking-meta);
+  text-transform: uppercase;
+  color: var(--deep-sand);
+  margin-top: var(--space-1);
+}
+
+.collections-detail__footer {
+  margin-top: var(--space-7);
+  text-align: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--type-body-lg);
+  line-height: var(--leading-snug);
+  color: var(--meta);
+}
+
+/* ---- .image-placeholder-note ----
+ * When in review mode (body[data-review="true"]) and an image slot
+ * is placeheld with a gradient, this aside surfaces a description
+ * directly over the placeholder so the reader sees what the image
+ * will become without leaving the placeholder context.
+ *
+ * Used on Slide 8 (problem sides — may reshoot for v5 specifics),
+ * Slide 10 (collections intro sides), and Slide 15 (optional
+ * horizon band).
+ *
+ * Sits inside an absolutely-positioned image container (e.g.
+ * .collections-intro__side, .problem__side, .split__image). */
+
+.image-placeholder-note {
+  display: none;
+}
+
+body[data-review="true"] .image-placeholder-note {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--space-5);
+  background: rgba(28, 28, 26, 0.62);
+  color: var(--bone);
+}
+
+.image-placeholder-note__title {
+  display: block;
+  font-family: var(--font-meta);
+  font-size: var(--type-meta);
+  font-weight: 600;
+  letter-spacing: var(--tracking-meta);
+  text-transform: uppercase;
+  color: var(--deep-sand);
+  margin-bottom: var(--space-3);
+  text-align: center;
+}
+
+.image-placeholder-note__body {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  line-height: var(--leading-normal);
+  color: var(--bone);
+  max-width: 32ch;
+  margin-inline: auto;
+  text-align: center;
+  opacity: 0.95;
+}
+
+.image-placeholder-note__test {
+  display: block;
+  margin-top: var(--space-3);
+  font-family: var(--font-meta);
+  font-size: var(--type-meta);
+  letter-spacing: var(--tracking-meta);
+  text-transform: uppercase;
+  color: var(--deep-sand);
+  opacity: 0.85;
+  text-align: center;
 }

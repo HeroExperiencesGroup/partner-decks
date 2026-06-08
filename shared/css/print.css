@@ -48,9 +48,29 @@
   /* hide interactive chrome */
   .skip-link,
   .deck-progress,
+  .top-nav,
   .kbd-hint,
-  .review-banner {
+  .review-banner,
+  .rotate-hint {
     display: none !important;
+  }
+
+  /* Editorial tabs in print: hide the tab buttons; expand ALL panels
+   * (not just the active one) so the PDF reads as the complete content.
+   * Each panel breaks to a new page so a single tabbed slide becomes
+   * multiple sequential pages in the leave-behind. */
+  .tabs-editorial {
+    display: none !important;
+  }
+  .tab-panel-editorial {
+    display: block !important;
+    animation: none !important;
+    page-break-before: always;
+    break-before: page;
+  }
+  .tab-panel-editorial:first-of-type {
+    page-break-before: auto;
+    break-before: auto;
   }
 
   /* review-mode annotations never print */

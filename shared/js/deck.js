@@ -126,6 +126,133 @@
       if (a.getAttribute("href") === "#" + id) a.setAttribute("aria-current", "true");
       else a.removeAttribute("aria-current");
     });
+    syncTopNav(id);
+  }
+
+  /* -------------------------------------------------
+   * Top-right nav widget
+   *
+   * Static counter pill (default) + proximity-revealed full nav (prev/next
+   * + dots + counter). Theme-aware via data-theme attribute on the host
+   * widget — flipped to "dark" when the visible section is data-mode
+   * "immersive". Hidden on mobile (CSS handles the breakpoint).
+   * ------------------------------------------------- */
+
+  var topNavEl, topNavStatic, topNavFull, topNavCounter, topNavCounterStatic,
+      topNavDotsEl, topNavPrev, topNavNext;
+  var topNavDots = [];
+  var TOP_NAV_PROXIMITY_PX = 220;
+
+  function pad2(n) { return n < 10 ? "0" + n : String(n); }
+
+  function buildTopNavDots() {
+    if (!topNavDotsEl) return;
+    topNavDotsEl.innerHTML = "";
+    topNavDots = [];
+    sections.forEach(function (s, i) {
+      var b = doc.createElement("button");
+      b.className = "top-nav__dot";
+      b.type = "button";
+      var label = s.getAttribute("aria-labelledby");
+      var labelText = "Slide " + (i + 1);
+      if (label) {
+        var labelEl = doc.getElementById(label);
+        if (labelEl && labelEl.textContent) {
+          labelText = labelEl.textContent.trim().slice(0, 60);
+        }
+      }
+      b.setAttribute("aria-label", labelText);
+      b.addEventListener("click", function () { goTo(i); });
+      topNavDotsEl.appendChild(b);
+      topNavDots.push(b);
+    });
+  }
+
+  function syncTopNav(id) {
+    if (!topNavEl) return;
+    var idx = -1;
+    for (var i = 0; i < sections.length; i++) {
+      if (sections[i].id === id) { idx = i; break; }
+    }
+    if (idx < 0) idx = currentSectionIndex();
+    if (idx < 0) return;
+
+    var counterText = pad2(idx + 1) + " / " + pad2(sections.length);
+    if (topNavCounter) topNavCounter.textContent = counterText;
+    if (topNavCounterStatic) topNavCounterStatic.textContent = counterText;
+
+    topNavDots.forEach(function (d, i) {
+      d.classList.toggle("is-active", i === idx);
+      if (i === idx) d.setAttribute("aria-current", "true");
+      else d.removeAttribute("aria-current");
+    });
+
+    var mode = sections[idx].getAttribute("data-mode");
+    topNavEl.setAttribute("data-theme", mode === "immersive" ? "dark" : "light");
+  }
+
+  function initTopNav() {
+    topNavEl = qs(".top-nav");
+    if (!topNavEl) return;
+    topNavStatic       = qs(".top-nav__static", topNavEl);
+    topNavFull         = qs(".top-nav__full", topNavEl);
+    topNavCounter      = qs(".top-nav__counter", topNavEl);
+    topNavCounterStatic = qs("[data-top-nav-counter-static]", topNavEl);
+    topNavDotsEl       = qs(".top-nav__dots", topNavEl);
+    topNavPrev         = qs("[data-top-nav-prev]", topNavEl);
+    topNavNext         = qs("[data-top-nav-next]", topNavEl);
+
+    buildTopNavDots();
+
+    if (topNavPrev) topNavPrev.addEventListener("click", function () {
+      goTo(currentSectionIndex() - 1);
+    });
+    if (topNavNext) topNavNext.addEventListener("click", function () {
+      goTo(currentSectionIndex() + 1);
+    });
+
+    /* Proximity detection — only on devices with hover. CSS already hides
+     * the widget on coarse-pointer / no-hover devices, but we guard JS
+     * too so we don't attach a mousemove listener on touch devices. */
+    var hoverMq = window.matchMedia("(hover: hover) and (pointer: fine)");
+    if (hoverMq.matches && topNavFull) {
+      window.addEventListener("mousemove", function (e) {
+        var r = topNavFull.getBoundingClientRect();
+        var dx = Math.max(0, Math.max(r.left - e.clientX, e.clientX - r.right));
+        var dy = Math.max(0, Math.max(r.top  - e.clientY, e.clientY - r.bottom));
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        topNavEl.classList.toggle("is-near", dist < TOP_NAV_PROXIMITY_PX);
+      });
+    }
+  }
+
+  /* -------------------------------------------------
+   * Editorial tabs — [data-tabs-editorial] containers
+   *
+   * Buttons (.tab-btn-editorial[data-tab="X"]) toggle panels
+   * (.tab-panel-editorial[data-tab="X"]) within the same section.
+   * One container per section. Used on Slides 8, 14, 18.
+   * ------------------------------------------------- */
+
+  function initEditorialTabs() {
+    qsa("[data-tabs-editorial]").forEach(function (group) {
+      var scope = group.closest(".section") || doc;
+      var buttons = qsa(".tab-btn-editorial[data-tab]", group);
+      var panels  = qsa(".tab-panel-editorial[data-tab]", scope);
+      buttons.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var key = btn.getAttribute("data-tab");
+          buttons.forEach(function (b) {
+            var on = b === btn;
+            b.classList.toggle("is-active", on);
+            b.setAttribute("aria-selected", on ? "true" : "false");
+          });
+          panels.forEach(function (p) {
+            p.classList.toggle("is-active", p.getAttribute("data-tab") === key);
+          });
+        });
+      });
+    });
   }
 
   /* -------------------------------------------------
@@ -306,7 +433,9 @@
     progressLinks = qsa(".deck-progress a");
 
     window.addEventListener("keydown", handleKey);
+    initTopNav();
     setupSectionObserver();
+    initEditorialTabs();
     initReviewMode();
     initRotateHint();
     initLazyImages();

@@ -1,7 +1,9 @@
 # CLAUDE.md — Working Context
 
-**Working context version:** v4.4 (PRD at v4.1)
-**Last updated:** May 13, 2026
+**Working context version:** v5.0 (PRD at v5)
+**Last updated:** May 15, 2026
+
+**v5.0 changes:** Complete restructure around two-tier (Platinum + Heritage) thesis. PRD bumped to v5 (`PRD.md`); thesis pivoted from anti-luxury documentary register to *editorial luxury* — Hero shown as the only Gulf operator where luxury and conservation are inseparable, delivered through two collections within a single conservation mandate. 21-slide structure (was 17). New slides: Hero vs typical Dubai operator spec sheet (9), Two collections intro (10), Inside the collections (15). Slide 6 → 8 (Problem) revised with concrete Hero specifics. Phase B0 introduced: per-slide descriptive briefs at `/natgeo/briefs/` precede copy and HTML — all 21 briefs drafted 2026-05-15. Source pack updated: #8 ecotourism resolved as `verified (self-source)` via Platinum Heritage site verbatim; #14 Michelin chef resolved (Chef Claudio Filippone + Executive Chef Manish Khot, named on /platinum-desert-safari); 12 new entries added (#21–32) covering Royal Family property access, 1:2 staff ratio, 4-guest vehicle cap, Al Maha partnership, gentle-drive policy, animal-welfare compliance, two-collection product catalogues, four-element breakfast, 500K visitors, 200K bottles, 650-cars-pending. PRD §6.5 Land Rover rule reframed as vehicle-agnostic on forward slides (silence, not exclusion); current-operations slides may surface the vintage fleet. PRD §6.6 added: luxury through fact, not signifier. Phase B HTML restructure underway 2026-05-15.
 
 **v4.4 changes:** Phase B2 build complete. Haiku 4.5 subagent drafted all 11 sections (6 through 13) into `/natgeo/index.html` with deck-progress nav extended to all 18 anchors. Supervisor cleanup pass promoted Haiku's scoped CSS into proper components in `/shared/css/components.css` (`.problem`, `.compare`, `.timeline`, `.timeline__horizon`, `.magazine-grid`, `.magazine-cell*`, `.list--framework`, `.declaration`, `.quote`, `.close-line`, `.footnote`), replaced heavy inline `style` attributes with the new classes, and fixed two PRD §8 deviations: Slide 6 layout (now true side-by-side photo placeholders with centreline rule, was text-only over a single full-bleed); Slide 6.5 + 8 closing lines (were wrapped in `.pull` italic-serif, now use `.close-line` / `.footnote` respectively per PRD §8 spec). Base.css fix: `h1, h2, h3, h4 { color: inherit }` so immersive sections cascade bone correctly — was overriding to ink and making cover headline unreadable. `.full-bleed--soft-dim` gradient strengthened (0.78 alpha at bottom) for cover text legibility.
 **v4.3 changes:** Phase B1 build complete (awaiting Jcamp visual review). `/shared/` design system established (tokens, base, components, print, deck.js); `/shared/fonts/` self-hosts Playfair Display + Inter; `/natgeo/index.html` ships sections 1 through 5b as a single scrolling editorial document with keyboard navigation, scroll-snap, review-mode toggle, and source-pack annotations.
@@ -16,7 +18,7 @@ Hosted at `partners.hero-experiences.com/natgeo-<suffix>/` (subdomain pending He
 
 ## Source of truth
 
-`PRD.md` (currently **v4**) is the single source of truth. Read it before every session.
+`PRD.md` (currently **v5**) is the single source of truth. Read it before every session.
 
 ## Current state
 
@@ -27,6 +29,9 @@ Hosted at `partners.hero-experiences.com/natgeo-<suffix>/` (subdomain pending He
 - [x] **Phase C — Copy pass** (18 section files under `/natgeo/copy/`; committed locally as b094668)
 - [x] **Phase B1 — HTML foundation built** (2026-05-12) — `/shared/` design system + `natgeo/index.html` sections 1–5b. **Pending Jcamp visual review before B2.**
 - [x] **Phase B2 — Full HTML build** (2026-05-13) — sections 6 through 13 complete; 11 new `<section>` blocks added; scoped CSS for slide-specific layouts; navigation updated; all copy verbatim from source files
+- [x] **PRD v5** (2026-05-14/15) — full restructure around two-tier thesis; 21 slides; new §6.6 (mode-of-luxury); §6.5 reframed vehicle-agnostic on forward slides
+- [x] **Phase B0 v5** (2026-05-15) — per-slide descriptive briefs for all 21 slides written to `/natgeo/briefs/`
+- [~] **Phase B v5 HTML restructure** (in progress 2026-05-15) — index.html rewritten for v5 slide order; new components added to components.css; new slide placeholders with image descriptions in review mode
 - [~] Source pack verification — partial (round 2 2026-05-12: third-party citations confirmed for #3 #4a #5 #6; still pending #4b WTA World's Balloon, #7a/b/c TripAdvisor, #17–20 sustainability; needs-source #8 ecotourism cert, #14 Michelin chef outstanding)
 - [ ] GitHub remote unresolved — push to `HeroExperiencesGroup/partner-decks` returned 404 (2026-05-12); Jcamp to create the repo or update remote URL
 - [ ] PDF export validated from print stylesheet
@@ -37,41 +42,34 @@ Hosted at `partners.hero-experiences.com/natgeo-<suffix>/` (subdomain pending He
 
 ## Active task
 
-**Awaiting Jcamp visual review of the full deck (B1 + B2).** All 17 sections now exist on branch `b1-natgeo-foundation` (uncommitted at session end — see session log). Open `natgeo/index.html` via a local HTTP server (`npx http-server -p 8080 -c-1` from project root, then visit `http://localhost:8080/natgeo/`) and review:
+**Phase B v5 HTML restructure — in progress as of 2026-05-15.** The deck is being restructured around the v5 two-tier thesis. Read PRD v5 first (especially §2.2 thesis, §3.5 21-slide rhythm, §6.5 vehicle handling, §6.6 mode-of-luxury). Then read the 21 per-slide briefs at `/natgeo/briefs/` for slide-by-slide direction including image descriptions and atmosphere notes.
 
-**B1 (1–5b):**
-- Cover headline (h1.cover-label) now reads in bone over the dune — base.css fix removed the override that was making it ink
-- Editorial-cinematic register reads correctly on mobile, tablet, and laptop
-- Immersive/restrained alternation across slides 1 → 5b
-- Section 5a safe-fallback wording reads naturally without the ecotourism claim
-- Section 5b two-grouping museum-wall treatment matches the v4.1 strategic update
-- Section 2 image variant: press `V` to toggle between `none` and `sparse` (Unsplash placeholder loaded)
+What is being delivered in this restructure:
+- `natgeo/index.html` rewritten for v5 slide order (21 slides — was 17)
+- New CSS components appended to `shared/css/components.css` for three new slides: `.spec-table` (Slide 9), `.collections-intro` (Slide 10), `.collections-detail` (Slide 15)
+- Deck-progress nav updated to all 21 anchors
+- New image slots placeheld with gradient + visible image description in review mode (so Jcamp can scroll and see how each new slide will feel before commissioning real photography)
+- Existing imagery retained where the v4 image direction still serves the v5 slide
 
-**B2 (6–13):**
-- Slide 6 (Problem) — two image placeholders side by side with centreline rule; placeholder gradients stand in. Real imagery: commission/license two contrasting photographs (commoditised left, Hero right). Documented in `natgeo/assets/README.md`.
-- Slide 6.5 (Why now) — typographic restrained; closing line in `.close-line` (small sans, deep sand), not pull quote
-- Slide 7 (Solution) — immersive with full-bleed placeholder + 3-line stack
-- Slide 8 (Framework) — 5-pillar `.list--framework`; footer in `.footnote` (italic serif, small)
-- Slide 8.5 (Conservation/culture/education) — three-column `.magazine-grid` over immersive dark
-- Slide 9 (Unmatched) — `.compare` two-column with vertical hairline rule, plus pull line + close-line
-- Slide 10 (Commercial value) — typographic list, parallel to Slide 4
-- Slide 11 (Implementation) — three-phase `.timeline` + `.timeline__horizon` band at base
-- Slide 12 (Big idea) — full-bleed dark with `.quote` block (italic serif, centred)
-- Slide 12.5 (The ask) — `.declaration` (serif display, full weight, centred) + `.close-line`
-- Slide 13 (Closing) — `.compare` two-column on dark + small-caps footer band + logo pair, mirroring cover
+Awaiting after this restructure:
+- Jcamp visual review of v5 deck
+- Copy refinement (briefs → final copy under `/natgeo/copy/` with v5-aligned filenames)
+- Real imagery for new placeholders (Slide 10 left + right; Slide 8 may need new left-side dune-bashing image)
+- Source-pack-blocker resolution: `/reference/source-pack.md` #32 "650 cars not produced" pending Hero internal confirmation of figure
 
-**Universal review notes:**
-- Review-mode annotations (press `R`) on slides 5a and 5b only — B2 slides cite no `pending` source-pack claims
-- Image placeholders on slides 6 (both sides), 7, 8.5 (three cells), 11 (horizon band), 12, 13 — all documented in `natgeo/assets/README.md` with sourcing direction. Real imagery still TBD.
-- Keyboard: `↑/↓` navigate, `R` review mode, `V` slide-2 image toggle
+What is preserved from v4 build (do not touch unless task requires):
+- `/shared/css/` design system (tokens, base, print, deck.js, fonts) — survives intact
+- Existing image assets for Slides 1, 3, 4 (was 3.5), 6 (was 5a, current image option A), 14 (was 8.5, 3 images), 18 (was 11), 19 (was 12), 21 (was 13)
 
-Once visual review passes, next session executes **Phase B3** — image sourcing, performance optimisation (re-encode vision JPG, generate WebP variants), PDF print-stylesheet validation, and deployment prep.
+**v4 prior active task — superseded.** Full deck visual review of v4 (17 slides, branch `b1-natgeo-foundation`) was the active task at the end of the 2026-05-14 session. v5 supersedes — visual review will now be on the v5 build, not v4.
+
+**To preview locally:** `npx http-server -p 8080 -c-1` from project root, then visit `http://localhost:8080/natgeo/`. Keyboard: `↑/↓` navigate, `R` toggle review mode (shows source-pack notes + image-direction descriptions on new placeholder slots), `V` toggle Slide 2 image variant.
 
 **Branch:** `b1-natgeo-foundation`. Do not push to `main` directly per Jcamp's instruction.
 
 **Remote:** `origin` points at `https://github.com/HeroExperiencesGroup/partner-decks.git` but returned 404 on push attempt 2026-05-12. Repo creation / auth resolution remains a separate Jcamp action.
 
-See the "Phase B1 — decisions locked" section below for the binding constraints that shaped the build.
+See the "Phase B1 — decisions locked" section below for binding constraints from v4 that still apply unless explicitly superseded by v5 (most do — e.g. self-hosted webfonts, review-mode mechanism, image variants as CSS classes for Sections 2 and 11).
 
 ## Execution model — supervisor + worker
 
@@ -306,3 +304,4 @@ Locked by Jcamp 2026-05-12. Binding constraints for the next session's B1 build.
 | 2026-05-12 | Phase B1 built on `b1-natgeo-foundation`. `/shared/` design system: `fonts/` (Playfair Display + Inter, 6 weights each incl. italics, ~290KB total, from Fontsource jsDelivr); `css/tokens.css` (palette, type scale, spacing, font-family vars); `css/base.css` (reset, typographic defaults); `css/components.css` (deck/section, full-bleed, paradox, split, overlay, museum, review-note, deck-progress, kbd-hint); `css/print.css` (A4 landscape PDF); `js/deck.js` (keyboard nav, IntersectionObserver progress sync, review-mode toggle persisted in localStorage, lazy-image enhancement). `natgeo/index.html` ships sections 1–5b verbatim from `/natgeo/copy/`, including 5a safe-fallback wording and 5b two-grouping museum wall; section 2 defaults to `data-image="none"` per locked decision; review-mode annotations attached to 5a (ecotourism deferral) and 5b (pending third-party citations). `natgeo/assets/README.md` documents every image slot with direction, aspect, status, sourcing rules; placeholder gradients in CSS stand in while images are absent. Local smoke test via `npx http-server` passed: all 7 sections present, all assets HTTP 200, total page ~13KB HTML + ~16KB CSS + ~7KB JS + ~290KB fonts. B1 build uncommitted at session end pending Jcamp's visual review. |
 | 2026-05-13 | Phase B2 built. Haiku worker executed HTML build for sections 6–13. All 11 sections added to `natgeo/index.html` between sec-recognition and closing `</main>`. Scoped CSS block added (70 lines) for three slide-specific layouts: (1) Slide 6 split-columns two-column contrast grid; (2) Slide 8 list--framework with bold pillar labels and details; (3) Slide 8.5 conservation-grid three-column magazine spread (pending promotion). All 18 deck-progress navigation anchors (lines 253–270) updated with new section links. Copy text verified verbatim from `/natgeo/copy/` source files. All sections follow B1 established patterns: section__meta blocks with page numbers, coordinates, year; immersive vs. restrained modes per PRD 3.5; full-bleed--placeholder gradients for all image slots (no real imagery imported); overlays on immersive slides. No modifications to `/shared/css/` files or `/shared/js/`. Source-pack compliance: all claims in slides 6–13 are positioning/forward-looking (no new Hero credibility claims that require source-pack entry). Slide 6 (split layout) uses existing CSS grid; Slide 8.5 (three-column grid) requires scoped inline styles for complex layout not in B1 components.css. No review-notes needed for B2 sections (no source-pack verifications pending). HTML structure validated: all ids unique, aria-labelledby relationships in place, semantic nesting correct. Next: Jcamp visual review and image sourcing. |
 | 2026-05-14 | All 14 image slots wired with real photography. 13 from Hero's Platinum Heritage / DDCR archive, 1 approved Unsplash (Slide 3). Slide 2 paradox switched to sparse variant using same source as Slide 13 closing (visual thread between opener and closing). Slide 8.5 ×3 populated (Nature Drive 6 gazelles → Conservation; Bedouin Breakfast 2 → Culture; Stargazing 16 → Education). Slide 11 horizon iterated through 3 candidates — (38) oryx, (53) aerial dunes, finally (52) which has the clearest horizon line + ghaf scrub; locked at `object-position: center 17%`. Slide 7 (Solution) populated with Desert Dunes (10) — figure walking dune ridge toward sun. PRD §8 "no figures" rule for Slide 7 explicitly relaxed by Jcamp; figure provides documentary scale, reads as expedition not advertising. Recorded in `natgeo/assets/README.md` "Slide 7 — figure exception" section. AI-enhanced variants of (53) considered for Slide 7 but rejected — Nat Geo photo editors would catch AI tells (missing ghaf scrub, over-symmetric ripples). Real Hero photography preferred even when figure-exception required. All images compressed via sharp/mozjpeg — total deck weight ~2.5MB. Deck is now image-complete and ready for visual review before delivery. |
+| 2026-05-15 | v5 full restructure. Driven by higher-up feedback that v4 under-represented Hero's actual brand voice (Platinum Heritage's own positioning is "Sustainable-Luxury Desert Safaris" / "rustic luxury"), made the comparison argument too vague, and failed to surface concrete differentiators leadership needs. PRD bumped to v5 with new thesis (§2.2): Hero is the only Gulf operator where editorial luxury and conservation are inseparable, delivered through two collections within a single conservation mandate. Architecture: 21 slides (was 17). Three new slides added — Slide 9 (Hero vs typical Dubai operator spec sheet), Slide 10 (Two collections intro side-by-side), Slide 15 (Inside the collections experience-card spread). Slide 6 → 8 (Problem) revised from vague-noun parallel ("falcon, silence, fire, story") to concrete Hero specifics ("falconry under the open sky, fire, oryx tracking, silence") with "dune-bashing" added on left column as the practice Hero publicly refuses. PRD §6.5 (Land Rover handling) reframed — current-vs-forward split: current-operations slides (6, 10, 14, 15) may surface the vintage 1950s fleet (Hero's own brand language); forward-partnership slides (3, 12, 18, 19, 20, 21) stay vehicle-agnostic, neither inclusive nor exclusive. Same end-state v4 produced via blanket de-emphasis, rationalised by scope rather than suppression. PRD §6.6 (mode-of-luxury) added: luxury through fact (named credentials, numerical specs, concrete access, documentary high-end imagery) permitted; luxury through signifier (adjective puff, gold/marble/champagne, drone-pool, Burj-Al-Arab register) forbidden. NatGeo precedent expanded from Unique Lodges alone to Singita / Asilia / Bushcamp / Unique Lodges. Banned-words list refined: *exclusive* / *private* permitted in factual constructions only; *luxurious* / *bespoke* / *premium* still banned; *luxury* permitted as tier-name noun. Source pack: #8 ecotourism upgraded `needs-source` → `verified (self-source)` via Platinum Heritage site verbatim ("The only Ecotourism Desert Safari company in Dubai"); #14 Michelin chef resolved (Chef Claudio Filippone & Executive Chef Manish Khot, named on /platinum-desert-safari); 12 new entries (#21–32) added under new Section 5 "v5 additions" covering Royal Family property access, 1:2 staff ratio, 4-guest vehicle cap, Al Maha partnership, gentle-drive policy, animal-welfare compliance, two-collection product catalogues, four-element breakfast, 500K visitors, 200K bottles, 650-cars-pending. Phase B0 introduced — per-slide descriptive briefs at `/natgeo/briefs/` (21 Markdown files specifying copy structure, image description, atmosphere note per slide) as a bridge between PRD and HTML; closes a v4 gap where copy-to-HTML structural rework was needed on three slides at B2 cleanup. HTML restructure begun: index.html rewritten for v5 21-slide order with new image slots placeheld + descriptions visible in review mode (so Jcamp can scroll and see how new slides feel before commissioning real photography); new CSS components appended to components.css (.spec-table for Slide 9, .collections-intro for Slide 10, .collections-detail for Slide 15). HTML rewrite delegated to Haiku 4.5 subagent per established execution model (Opus 4.7 supervisor + Haiku worker for structured generation); supervisor review on output before user review. |
