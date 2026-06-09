@@ -3,14 +3,17 @@
  * Vanilla JS, no dependencies. Mobile-first.
  *
  * Responsibilities:
- *   1. Keyboard navigation between sections (Arrow keys, Page Up/Down,
+ *   1. Wrap each .section in a .slide-viewport for 16:9 letterboxing.
+ *   2. Keyboard navigation between sections (Arrow keys, Page Up/Down,
  *      Home/End, j/k as fallback).
- *   2. Track the current section and update aria-current on the
+ *   3. Track the current section and update aria-current on the
  *      progress dots + page-meta page-number readout.
- *   3. Toggle review mode (body[data-review="true"]) on `R` keypress
+ *   4. Toggle review mode (body[data-review="true"]) on `R` keypress
  *      and `?review=1` query string. Persisted in localStorage.
- *   4. Lazy-load below-the-fold images via IntersectionObserver.
- *   5. Briefly show then fade the keyboard-hint chip on first load.
+ *   5. Lazy-load below-the-fold images via IntersectionObserver.
+ *   6. Briefly show then fade the keyboard-hint chip on first load.
+ *   7. Auto-fullscreen on first user gesture (click / key / touch).
+ *   8. Compare-grid hover interaction for Slide 8.
  */
 
 (function () {
@@ -21,7 +24,8 @@
   var html = doc.documentElement;
   var body = doc.body;
   var deck;
-  var sections = [];
+  var sections  = [];   /* .section elements — content / observation */
+  var viewports = [];   /* .slide-viewport elements — scroll / snap */
   var progressLinks = [];
 
   function ready(fn) {
@@ -35,31 +39,50 @@
   }
 
   /* -------------------------------------------------
+   * 16:9 viewport wrappers
+   *
+   * Wraps every .section in a .slide-viewport div.
+   * The viewport is the scroll-snap target (100dvh).
+   * The section inside is sized to 16:9 via CSS.
+   * ------------------------------------------------- */
+
+  function wrapSections() {
+    sections.forEach(function (s) {
+      var vp = doc.createElement("div");
+      vp.className = "slide-viewport";
+      s.parentNode.insertBefore(vp, s);
+      vp.appendChild(s);
+    });
+    viewports = qsa(".slide-viewport", deck);
+  }
+
+  /* -------------------------------------------------
    * Section navigation
    * ------------------------------------------------- */
 
   function currentSectionIndex() {
-    if (!sections.length) return 0;
+    var targets = viewports.length ? viewports : sections;
+    if (!targets.length) return 0;
     var scroll = deck.scrollTop;
     var bestIdx = 0;
     var bestDist = Infinity;
-    for (var i = 0; i < sections.length; i++) {
-      var d = Math.abs(sections[i].offsetTop - scroll);
+    for (var i = 0; i < targets.length; i++) {
+      var d = Math.abs(targets[i].offsetTop - scroll);
       if (d < bestDist) { bestDist = d; bestIdx = i; }
     }
     return bestIdx;
   }
 
   function goTo(index) {
+    var targets = viewports.length ? viewports : sections;
     if (index < 0) index = 0;
-    if (index >= sections.length) index = sections.length - 1;
-    var target = sections[index];
+    if (index >= targets.length) index = targets.length - 1;
+    var target = targets[index];
     if (!target) return;
     deck.scrollTo({ top: target.offsetTop, behavior: "smooth" });
   }
 
   function handleKey(e) {
-    // Ignore when modifier keys are held or the user is typing in a field
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     var tag = (e.target && e.target.tagName) || "";
     if (tag === "INPUT" || tag === "TEXTAREA" || e.target.isContentEditable) return;
@@ -92,9 +115,6 @@
 
   /* -------------------------------------------------
    * Section 2 image variant toggle (B1 visual-review aid)
-   *
-   * Flips #sec-paradox between data-image="none" and "sparse"
-   * so Jcamp can A/B the rhythm coming off the cover.
    * ------------------------------------------------- */
 
   function toggleParadoxImage() {
@@ -131,11 +151,6 @@
 
   /* -------------------------------------------------
    * Top-right nav widget
-   *
-   * Static counter pill (default) + proximity-revealed full nav (prev/next
-   * + dots + counter). Theme-aware via data-theme attribute on the host
-   * widget — flipped to "dark" when the visible section is data-mode
-   * "immersive". Hidden on mobile (CSS handles the breakpoint).
    * ------------------------------------------------- */
 
   var topNavEl, topNavStatic, topNavFull, topNavCounter, topNavCounterStatic,
@@ -162,6 +177,7 @@
         }
       }
       b.setAttribute("aria-label", labelText);
+      b.setAttribute("data-slide-number", i + 1);  /* hover tooltip */
       b.addEventListener("click", function () { goTo(i); });
       topNavDotsEl.appendChild(b);
       topNavDots.push(b);
@@ -194,13 +210,13 @@
   function initTopNav() {
     topNavEl = qs(".top-nav");
     if (!topNavEl) return;
-    topNavStatic       = qs(".top-nav__static", topNavEl);
-    topNavFull         = qs(".top-nav__full", topNavEl);
-    topNavCounter      = qs(".top-nav__counter", topNavEl);
+    topNavStatic        = qs(".top-nav__static", topNavEl);
+    topNavFull          = qs(".top-nav__full", topNavEl);
+    topNavCounter       = qs(".top-nav__counter", topNavEl);
     topNavCounterStatic = qs("[data-top-nav-counter-static]", topNavEl);
-    topNavDotsEl       = qs(".top-nav__dots", topNavEl);
-    topNavPrev         = qs("[data-top-nav-prev]", topNavEl);
-    topNavNext         = qs("[data-top-nav-next]", topNavEl);
+    topNavDotsEl        = qs(".top-nav__dots", topNavEl);
+    topNavPrev          = qs("[data-top-nav-prev]", topNavEl);
+    topNavNext          = qs("[data-top-nav-next]", topNavEl);
 
     buildTopNavDots();
 
@@ -211,9 +227,6 @@
       goTo(currentSectionIndex() + 1);
     });
 
-    /* Proximity detection — only on devices with hover. CSS already hides
-     * the widget on coarse-pointer / no-hover devices, but we guard JS
-     * too so we don't attach a mousemove listener on touch devices. */
     var hoverMq = window.matchMedia("(hover: hover) and (pointer: fine)");
     if (hoverMq.matches && topNavFull) {
       window.addEventListener("mousemove", function (e) {
@@ -228,10 +241,6 @@
 
   /* -------------------------------------------------
    * Editorial tabs — [data-tabs-editorial] containers
-   *
-   * Buttons (.tab-btn-editorial[data-tab="X"]) toggle panels
-   * (.tab-panel-editorial[data-tab="X"]) within the same section.
-   * One container per section. Used on Slides 8, 14, 18.
    * ------------------------------------------------- */
 
   function initEditorialTabs() {
@@ -253,6 +262,57 @@
         });
       });
     });
+  }
+
+  /* -------------------------------------------------
+   * Compare grid — Slide 8 hover-expand interaction
+   *
+   * Hovering any cell expands that cell and its counterpart
+   * (same data-pair index, other half). All other cells
+   * compress. Caption fades in on the active pair.
+   * Touch: tap to toggle the pair.
+   * ------------------------------------------------- */
+
+  function initCompareGrid() {
+    var grid = qs("[data-compare-grid]");
+    if (!grid) return;
+
+    var cells = qsa(".compare-grid__cell", grid);
+
+    function activate(pair) {
+      grid.setAttribute("data-active-pair", pair);
+      cells.forEach(function (c) {
+        c.classList.toggle("is-active", c.getAttribute("data-pair") === pair);
+      });
+    }
+
+    function deactivate() {
+      grid.removeAttribute("data-active-pair");
+      cells.forEach(function (c) { c.classList.remove("is-active"); });
+    }
+
+    var hoverMq = window.matchMedia("(hover: hover) and (pointer: fine)");
+
+    if (hoverMq.matches) {
+      cells.forEach(function (cell) {
+        cell.addEventListener("mouseenter", function () {
+          activate(cell.getAttribute("data-pair"));
+        });
+        cell.addEventListener("mouseleave", deactivate);
+      });
+    } else {
+      /* Touch / coarse pointer: tap to reveal, tap again to dismiss */
+      cells.forEach(function (cell) {
+        cell.addEventListener("click", function () {
+          var pair = cell.getAttribute("data-pair");
+          if (grid.getAttribute("data-active-pair") === pair) {
+            deactivate();
+          } else {
+            activate(pair);
+          }
+        });
+      });
+    }
   }
 
   /* -------------------------------------------------
@@ -279,7 +339,6 @@
     try { stored = localStorage.getItem(REVIEW_KEY) === "1"; } catch (e) {}
     if (qsHas || stored) setReview(true);
 
-    // wire any explicit review toggle buttons
     qsa("[data-review-toggle]").forEach(function (btn) {
       btn.addEventListener("click", function (e) {
         e.preventDefault();
@@ -289,12 +348,30 @@
   }
 
   /* -------------------------------------------------
-   * Lazy image loading (above-the-fold images use loading="eager")
+   * Auto-fullscreen on first user gesture
+   *
+   * Browsers require a user gesture to enter fullscreen.
+   * We listen for the first meaningful interaction and
+   * request it then. Fires once; listener self-removes.
+   * ------------------------------------------------- */
+
+  function initAutoFullscreen() {
+    var done = false;
+    function attempt() {
+      if (done) return;
+      done = true;
+      requestFullscreenSafe();
+    }
+    window.addEventListener("click",    attempt, { once: true });
+    window.addEventListener("keydown",  attempt, { once: true });
+    window.addEventListener("touchend", attempt, { once: true, passive: true });
+  }
+
+  /* -------------------------------------------------
+   * Lazy image loading
    * ------------------------------------------------- */
 
   function initLazyImages() {
-    // Native lazy-loading handles most browsers. This adds a small
-    // fade-in once an image is decoded.
     qsa("img[loading='lazy']").forEach(function (img) {
       if (img.complete) { img.classList.add("is-loaded"); return; }
       img.addEventListener("load", function () { img.classList.add("is-loaded"); });
@@ -303,16 +380,6 @@
 
   /* -------------------------------------------------
    * Rotate-to-landscape hint + post-rotation fullscreen prompt
-   *
-   * State machine on body[data-rotate-hint]:
-   *   "portrait"  — initial state on mobile portrait, asks user to rotate
-   *   "landscape" — shown after user rotates from portrait → landscape,
-   *                 offers fullscreen via tap (user-gesture requirement)
-   *   (unset)     — dismissed
-   *
-   * Persistence: dismissal saved in sessionStorage; doesn't re-prompt
-   * within the same session. Fullscreen requires a tap because every
-   * major browser requires a user gesture to enter fullscreen.
    * ------------------------------------------------- */
 
   var ROTATE_HINT_KEY = "partner-decks:rotate-hint-dismissed";
@@ -339,8 +406,6 @@
     try {
       var p = req.call(el);
       var lockLandscape = function () {
-        // Try to keep landscape after entering fullscreen so the
-        // browser chrome can't reappear on orientation change.
         if (screen.orientation && screen.orientation.lock) {
           try {
             var lp = screen.orientation.lock("landscape");
@@ -351,13 +416,9 @@
       if (p && typeof p.then === "function") {
         p.then(lockLandscape).catch(function () {});
       } else {
-        // older API returns undefined; lock after a tick
         setTimeout(lockLandscape, 100);
       }
-    } catch (e) {
-      // iOS Safari < 16.4 etc. don't support fullscreen on arbitrary
-      // elements. Silently ignore — overlay still dismisses.
-    }
+    } catch (e) {}
   }
 
   function initRotateHint() {
@@ -371,7 +432,6 @@
       body.setAttribute("data-rotate-hint", "portrait");
     }
 
-    // dismiss buttons (work in both views)
     qsa("[data-rotate-hint-dismiss]").forEach(function (btn) {
       btn.addEventListener("click", function (e) {
         e.preventDefault();
@@ -379,7 +439,6 @@
       });
     });
 
-    // fullscreen button (landscape view only)
     qsa("[data-rotate-hint-fullscreen]").forEach(function (btn) {
       btn.addEventListener("click", function (e) {
         e.preventDefault();
@@ -388,8 +447,6 @@
       });
     });
 
-    // when user rotates from portrait → landscape while the rotate
-    // prompt is showing, transition to the fullscreen prompt
     var landscapeMq = window.matchMedia("(orientation: landscape)");
     function onOrient() {
       var state = body.getAttribute("data-rotate-hint");
@@ -400,7 +457,7 @@
     if (landscapeMq.addEventListener) {
       landscapeMq.addEventListener("change", onOrient);
     } else if (landscapeMq.addListener) {
-      landscapeMq.addListener(onOrient); // older Safari
+      landscapeMq.addListener(onOrient);
     }
   }
 
@@ -429,28 +486,30 @@
   ready(function () {
     deck = qs(".deck");
     if (!deck) return;
-    sections = qsa(".section", deck);
+    sections      = qsa(".section", deck);
     progressLinks = qsa(".deck-progress a");
+
+    wrapSections();                /* must run before nav setup */
 
     window.addEventListener("keydown", handleKey);
     initTopNav();
     setupSectionObserver();
     initEditorialTabs();
+    initCompareGrid();
     initReviewMode();
     initRotateHint();
+    initAutoFullscreen();
     initLazyImages();
     initKbdHint();
 
-    // mark first section as current on load (observer may not fire immediately)
     if (sections.length) markCurrent(sections[0].id);
 
-    // expose minimal API for future use
     window.__deck = {
-      goTo: goTo,
-      next: function () { goTo(currentSectionIndex() + 1); },
-      prev: function () { goTo(currentSectionIndex() - 1); },
+      goTo:         goTo,
+      next:         function () { goTo(currentSectionIndex() + 1); },
+      prev:         function () { goTo(currentSectionIndex() - 1); },
       toggleReview: toggleReview,
-      sections: sections
+      sections:     sections
     };
   });
 })();
