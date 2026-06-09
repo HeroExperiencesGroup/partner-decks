@@ -544,6 +544,12 @@
 #sec-problem .tab-panel-editorial > .compare-grid {
   flex: 1;
   min-height: 0;
+  /* Cancel the global bleed rules — images sit within section padding.
+   * This avoids the overflow:hidden / negative-margin boundary that
+   * clips the caption text at the left edge. */
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
 }
 
 .compare-grid__half {
@@ -652,7 +658,7 @@
   left: 0;
   right: 0;
   z-index: 2;
-  padding: var(--space-5);
+  padding: var(--space-5) var(--space-6);  /* wider horizontal padding — keeps text clear of cell edges */
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
