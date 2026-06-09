@@ -277,42 +277,35 @@
     var grid = qs("[data-compare-grid]");
     if (!grid) return;
 
-    var cells = qsa(".compare-grid__cell", grid);
+    var thumbs     = qsa(".compare-grid__thumb",      grid);
+    var largeCells = qsa(".compare-grid__large-cell", grid);
 
-    function activate(pair) {
-      grid.setAttribute("data-active-pair", pair);
-      cells.forEach(function (c) {
+    /* Show a pair: activate all thumbs + large cells with matching data-pair */
+    function showPair(pair) {
+      thumbs.forEach(function (t) {
+        t.classList.toggle("is-active", t.getAttribute("data-pair") === pair);
+      });
+      largeCells.forEach(function (c) {
         c.classList.toggle("is-active", c.getAttribute("data-pair") === pair);
       });
     }
 
-    function deactivate() {
-      grid.removeAttribute("data-active-pair");
-      cells.forEach(function (c) { c.classList.remove("is-active"); });
-    }
-
     var hoverMq = window.matchMedia("(hover: hover) and (pointer: fine)");
 
-    if (hoverMq.matches) {
-      cells.forEach(function (cell) {
-        cell.addEventListener("mouseenter", function () {
-          activate(cell.getAttribute("data-pair"));
+    thumbs.forEach(function (thumb) {
+      if (hoverMq.matches) {
+        /* Desktop: hover thumbnail to switch pair. State persists until
+         * another thumb is hovered — no revert on mouseleave. */
+        thumb.addEventListener("mouseenter", function () {
+          showPair(thumb.getAttribute("data-pair"));
         });
-        cell.addEventListener("mouseleave", deactivate);
-      });
-    } else {
-      /* Touch / coarse pointer: tap to reveal, tap again to dismiss */
-      cells.forEach(function (cell) {
-        cell.addEventListener("click", function () {
-          var pair = cell.getAttribute("data-pair");
-          if (grid.getAttribute("data-active-pair") === pair) {
-            deactivate();
-          } else {
-            activate(pair);
-          }
+      } else {
+        /* Touch / coarse pointer: tap to select pair */
+        thumb.addEventListener("click", function () {
+          showPair(thumb.getAttribute("data-pair"));
         });
-      });
-    }
+      }
+    });
   }
 
   /* -------------------------------------------------
