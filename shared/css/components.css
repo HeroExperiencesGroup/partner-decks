@@ -499,12 +499,10 @@
   overflow: hidden;
 }
 
-/* When inside a tab panel: fill the available space below headline + tabs,
- * and bleed full-width to the section edges (compensate for section padding). */
+/* When inside a tab panel: bleed full-width to section edges.
+ * Height is handled by the flex-fill chain below (#sec-problem). */
 .tab-panel-editorial > .compare-grid {
   margin-top: var(--space-5);
-  height: calc(100dvh - var(--section-padding-y) * 2 - 10rem);
-  min-height: 16rem;
   /* negative margin bleed to section edges */
   margin-left: calc(-1 * var(--gutter));
   margin-right: calc(-1 * var(--gutter));
@@ -523,6 +521,29 @@
     margin-right: calc(-1 * var(--space-8));
     width: calc(100% + 2 * var(--space-8));
   }
+}
+
+/* Slide 8 flex-fill chain: section__inner → active tab panel → compare-grid.
+ * Replaces the magic-number height calc — the grid fills exactly the space
+ * remaining after the headline and tab bar, on any screen height. */
+#sec-problem .section__inner {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+#sec-problem .tab-panel-editorial.is-active {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#sec-problem .tab-panel-editorial > .compare-grid {
+  flex: 1;
+  min-height: 0;
 }
 
 .compare-grid__half {
