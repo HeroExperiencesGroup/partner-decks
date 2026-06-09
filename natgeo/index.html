@@ -331,7 +331,7 @@
        Slide 8 — The problem (Immersive — split layout)
        Brief: natgeo/briefs/08-problem.md
        ===================================================== -->
-  <section class="section" id="sec-problem" data-slide="8" data-mode="immersive" aria-labelledby="problem-headline">
+  <section class="section" id="sec-problem" data-slide="8" data-mode="immersive" data-image="full-bleed" aria-labelledby="problem-headline">
 
     <div class="section__meta meta">
       <span>08</span>
@@ -342,116 +342,184 @@
     <div class="review-notes">
       <aside class="review-note review-note--intent" aria-label="Editorial intent">
         <span class="review-note__title">Intent</span>
-        4×2 hover-expand comparison grid. Left half = typical Dubai operator. Right half = Hero Experiences. Hover any cell to expand that pair — both cells widen simultaneously, captions fade in. Four dimensions of the same argument: atmosphere, practice, place, access. Reader comprehends the full contrast before reading a word; the hover rewards curiosity without demanding it.
+        Three tabs. Atmosphere tab: 4×2 hover-expand grid — typical Dubai left, Hero right (Bonfire / Falcons / Cultural / Platinum). Hover any cell to expand that pair; both sides widen, captions fade in. The v4 1v1 atmosphere felt incomplete — this gives the full range. Practice and Place remain 1v1.
       </aside>
       <aside class="review-note review-note--image" aria-label="Image-sourcing annotation">
-        <span class="review-note__title">Images · 4 pairs · 8 slots</span>
-        Pair 1 (Atmosphere): <code>06-left.jpg</code> + <code>06-right.jpg</code>, Hero archive, existing. Pairs 2–3 left: placeholders (commission dune-bashing convoy; open unregulated desert). Pair 2 right: placeholder (Land Rover in DDCR, oryx, no dust). Pair 3 right: placeholder (DDCR ghaf-tree landscape). Pair 4 right: reuses <code>08.5-culture.jpg</code> (Bedouin breakfast, Hero archive).
+        <span class="review-note__title">Images · Atmosphere grid (8 slots) + Practice/Place (4 slots)</span>
+        Atmosphere left: <code>06-left.jpg</code> pair 1 (existing); pairs 2–4 left = placeholders (neon camp / staged entertainment / mass group). Atmosphere right: pair 1 = <code>06-right.jpg</code> (Bonfire); pair 2 = placeholder (Falconry in DDCR); pair 3 = <code>08.5-culture.jpg</code> (Cultural/Bedouin); pair 4 = placeholder (Platinum private camp). Practice + Place: existing placeholders from v5 brief.
       </aside>
     </div>
 
-    <div class="compare-grid" data-compare-grid aria-label="Typical desert safari versus Hero Experiences — four dimensions">
+    <div class="section__inner">
+      <h2 id="problem-headline" class="headline headline--lg headline--bone" style="text-align:center; margin-inline:auto; max-width: 26ch;">Most desert safaris are not desert experiences.</h2>
 
-      <div class="compare-grid__headline">
-        <h2 id="problem-headline" class="headline headline--lg headline--bone">Most desert safaris are not desert experiences.</h2>
+      <div class="tabs-editorial" role="tablist" data-tabs-editorial style="margin-top: var(--space-6);">
+        <button class="tab-btn-editorial is-active" type="button" role="tab" data-tab="atmosphere" aria-selected="true">Atmosphere</button>
+        <button class="tab-btn-editorial" type="button" role="tab" data-tab="practice" aria-selected="false">Practice</button>
+        <button class="tab-btn-editorial" type="button" role="tab" data-tab="place" aria-selected="false">Place</button>
       </div>
 
-      <!-- Left half: typical Dubai operator -->
-      <div class="compare-grid__half compare-grid__half--left">
+      <!-- Tab A: Atmosphere — 4×2 hover-expand comparison grid -->
+      <div class="tab-panel-editorial is-active" data-tab="atmosphere" role="tabpanel">
+        <div class="compare-grid" data-compare-grid aria-label="Typical safari atmosphere versus Hero Experiences">
 
-        <div class="compare-grid__cell" data-pair="1">
-          <img class="compare-grid__bg" src="assets/images/06-left.jpg" alt="" loading="lazy" decoding="async">
-          <div class="compare-grid__caption">
-            <p class="compare-grid__caption-lead">A camp built for crowds</p>
-            <p class="compare-grid__caption-sub">Atmosphere</p>
+          <!-- Left: typical Dubai operator atmosphere (4 cells) -->
+          <div class="compare-grid__half compare-grid__half--left">
+
+            <div class="compare-grid__cell" data-pair="1">
+              <img class="compare-grid__bg" src="assets/images/06-left.jpg" alt="" loading="lazy" decoding="async">
+              <div class="compare-grid__caption">
+                <p class="compare-grid__caption-lead">A camp built for crowds</p>
+                <p class="compare-grid__caption-sub">Typical · Atmosphere</p>
+              </div>
+            </div>
+
+            <div class="compare-grid__cell" data-pair="2">
+              <div class="compare-grid__bg compare-grid__bg--dune-bash"></div>
+              <aside class="image-placeholder-note">
+                <span class="image-placeholder-note__title">Image · placeholder · typical: neon camp</span>
+                <p class="image-placeholder-note__body">Crowded desert camp at dusk — neon strip lighting, dozens of tourists, buffet setup. Commercial, flat. Documentary register.</p>
+              </aside>
+              <div class="compare-grid__caption">
+                <p class="compare-grid__caption-lead">Neon, noise, numbers</p>
+                <p class="compare-grid__caption-sub">Typical · Atmosphere</p>
+              </div>
+            </div>
+
+            <div class="compare-grid__cell" data-pair="3">
+              <div class="compare-grid__bg compare-grid__bg--coach"></div>
+              <aside class="image-placeholder-note">
+                <span class="image-placeholder-note__title">Image · placeholder · typical: staged entertainment</span>
+                <p class="image-placeholder-note__body">Tent awning, staged belly-dance or fire performer — packaged culture under artificial light. Generic backdrop.</p>
+              </aside>
+              <div class="compare-grid__caption">
+                <p class="compare-grid__caption-lead">Packaged culture for consumption</p>
+                <p class="compare-grid__caption-sub">Typical · Atmosphere</p>
+              </div>
+            </div>
+
+            <div class="compare-grid__cell" data-pair="4">
+              <div class="compare-grid__bg compare-grid__bg--open-desert"></div>
+              <aside class="image-placeholder-note">
+                <span class="image-placeholder-note__title">Image · placeholder · typical: mass-group arrival</span>
+                <p class="image-placeholder-note__body">Coach passengers disembarking at a standard desert camp. Matching headwear, itinerary sheets visible. No sense of place or scale.</p>
+              </aside>
+              <div class="compare-grid__caption">
+                <p class="compare-grid__caption-lead">A product, not an experience</p>
+                <p class="compare-grid__caption-sub">Typical · Atmosphere</p>
+              </div>
+            </div>
+
           </div>
-        </div>
 
-        <div class="compare-grid__cell" data-pair="2">
-          <div class="compare-grid__bg compare-grid__bg--dune-bash"></div>
-          <aside class="image-placeholder-note">
-            <span class="image-placeholder-note__title">Image · placeholder · dune-bashing</span>
-            <p class="image-placeholder-note__body">4×4 mid-ascent on a dune slope, dust trail, other vehicles in the middle distance. Documentary register — not staged, not heroic; the practice as it is.</p>
-            <span class="image-placeholder-note__test">Test: Nat Geo Traveler — Singita / Bushcamp register, not Burj Al Arab brochure.</span>
-          </aside>
-          <div class="compare-grid__caption">
-            <p class="compare-grid__caption-lead">Dune-bashing</p>
-            <p class="compare-grid__caption-sub">Habitat disturbed for adrenaline · Practice</p>
+          <!-- Right: Hero Experiences atmosphere — Bonfire, Falcons, Cultural, Platinum -->
+          <div class="compare-grid__half compare-grid__half--right">
+
+            <div class="compare-grid__cell" data-pair="1">
+              <img class="compare-grid__bg" src="assets/images/06-right.jpg" alt="" loading="lazy" decoding="async">
+              <div class="compare-grid__caption">
+                <p class="compare-grid__caption-lead">Bonfire under open sky</p>
+                <p class="compare-grid__caption-sub">Hero · Atmosphere</p>
+              </div>
+            </div>
+
+            <div class="compare-grid__cell" data-pair="2">
+              <div class="compare-grid__bg compare-grid__bg--falcon"></div>
+              <aside class="image-placeholder-note">
+                <span class="image-placeholder-note__title">Image · placeholder · Hero: falconry</span>
+                <p class="image-placeholder-note__body">Falconer with a falcon on the glove in DDCR landscape. Golden-hour light. Bird as part of the ecosystem, not a prop. Documentary register.</p>
+                <span class="image-placeholder-note__test">Test: Nat Geo Traveler register — living habitat, not staged performance.</span>
+              </aside>
+              <div class="compare-grid__caption">
+                <p class="compare-grid__caption-lead">Falconry in living habitat</p>
+                <p class="compare-grid__caption-sub">Hero · Atmosphere</p>
+              </div>
+            </div>
+
+            <div class="compare-grid__cell" data-pair="3">
+              <img class="compare-grid__bg" src="assets/images/08.5-culture.jpg" alt="" loading="lazy" decoding="async">
+              <div class="compare-grid__caption">
+                <p class="compare-grid__caption-lead">Bedouin ceremony at first light</p>
+                <p class="compare-grid__caption-sub">Hero · Cultural</p>
+              </div>
+            </div>
+
+            <div class="compare-grid__cell" data-pair="4">
+              <div class="compare-grid__bg compare-grid__bg--platinum-hero"></div>
+              <aside class="image-placeholder-note">
+                <span class="image-placeholder-note__title">Image · placeholder · Hero: Platinum private camp</span>
+                <p class="image-placeholder-note__body">Private Platinum camp — table set under the night sky, one party only. No ambient noise, no other guests. Starlit atmosphere.</p>
+                <span class="image-placeholder-note__test">Test: Nat Geo Traveler register — conservation luxury, not hotel terrace.</span>
+              </aside>
+              <div class="compare-grid__caption">
+                <p class="compare-grid__caption-lead">Platinum — the reserve, one party</p>
+                <p class="compare-grid__caption-sub">Hero · Platinum</p>
+              </div>
+            </div>
+
           </div>
-        </div>
 
-        <div class="compare-grid__cell" data-pair="3">
-          <div class="compare-grid__bg compare-grid__bg--open-desert"></div>
-          <aside class="image-placeholder-note">
-            <span class="image-placeholder-note__title">Image · placeholder · open desert</span>
-            <p class="image-placeholder-note__body">Open, unprotected desert tract. Tire tracks criss-crossing in foreground, no boundary markers. Generic, disordered. Documentary register.</p>
-            <span class="image-placeholder-note__test">Test: Nat Geo Traveler — Singita / Bushcamp register, not Burj Al Arab brochure.</span>
-          </aside>
-          <div class="compare-grid__caption">
-            <p class="compare-grid__caption-lead">Open to anyone, regulated by no one</p>
-            <p class="compare-grid__caption-sub">Place</p>
-          </div>
         </div>
-
-        <div class="compare-grid__cell" data-pair="4">
-          <div class="compare-grid__bg compare-grid__bg--coach"></div>
-          <aside class="image-placeholder-note">
-            <span class="image-placeholder-note__title">Image · placeholder · coach groups</span>
-            <p class="image-placeholder-note__body">Large group boarding coaches or minibuses. No sense of intimacy. Generic desert backdrop.</p>
-          </aside>
-          <div class="compare-grid__caption">
-            <p class="compare-grid__caption-lead">Coach groups of forty</p>
-            <p class="compare-grid__caption-sub">Access</p>
-          </div>
-        </div>
-
       </div>
 
-      <!-- Right half: Hero Experiences -->
-      <div class="compare-grid__half compare-grid__half--right">
-
-        <div class="compare-grid__cell" data-pair="1">
-          <img class="compare-grid__bg" src="assets/images/06-right.jpg" alt="" loading="lazy" decoding="async">
-          <div class="compare-grid__caption">
-            <p class="compare-grid__caption-lead">A reserve where conservation is the operating premise</p>
-            <p class="compare-grid__caption-sub">Atmosphere</p>
+      <!-- Tab B: Practice — 1v1 -->
+      <div class="tab-panel-editorial" data-tab="practice" role="tabpanel">
+        <div class="problem">
+          <div class="problem__side">
+            <div class="problem__bg problem__bg--left" aria-hidden="true"></div>
+            <aside class="image-placeholder-note">
+              <span class="image-placeholder-note__title">Image · placeholder · dune-bashing</span>
+              <p class="image-placeholder-note__body">4×4 mid-ascent on a dune slope, dust trail, other vehicles in the middle distance. Documentary register — not staged, not heroic; the practice as it is.</p>
+              <span class="image-placeholder-note__test">Test: Nat Geo Traveler register — Singita / Bushcamp, not Burj Al Arab brochure.</span>
+            </aside>
+            <div class="problem__text">
+              <p class="problem__lead">Dune-bashing</p>
+              <p class="problem__sub">Habitat disturbed for adrenaline</p>
+            </div>
+          </div>
+          <div class="problem__side">
+            <div class="problem__bg problem__bg--right" aria-hidden="true"></div>
+            <aside class="image-placeholder-note">
+              <span class="image-placeholder-note__title">Image · placeholder · gentle-drive</span>
+              <p class="image-placeholder-note__body">Land Rover stopped in DDCR, ghaf scrub foreground, oryx or sand gazelle in middle distance. No chase, no dust. Guests observing. Golden-hour light.</p>
+              <span class="image-placeholder-note__test">Test: Nat Geo Traveler register — Singita / Bushcamp, not Burj Al Arab brochure.</span>
+            </aside>
+            <div class="problem__text">
+              <p class="problem__lead">Gentle-drive policy</p>
+              <p class="problem__sub">Only operator in Dubai to refuse dune-bashing</p>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div class="compare-grid__cell" data-pair="2">
-          <div class="compare-grid__bg compare-grid__bg--gentle-drive"></div>
-          <aside class="image-placeholder-note">
-            <span class="image-placeholder-note__title">Image · placeholder · gentle-drive</span>
-            <p class="image-placeholder-note__body">Land Rover stopped in DDCR — ghaf scrub foreground, oryx or sand gazelle in middle distance. No chase, no dust. Guests observing. Golden-hour light.</p>
-            <span class="image-placeholder-note__test">Test: Nat Geo Traveler — Singita / Bushcamp register, not Burj Al Arab brochure.</span>
-          </aside>
-          <div class="compare-grid__caption">
-            <p class="compare-grid__caption-lead">Gentle-drive policy</p>
-            <p class="compare-grid__caption-sub">Only operator in Dubai to refuse dune-bashing · Practice</p>
+      <!-- Tab C: Place — 1v1 -->
+      <div class="tab-panel-editorial" data-tab="place" role="tabpanel">
+        <div class="problem">
+          <div class="problem__side">
+            <div class="problem__bg problem__bg--left" aria-hidden="true"></div>
+            <aside class="image-placeholder-note">
+              <span class="image-placeholder-note__title">Image · placeholder · open desert</span>
+              <p class="image-placeholder-note__body">Open, unprotected desert tract. Tire tracks criss-crossing in foreground, no boundary markers, no sense of regulation. Generic, disordered.</p>
+              <span class="image-placeholder-note__test">Test: Nat Geo Traveler register — Singita / Bushcamp, not Burj Al Arab brochure.</span>
+            </aside>
+            <div class="problem__text">
+              <p class="problem__lead">Public desert</p>
+              <p class="problem__sub">Open to anyone, regulated by no one</p>
+            </div>
+          </div>
+          <div class="problem__side">
+            <div class="problem__bg problem__bg--right" aria-hidden="true"></div>
+            <aside class="image-placeholder-note">
+              <span class="image-placeholder-note__title">Image · placeholder · DDCR reserve</span>
+              <p class="image-placeholder-note__body">DDCR landscape reading as a reserve — oryx or gazelle in habitat, ghaf trees, preserved wildness. Low light, atmospheric.</p>
+              <span class="image-placeholder-note__test">Test: conservation magazine register.</span>
+            </aside>
+            <div class="problem__text">
+              <p class="problem__lead">Dubai Desert Conservation Reserve</p>
+              <p class="problem__sub">UAE's first national park · Royal Family private property</p>
+            </div>
           </div>
         </div>
-
-        <div class="compare-grid__cell" data-pair="3">
-          <div class="compare-grid__bg compare-grid__bg--ddcr"></div>
-          <aside class="image-placeholder-note">
-            <span class="image-placeholder-note__title">Image · placeholder · DDCR reserve</span>
-            <p class="image-placeholder-note__body">DDCR landscape as a reserve — oryx or gazelle in habitat, ghaf trees, preserved wildness. Low light, atmospheric.</p>
-            <span class="image-placeholder-note__test">Test: conservation magazine — Nat Geo Traveler Singita register.</span>
-          </aside>
-          <div class="compare-grid__caption">
-            <p class="compare-grid__caption-lead">Dubai Desert Conservation Reserve</p>
-            <p class="compare-grid__caption-sub">UAE's first national park · Royal Family property · Place</p>
-          </div>
-        </div>
-
-        <div class="compare-grid__cell" data-pair="4">
-          <img class="compare-grid__bg" src="assets/images/08.5-culture.jpg" alt="" loading="lazy" decoding="async">
-          <div class="compare-grid__caption">
-            <p class="compare-grid__caption-lead">Four guests. Two staff. One morning under the sky.</p>
-            <p class="compare-grid__caption-sub">1:2 staff-to-guest ratio across both collections · Access</p>
-          </div>
-        </div>
-
       </div>
 
     </div>

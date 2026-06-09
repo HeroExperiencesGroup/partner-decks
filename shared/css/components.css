@@ -493,25 +493,36 @@
  * ========================================================= */
 
 .compare-grid {
-  position: absolute;
-  inset: 0;
+  position: relative;
   display: flex;
   flex-direction: row;
-  z-index: 0;
+  overflow: hidden;
 }
 
-.compare-grid__headline {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
-  padding: var(--space-7) var(--space-7) 0;
-  text-align: center;
-  pointer-events: none;
-  /* top gradient so headline reads over any image */
-  background: linear-gradient(to bottom, rgba(28,28,26,0.72) 0%, rgba(28,28,26,0) 100%);
-  padding-bottom: var(--space-8);
+/* When inside a tab panel: fill the available space below headline + tabs,
+ * and bleed full-width to the section edges (compensate for section padding). */
+.tab-panel-editorial > .compare-grid {
+  margin-top: var(--space-5);
+  height: calc(100dvh - var(--section-padding-y) * 2 - 10rem);
+  min-height: 16rem;
+  /* negative margin bleed to section edges */
+  margin-left: calc(-1 * var(--gutter));
+  margin-right: calc(-1 * var(--gutter));
+  width: calc(100% + 2 * var(--gutter));
+}
+@media (min-width: 40em) {
+  .tab-panel-editorial > .compare-grid {
+    margin-left: calc(-1 * var(--space-7));
+    margin-right: calc(-1 * var(--space-7));
+    width: calc(100% + 2 * var(--space-7));
+  }
+}
+@media (min-width: 64em) {
+  .tab-panel-editorial > .compare-grid {
+    margin-left: calc(-1 * var(--space-8));
+    margin-right: calc(-1 * var(--space-8));
+    width: calc(100% + 2 * var(--space-8));
+  }
 }
 
 .compare-grid__half {
@@ -561,6 +572,14 @@
 }
 .compare-grid__bg--ddcr {
   background: linear-gradient(135deg, #2a3828 0%, #1e2c1a 60%, #1c1c1a 100%);
+}
+.compare-grid__bg--falcon {
+  /* warm amber-sky: falcon against late-afternoon haze */
+  background: linear-gradient(135deg, #7a5820 0%, #4a3418 55%, #1c1c1a 100%);
+}
+.compare-grid__bg--platinum-hero {
+  /* deep midnight: private camp under stars, no ambient light */
+  background: linear-gradient(135deg, #1e2030 0%, #161820 60%, #0e0e14 100%);
 }
 
 /* top dark vignette: headline readability */
