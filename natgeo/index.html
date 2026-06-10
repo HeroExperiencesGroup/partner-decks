@@ -342,11 +342,11 @@
     <div class="review-notes">
       <aside class="review-note review-note--intent" aria-label="Editorial intent">
         <span class="review-note__title">Intent</span>
-        Three tabs. Atmosphere tab: 4×2 hover-expand grid — typical Dubai left, Hero right (Bonfire / Falcons / Cultural / Platinum). Hover any cell to expand that pair; both sides widen, captions fade in. The v4 1v1 atmosphere felt incomplete — this gives the full range. Practice and Place remain 1v1.
+        Three tabs. Atmosphere: 4×2 grid, Hero left / Typical right. Lead with what Hero offers — reader sees the quality first, then the contrast. Pair 3 (Bonfire vs. buffet queue) and pair 4 (Falcon vs. neon concert) carry the strongest argument for Nat Geo: intimacy against scale, living ecosystem against staged entertainment. Practice: Range Rovers + oryx vs. dune-bashing — same left=Hero / right=Typical logic.
       </aside>
       <aside class="review-note review-note--image" aria-label="Image-sourcing annotation">
-        <span class="review-note__title">Images · Atmosphere grid (8 slots) + Practice/Place (4 slots)</span>
-        Atmosphere left: <code>06-left.jpg</code> pair 1 (existing); pairs 2–4 left = placeholders (neon camp / staged entertainment / mass group). Atmosphere right: pair 1 = <code>06-right.jpg</code> (Bonfire); pair 2 = placeholder (Falconry in DDCR); pair 3 = <code>08.5-culture.jpg</code> (Cultural/Bedouin); pair 4 = placeholder (Platinum private camp). Practice + Place: existing placeholders from v5 brief.
+        <span class="review-note__title">Images · all sourced from Hero archive (Newly added photos folder)</span>
+        Left (Hero): Pair 1 = Arabic coffee welcome, Pair 2 = Platinum camp night, Pair 3 = Campfire under stars, Pair 4 = Falcon in flight. Right (Typical): Pair 1–4 = crowd/4x4 chaos, neon camp aerial, mass buffet queue, neon concert. Practice: left = Range Rovers + oryx herd; right = dune-bashing 4x4.
       </aside>
     </div>
 
@@ -359,128 +359,106 @@
         <button class="tab-btn-editorial" type="button" role="tab" data-tab="place" aria-selected="false">Place</button>
       </div>
 
-      <!-- Tab A: Atmosphere — thumbnail strip + large synced preview -->
+      <!-- Tab A: Atmosphere — Hero left / Typical right -->
       <div class="tab-panel-editorial is-active" data-tab="atmosphere" role="tabpanel">
-        <div class="compare-grid" data-compare-grid aria-label="Typical safari atmosphere versus Hero Experiences">
+        <div class="compare-grid" data-compare-grid aria-label="Hero Experiences versus typical desert safari — atmosphere">
 
-          <!-- Left: typical Dubai operator -->
+          <!-- Left: Hero Experiences -->
           <div class="compare-grid__half compare-grid__half--left">
 
             <div class="compare-grid__thumbs">
-              <button class="compare-grid__thumb is-active" type="button" data-pair="1" aria-label="Typical: a camp built for crowds">
-                <img src="assets/images/06-left.jpg" alt="" loading="eager" decoding="async">
+              <button class="compare-grid__thumb is-active" type="button" data-pair="1" aria-label="Hero: Arabic coffee welcome">
+                <img src="assets/images/Newly added photos/Atmosphere_Left_Pair1_Heritage Arabic coffee welcome.jpg" alt="" loading="eager" decoding="async">
               </button>
-              <button class="compare-grid__thumb" type="button" data-pair="2" aria-label="Typical: neon, noise, numbers">
-                <div class="compare-grid__thumb-bg compare-grid__bg--dune-bash"></div>
+              <button class="compare-grid__thumb" type="button" data-pair="2" aria-label="Hero: Platinum camp">
+                <img src="assets/images/Newly added photos/Atmosphere_Left_Pair2_Platinum.jpg" alt="" loading="lazy" decoding="async">
               </button>
-              <button class="compare-grid__thumb" type="button" data-pair="3" aria-label="Typical: packaged culture">
-                <div class="compare-grid__thumb-bg compare-grid__bg--coach"></div>
+              <button class="compare-grid__thumb" type="button" data-pair="3" aria-label="Hero: campfire under the stars">
+                <img src="assets/images/Newly added photos/Campfire - Platinum Heritage (27).jpg" alt="" loading="lazy" decoding="async">
               </button>
-              <button class="compare-grid__thumb" type="button" data-pair="4" aria-label="Typical: mass-group arrival">
-                <div class="compare-grid__thumb-bg compare-grid__bg--open-desert"></div>
+              <button class="compare-grid__thumb" type="button" data-pair="4" aria-label="Hero: falcon in the living desert">
+                <img src="assets/images/Newly added photos/Falcons - Platinum Heritage (100).png" alt="" loading="lazy" decoding="async">
               </button>
             </div>
 
             <div class="compare-grid__large">
               <div class="compare-grid__large-cell is-active" data-pair="1">
-                <img src="assets/images/06-left.jpg" alt="" loading="eager" decoding="async">
+                <img src="assets/images/Newly added photos/Atmosphere_Left_Pair1_Heritage Arabic coffee welcome.jpg" alt="" loading="eager" decoding="async">
                 <div class="compare-grid__large-caption">
-                  <p class="compare-grid__large-caption-lead">A camp built for crowds</p>
-                  <p class="compare-grid__large-caption-sub">Typical · Atmosphere</p>
+                  <p class="compare-grid__large-caption-lead">Arabic coffee welcome</p>
+                  <p class="compare-grid__large-caption-sub">Heritage · Arrival</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="2">
-                <div class="compare-grid__bg compare-grid__bg--dune-bash"></div>
-                <aside class="image-placeholder-note">
-                  <span class="image-placeholder-note__title">Image · placeholder · typical: neon camp</span>
-                  <p class="image-placeholder-note__body">Crowded desert camp at dusk — neon strip lighting, dozens of tourists, buffet setup. Commercial, flat. Documentary register.</p>
-                </aside>
+                <img src="assets/images/Newly added photos/Atmosphere_Left_Pair2_Platinum.jpg" alt="" loading="lazy" decoding="async">
                 <div class="compare-grid__large-caption">
-                  <p class="compare-grid__large-caption-lead">Neon, noise, numbers</p>
-                  <p class="compare-grid__large-caption-sub">Typical · Atmosphere</p>
+                  <p class="compare-grid__large-caption-lead">Platinum camp beneath the desert sky</p>
+                  <p class="compare-grid__large-caption-sub">Platinum · Setting</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="3">
-                <div class="compare-grid__bg compare-grid__bg--coach"></div>
-                <aside class="image-placeholder-note">
-                  <span class="image-placeholder-note__title">Image · placeholder · typical: staged entertainment</span>
-                  <p class="image-placeholder-note__body">Tent awning, staged belly-dance or fire performance — packaged culture under artificial light.</p>
-                </aside>
+                <img src="assets/images/Newly added photos/Campfire - Platinum Heritage (27).jpg" alt="" loading="lazy" decoding="async">
                 <div class="compare-grid__large-caption">
-                  <p class="compare-grid__large-caption-lead">Packaged culture for consumption</p>
-                  <p class="compare-grid__large-caption-sub">Typical · Atmosphere</p>
+                  <p class="compare-grid__large-caption-lead">Campfire under open sky</p>
+                  <p class="compare-grid__large-caption-sub">Heritage · Night</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="4">
-                <div class="compare-grid__bg compare-grid__bg--open-desert"></div>
-                <aside class="image-placeholder-note">
-                  <span class="image-placeholder-note__title">Image · placeholder · typical: mass-group arrival</span>
-                  <p class="image-placeholder-note__body">Coach passengers disembarking at a standard desert camp. Matching headwear. No sense of place.</p>
-                </aside>
+                <img src="assets/images/Newly added photos/Falcons - Platinum Heritage (100).png" alt="" loading="lazy" decoding="async">
                 <div class="compare-grid__large-caption">
-                  <p class="compare-grid__large-caption-lead">A product, not an experience</p>
-                  <p class="compare-grid__large-caption-sub">Typical · Atmosphere</p>
+                  <p class="compare-grid__large-caption-lead">Falcon in the living desert</p>
+                  <p class="compare-grid__large-caption-sub">Heritage · Wildlife</p>
                 </div>
               </div>
             </div>
 
           </div>
 
-          <!-- Right: Hero Experiences — Bonfire / Falcons / Cultural / Platinum -->
+          <!-- Right: Typical Dubai operator -->
           <div class="compare-grid__half compare-grid__half--right">
 
             <div class="compare-grid__thumbs">
-              <button class="compare-grid__thumb is-active" type="button" data-pair="1" aria-label="Hero: bonfire under open sky">
-                <img src="assets/images/06-right.jpg" alt="" loading="eager" decoding="async">
+              <button class="compare-grid__thumb is-active" type="button" data-pair="1" aria-label="Typical: dust, queues, engines">
+                <img src="assets/images/Newly added photos/Atmosphere_Right_Pair1.png" alt="" loading="eager" decoding="async">
               </button>
-              <button class="compare-grid__thumb" type="button" data-pair="2" aria-label="Hero: falconry in living habitat">
-                <div class="compare-grid__thumb-bg compare-grid__bg--falcon"></div>
+              <button class="compare-grid__thumb" type="button" data-pair="2" aria-label="Typical: commercial camp for hundreds">
+                <img src="assets/images/Newly added photos/Atmosphere_Right_Pair2.png" alt="" loading="lazy" decoding="async">
               </button>
-              <button class="compare-grid__thumb" type="button" data-pair="3" aria-label="Hero: Bedouin ceremony">
-                <img src="assets/images/08.5-culture.jpg" alt="" loading="lazy" decoding="async">
+              <button class="compare-grid__thumb" type="button" data-pair="3" aria-label="Typical: catering for coach groups">
+                <img src="assets/images/Newly added photos/Atmosphere_Right_Pair3.png" alt="" loading="lazy" decoding="async">
               </button>
-              <button class="compare-grid__thumb" type="button" data-pair="4" aria-label="Hero: Platinum private camp">
-                <div class="compare-grid__thumb-bg compare-grid__bg--platinum-hero"></div>
+              <button class="compare-grid__thumb" type="button" data-pair="4" aria-label="Typical: neon concert, shisha, performance">
+                <img src="assets/images/Newly added photos/Atmosphere_Right_Pair4.png" alt="" loading="lazy" decoding="async">
               </button>
             </div>
 
             <div class="compare-grid__large">
               <div class="compare-grid__large-cell is-active" data-pair="1">
-                <img src="assets/images/06-right.jpg" alt="" loading="eager" decoding="async">
+                <img src="assets/images/Newly added photos/Atmosphere_Right_Pair1.png" alt="" loading="eager" decoding="async">
                 <div class="compare-grid__large-caption">
-                  <p class="compare-grid__large-caption-lead">Bonfire under open sky</p>
-                  <p class="compare-grid__large-caption-sub">Hero · Atmosphere</p>
+                  <p class="compare-grid__large-caption-lead">Dust, queues, engines</p>
+                  <p class="compare-grid__large-caption-sub">Typical · Arrival</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="2">
-                <div class="compare-grid__bg compare-grid__bg--falcon"></div>
-                <aside class="image-placeholder-note">
-                  <span class="image-placeholder-note__title">Image · placeholder · Hero: falconry</span>
-                  <p class="image-placeholder-note__body">Falconer with a falcon on the glove in DDCR landscape. Golden-hour light. Bird as part of the ecosystem, not a prop.</p>
-                  <span class="image-placeholder-note__test">Test: Nat Geo Traveler — living habitat, not staged performance.</span>
-                </aside>
+                <img src="assets/images/Newly added photos/Atmosphere_Right_Pair2.png" alt="" loading="lazy" decoding="async">
                 <div class="compare-grid__large-caption">
-                  <p class="compare-grid__large-caption-lead">Falconry in living habitat</p>
-                  <p class="compare-grid__large-caption-sub">Hero · Atmosphere</p>
+                  <p class="compare-grid__large-caption-lead">A commercial camp for hundreds</p>
+                  <p class="compare-grid__large-caption-sub">Typical · Setting</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="3">
-                <img src="assets/images/08.5-culture.jpg" alt="" loading="lazy" decoding="async">
+                <img src="assets/images/Newly added photos/Atmosphere_Right_Pair3.png" alt="" loading="lazy" decoding="async">
                 <div class="compare-grid__large-caption">
-                  <p class="compare-grid__large-caption-lead">Bedouin ceremony at first light</p>
-                  <p class="compare-grid__large-caption-sub">Hero · Cultural</p>
+                  <p class="compare-grid__large-caption-lead">Catering for coach groups</p>
+                  <p class="compare-grid__large-caption-sub">Typical · Dining</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="4">
-                <div class="compare-grid__bg compare-grid__bg--platinum-hero"></div>
-                <aside class="image-placeholder-note">
-                  <span class="image-placeholder-note__title">Image · placeholder · Hero: Platinum private camp</span>
-                  <p class="image-placeholder-note__body">Private Platinum camp — table set under the night sky, one party only. No ambient noise, no other guests. Starlit atmosphere.</p>
-                  <span class="image-placeholder-note__test">Test: Nat Geo Traveler — conservation luxury, not hotel terrace.</span>
-                </aside>
+                <img src="assets/images/Newly added photos/Atmosphere_Right_Pair4.png" alt="" loading="lazy" decoding="async">
                 <div class="compare-grid__large-caption">
-                  <p class="compare-grid__large-caption-lead">Platinum — the reserve, one party</p>
-                  <p class="compare-grid__large-caption-sub">Hero · Platinum</p>
+                  <p class="compare-grid__large-caption-lead">Neon, performance, shisha</p>
+                  <p class="compare-grid__large-caption-sub">Typical · Evening</p>
                 </div>
               </div>
             </div>
@@ -490,31 +468,21 @@
         </div>
       </div>
 
-      <!-- Tab B: Practice — 1v1 -->
+      <!-- Tab B: Practice — Hero left / Typical right -->
       <div class="tab-panel-editorial" data-tab="practice" role="tabpanel">
         <div class="problem">
           <div class="problem__side">
-            <div class="problem__bg problem__bg--left" aria-hidden="true"></div>
-            <aside class="image-placeholder-note">
-              <span class="image-placeholder-note__title">Image · placeholder · dune-bashing</span>
-              <p class="image-placeholder-note__body">4×4 mid-ascent on a dune slope, dust trail, other vehicles in the middle distance. Documentary register — not staged, not heroic; the practice as it is.</p>
-              <span class="image-placeholder-note__test">Test: Nat Geo Traveler register — Singita / Bushcamp, not Burj Al Arab brochure.</span>
-            </aside>
+            <img src="assets/images/Newly added photos/Practice_left_Range Rovers - Platinum.jpg" alt="" loading="lazy" decoding="async">
             <div class="problem__text">
-              <p class="problem__lead">Dune-bashing</p>
-              <p class="problem__sub">Habitat disturbed for adrenaline</p>
+              <p class="problem__lead">Range Rovers in the conservation reserve</p>
+              <p class="problem__sub">Observing wildlife — never disturbing it</p>
             </div>
           </div>
           <div class="problem__side">
-            <div class="problem__bg problem__bg--right" aria-hidden="true"></div>
-            <aside class="image-placeholder-note">
-              <span class="image-placeholder-note__title">Image · placeholder · gentle-drive</span>
-              <p class="image-placeholder-note__body">Land Rover stopped in DDCR, ghaf scrub foreground, oryx or sand gazelle in middle distance. No chase, no dust. Guests observing. Golden-hour light.</p>
-              <span class="image-placeholder-note__test">Test: Nat Geo Traveler register — Singita / Bushcamp, not Burj Al Arab brochure.</span>
-            </aside>
+            <img src="assets/images/Newly added photos/Practice_Right_Dune Bashing.png" alt="" loading="lazy" decoding="async">
             <div class="problem__text">
-              <p class="problem__lead">Gentle-drive policy</p>
-              <p class="problem__sub">Only operator in Dubai to refuse dune-bashing</p>
+              <p class="problem__lead">Dune-bashing</p>
+              <p class="problem__sub">Habitat disturbed for adrenaline</p>
             </div>
           </div>
         </div>
