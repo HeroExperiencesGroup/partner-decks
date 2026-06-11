@@ -12,7 +12,7 @@
  *      and `?review=1` query string. Persisted in localStorage.
  *   5. Lazy-load below-the-fold images via IntersectionObserver.
  *   6. Briefly show then fade the keyboard-hint chip on first load.
- *   7. Auto-fullscreen on first user gesture (click / key / touch).
+ *   7. Splash screen — progress bar while images load, Begin button triggers fullscreen.
  *   8. Compare-grid hover interaction for Slide 8.
  */
 
@@ -341,23 +341,48 @@
   }
 
   /* -------------------------------------------------
-   * Auto-fullscreen on first user gesture
-   *
-   * Browsers require a user gesture to enter fullscreen.
-   * We listen for the first meaningful interaction and
-   * request it then. Fires once; listener self-removes.
+   * Splash screen — blocks interaction until images are ready,
+   * then lets the user choose to enter fullscreen via the button.
    * ------------------------------------------------- */
 
-  function initAutoFullscreen() {
-    var done = false;
-    function attempt() {
-      if (done) return;
-      done = true;
-      requestFullscreenSafe();
+  function initSplash() {
+    var splash   = doc.getElementById("splash");
+    var btn      = doc.getElementById("splashBtn");
+    var bar      = doc.getElementById("splashLoaderBar");
+    var label    = doc.getElementById("splashLoadingLabel");
+    if (!splash || !btn) return;
+
+    var imgs  = qsa("img", doc.body);
+    var total = imgs.length || 1;
+    var loaded = 0;
+
+    function tick(img) {
+      loaded++;
+      var pct = Math.min(100, Math.round((loaded / total) * 100));
+      if (bar)   bar.style.width = pct + "%";
+      /* Enable button once eager images (≈ first 3) are done */
+      if (loaded >= Math.min(3, total)) {
+        btn.disabled = false;
+        btn.removeAttribute("aria-disabled");
+      }
+      if (loaded >= total && label) {
+        label.textContent = "Ready";
+      }
     }
-    window.addEventListener("click",    attempt, { once: true });
-    window.addEventListener("keydown",  attempt, { once: true });
-    window.addEventListener("touchend", attempt, { once: true, passive: true });
+
+    imgs.forEach(function (img) {
+      if (img.complete) { tick(img); return; }
+      img.addEventListener("load",  function () { tick(img); }, { once: true });
+      img.addEventListener("error", function () { tick(img); }, { once: true });
+    });
+
+    btn.addEventListener("click", function () {
+      requestFullscreenSafe();
+      splash.classList.add("is-hidden");
+      setTimeout(function () {
+        if (splash.parentNode) splash.parentNode.removeChild(splash);
+      }, 750);
+    });
   }
 
   /* -------------------------------------------------
@@ -491,7 +516,7 @@
     initCompareGrid();
     initReviewMode();
     initRotateHint();
-    initAutoFullscreen();
+    initSplash();
     initLazyImages();
     initKbdHint();
 

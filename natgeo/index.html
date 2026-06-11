@@ -52,6 +52,23 @@
   </div>
 </div>
 
+<div id="splash" class="splash" role="dialog" aria-modal="true" aria-labelledby="splashTitle">
+  <div class="splash__inner">
+    <p class="splash__eyebrow">Hero Experiences × National Geographic</p>
+    <h1 class="splash__title" id="splashTitle">The Desert Expedition</h1>
+    <p class="splash__subtitle">A partnership proposal</p>
+    <div class="splash__divider" aria-hidden="true"></div>
+    <p class="splash__hint-text">This presentation is interactive — navigate with arrow keys, scroll, or swipe.</p>
+    <div class="splash__loader" aria-label="Loading images" id="splashLoader">
+      <div class="splash__loader-bar" id="splashLoaderBar"></div>
+    </div>
+    <p class="splash__loading-label" id="splashLoadingLabel">Loading…</p>
+    <button class="splash__btn" id="splashBtn" type="button" disabled aria-disabled="true">
+      Begin presentation
+    </button>
+  </div>
+</div>
+
 <main class="deck" id="deck" aria-label="Hero × National Geographic partnership proposal">
 
   <!-- =====================================================
@@ -60,7 +77,7 @@
        ===================================================== -->
   <section class="section" id="sec-cover" data-slide="1" data-mode="immersive" data-image="full-bleed" aria-labelledby="cover-label">
     <div class="full-bleed full-bleed--soft-dim" aria-hidden="true">
-      <img src="assets/images/01-cover.jpg" alt="" loading="eager" decoding="async">
+      <img src="assets/images/01-cover.webp" alt="" loading="eager" decoding="async">
     </div>
 
     <div class="section__meta meta">
@@ -130,7 +147,7 @@
           <p class="paradox__close">The Arabian desert deserves an expedition that refuses the trade-off.</p>
         </div>
         <div class="paradox__image" aria-hidden="true">
-          <img src="assets/images/02-paradox.jpg" alt="" loading="lazy" decoding="async">
+          <img src="assets/images/02-paradox.webp" alt="" loading="lazy" decoding="async">
         </div>
       </div>
     </div>
@@ -142,7 +159,7 @@
        ===================================================== -->
   <section class="section" id="sec-vision" data-slide="3" data-mode="immersive" data-image="full-bleed" aria-labelledby="vision-headline">
     <div class="full-bleed full-bleed--soft-dim" aria-hidden="true">
-      <img src="assets/images/03-vision.jpg" alt="" loading="lazy" decoding="async">
+      <img src="assets/images/03-vision.webp" alt="" loading="lazy" decoding="async">
     </div>
 
     <div class="section__meta meta">
@@ -172,7 +189,7 @@
        ===================================================== -->
   <section class="section" id="sec-arabia" data-slide="4" data-mode="immersive" data-image="full-bleed" aria-labelledby="arabia-headline">
     <div class="full-bleed full-bleed--lower-band" aria-hidden="true">
-      <img src="assets/images/03-5-arabia.jpg" alt="" loading="lazy" decoding="async">
+      <img src="assets/images/03-5-arabia.webp" alt="" loading="lazy" decoding="async">
     </div>
 
     <div class="section__meta meta">
@@ -265,7 +282,7 @@
           </div>
         </div>
         <div class="split__image" aria-hidden="true">
-          <img src="assets/images/05a-hero.jpg" alt="" loading="lazy" decoding="async">
+          <img src="assets/images/05a-hero.webp" alt="" loading="lazy" decoding="async">
         </div>
       </div>
     </div>
@@ -363,48 +380,42 @@
       <div class="tab-panel-editorial is-active" data-tab="atmosphere" role="tabpanel">
         <div class="compare-grid" data-compare-grid aria-label="Typical desert safari versus Hero Experiences — atmosphere">
 
+          <div class="compare-grid__nav">
+            <button class="compare-grid__thumb is-active" type="button" data-pair="1">Arrival</button>
+            <button class="compare-grid__thumb" type="button" data-pair="2">Setting</button>
+            <button class="compare-grid__thumb" type="button" data-pair="3">Dining</button>
+            <button class="compare-grid__thumb" type="button" data-pair="4">Evening</button>
+          </div>
+
+          <div class="compare-grid__panels">
+
           <!-- Left: Typical Dubai operator -->
           <div class="compare-grid__half compare-grid__half--left">
 
-            <div class="compare-grid__thumbs">
-              <button class="compare-grid__thumb is-active" type="button" data-pair="1" aria-label="Typical: dust, queues, engines">
-                <img src="assets/images/Newly added photos/Atmosphere_Right_Pair1.png" alt="" loading="eager" decoding="async">
-              </button>
-              <button class="compare-grid__thumb" type="button" data-pair="2" aria-label="Typical: commercial camp for hundreds">
-                <img src="assets/images/Newly added photos/Atmosphere_Right_Pair2.png" alt="" loading="lazy" decoding="async">
-              </button>
-              <button class="compare-grid__thumb" type="button" data-pair="3" aria-label="Typical: catering for coach groups">
-                <img src="assets/images/Newly added photos/Atmosphere_Right_Pair3.png" alt="" loading="lazy" decoding="async">
-              </button>
-              <button class="compare-grid__thumb" type="button" data-pair="4" aria-label="Typical: neon concert, shisha, performance">
-                <img src="assets/images/Newly added photos/Atmosphere_Right_Pair4.png" alt="" loading="lazy" decoding="async">
-              </button>
-            </div>
-
             <div class="compare-grid__large">
               <div class="compare-grid__large-cell is-active" data-pair="1">
-                <img src="assets/images/Newly added photos/Atmosphere_Right_Pair1.png" alt="" loading="eager" decoding="async">
+                <img src="assets/images/Atmosphere_Right_Pair1.webp" alt="" loading="eager" decoding="async">
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">Dust, queues, engines</p>
                   <p class="compare-grid__large-caption-sub">Typical · Arrival</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="2">
-                <img src="assets/images/Newly added photos/Atmosphere_Right_Pair2.png" alt="" loading="lazy" decoding="async">
+                <img src="assets/images/Atmosphere_Right_Pair2.webp" alt="" loading="lazy" decoding="async">
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">A commercial camp for hundreds</p>
                   <p class="compare-grid__large-caption-sub">Typical · Setting</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="3">
-                <img src="assets/images/Newly added photos/Atmosphere_Right_Pair3.png" alt="" loading="lazy" decoding="async">
+                <img src="assets/images/Atmosphere_Right_Pair3.webp" alt="" loading="lazy" decoding="async" style="object-position: right center;">
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">Catering for coach groups</p>
                   <p class="compare-grid__large-caption-sub">Typical · Dining</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="4">
-                <img src="assets/images/Newly added photos/Atmosphere_Right_Pair4.png" alt="" loading="lazy" decoding="async">
+                <img src="assets/images/Atmosphere_Right_Pair4.webp" alt="" loading="lazy" decoding="async">
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">Neon, performance, shisha</p>
                   <p class="compare-grid__large-caption-sub">Typical · Evening</p>
@@ -417,45 +428,30 @@
           <!-- Right: Hero Experiences -->
           <div class="compare-grid__half compare-grid__half--right">
 
-            <div class="compare-grid__thumbs">
-              <button class="compare-grid__thumb is-active" type="button" data-pair="1" aria-label="Hero: Arabic coffee welcome">
-                <img src="assets/images/Newly added photos/Atmosphere_Left_Pair1_Heritage Arabic coffee welcome.jpg" alt="" loading="eager" decoding="async">
-              </button>
-              <button class="compare-grid__thumb" type="button" data-pair="2" aria-label="Hero: Platinum camp beneath the desert sky">
-                <img src="assets/images/Newly added photos/Atmosphere_Left_Pair2_Platinum.jpg" alt="" loading="lazy" decoding="async">
-              </button>
-              <button class="compare-grid__thumb" type="button" data-pair="3" aria-label="Hero: personal dining service">
-                <img src="assets/images/Newly added photos/Atmosphere_Left_Pair3_Heritage Dinner - Platinum Heritage (110).jpg" alt="" loading="lazy" decoding="async">
-              </button>
-              <button class="compare-grid__thumb" type="button" data-pair="4" aria-label="Hero: guests invited to drum with performers">
-                <img src="assets/images/Newly added photos/Atmosphere_left_Pair4_DrummingHeritage .jpg" alt="" loading="lazy" decoding="async">
-              </button>
-            </div>
-
             <div class="compare-grid__large">
               <div class="compare-grid__large-cell is-active" data-pair="1">
-                <img src="assets/images/Newly added photos/Atmosphere_Left_Pair1_Heritage Arabic coffee welcome.jpg" alt="" loading="eager" decoding="async">
+                <img src="assets/images/Atmosphere_Left_Pair1.webp" alt="" loading="eager" decoding="async">
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">Arabic coffee welcome</p>
                   <p class="compare-grid__large-caption-sub">Heritage · Arrival</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="2">
-                <img src="assets/images/Newly added photos/Atmosphere_Left_Pair2_Platinum.jpg" alt="" loading="lazy" decoding="async">
+                <img src="assets/images/Atmosphere_Left_Pair2.webp" alt="" loading="lazy" decoding="async">
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">Platinum camp beneath the desert sky</p>
                   <p class="compare-grid__large-caption-sub">Platinum · Setting</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="3">
-                <img src="assets/images/Newly added photos/Atmosphere_Left_Pair3_Heritage Dinner - Platinum Heritage (110).jpg" alt="" loading="lazy" decoding="async">
+                <img src="assets/images/Atmosphere_Left_Pair3.webp" alt="" loading="lazy" decoding="async">
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">Personal service, one guest at a time</p>
                   <p class="compare-grid__large-caption-sub">Heritage · Dining</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="4">
-                <img src="assets/images/Newly added photos/Atmosphere_left_Pair4_DrummingHeritage .jpg" alt="" loading="lazy" decoding="async">
+                <img src="assets/images/Atmosphere_Left_Pair4.webp" alt="" loading="lazy" decoding="async">
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">Guests invited to drum alongside the performers</p>
                   <p class="compare-grid__large-caption-sub">Heritage · Cultural</p>
@@ -465,6 +461,8 @@
 
           </div>
 
+          </div><!-- /compare-grid__panels -->
+
         </div>
       </div>
 
@@ -472,36 +470,33 @@
       <div class="tab-panel-editorial" data-tab="practice" role="tabpanel">
         <div class="compare-grid" data-compare-grid aria-label="Typical desert operator practice versus Hero Experiences">
 
+          <div class="compare-grid__nav">
+            <button class="compare-grid__thumb is-active" type="button" data-pair="1">Movement</button>
+            <button class="compare-grid__thumb" type="button" data-pair="2">Habitat</button>
+            <button class="compare-grid__thumb" type="button" data-pair="3">Evening</button>
+          </div>
+
+          <div class="compare-grid__panels">
+
           <!-- Left: Typical -->
           <div class="compare-grid__half compare-grid__half--left">
-            <div class="compare-grid__thumbs">
-              <button class="compare-grid__thumb is-active" type="button" data-pair="1" aria-label="Typical: dune-bashing">
-                <img src="assets/images/Newly added photos/Practice_Right_Dune Bashing.png" alt="" loading="lazy" decoding="async">
-              </button>
-              <button class="compare-grid__thumb" type="button" data-pair="2" aria-label="Typical: machines in the desert">
-                <img src="assets/images/Newly added photos/Atmosphere_Right_Pair1.png" alt="" loading="lazy" decoding="async">
-              </button>
-              <button class="compare-grid__thumb" type="button" data-pair="3" aria-label="Typical: neon concert">
-                <img src="assets/images/Newly added photos/Atmosphere_Right_Pair4.png" alt="" loading="lazy" decoding="async">
-              </button>
-            </div>
             <div class="compare-grid__large">
               <div class="compare-grid__large-cell is-active" data-pair="1">
-                <img src="assets/images/Newly added photos/Practice_Right_Dune Bashing.png" alt="" loading="lazy" decoding="async">
+                <img src="assets/images/Practice_DuneBashing.webp" alt="" loading="lazy" decoding="async">
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">Dune-bashing</p>
                   <p class="compare-grid__large-caption-sub">Habitat disturbed for adrenaline</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="2">
-                <img src="assets/images/Newly added photos/Atmosphere_Right_Pair1.png" alt="" loading="lazy" decoding="async">
+                <img src="assets/images/Practice_Habitat.webp" alt="" loading="lazy" decoding="async">
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">Machines in the desert</p>
                   <p class="compare-grid__large-caption-sub">Noise, dust, carbon</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="3">
-                <img src="assets/images/Newly added photos/Atmosphere_Right_Pair4.png" alt="" loading="lazy" decoding="async">
+                <img src="assets/images/Practice_Evening.webp" alt="" loading="lazy" decoding="async">
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">A show performed at you</p>
                   <p class="compare-grid__large-caption-sub">Watched from a crowd</p>
@@ -512,34 +507,23 @@
 
           <!-- Right: Hero -->
           <div class="compare-grid__half compare-grid__half--right">
-            <div class="compare-grid__thumbs">
-              <button class="compare-grid__thumb is-active" type="button" data-pair="1" aria-label="Hero: Range Rovers in the conservation reserve">
-                <img src="assets/images/Newly added photos/Practice_left_Range Rovers - Platinum.jpg" alt="" loading="lazy" decoding="async">
-              </button>
-              <button class="compare-grid__thumb" type="button" data-pair="2" aria-label="Hero: falcon in living habitat">
-                <img src="assets/images/Newly added photos/Falcons - Platinum Heritage (100).png" alt="" loading="lazy" decoding="async">
-              </button>
-              <button class="compare-grid__thumb" type="button" data-pair="3" aria-label="Hero: campfire under open sky">
-                <img src="assets/images/Newly added photos/Campfire - Platinum Heritage (27).jpg" alt="" loading="lazy" decoding="async">
-              </button>
-            </div>
             <div class="compare-grid__large">
               <div class="compare-grid__large-cell is-active" data-pair="1">
-                <img src="assets/images/Newly added photos/Practice_left_Range Rovers - Platinum.jpg" alt="" loading="lazy" decoding="async">
+                <img src="assets/images/Practice_RangeRovers.webp" alt="" loading="lazy" decoding="async">
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">Range Rovers in the conservation reserve</p>
                   <p class="compare-grid__large-caption-sub">Observing wildlife — never disturbing it</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="2">
-                <img src="assets/images/Newly added photos/Falcons - Platinum Heritage (100).png" alt="" loading="lazy" decoding="async">
+                <img src="assets/images/Falcons-Platinum-100.webp" alt="" loading="lazy" decoding="async">
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">Falcon in the living desert</p>
                   <p class="compare-grid__large-caption-sub">Ancient practice, living ecosystem</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="3">
-                <img src="assets/images/Newly added photos/Campfire - Platinum Heritage (27).jpg" alt="" loading="lazy" decoding="async">
+                <img src="assets/images/Campfire-Platinum-27.webp" alt="" loading="lazy" decoding="async">
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">Three guests. One fire. A billion stars.</p>
                   <p class="compare-grid__large-caption-sub">An evening that belongs to you</p>
@@ -548,6 +532,8 @@
             </div>
           </div>
 
+          </div><!-- /compare-grid__panels -->
+
         </div>
       </div>
 
@@ -555,7 +541,7 @@
       <div class="tab-panel-editorial" data-tab="place" role="tabpanel">
         <div class="problem">
           <div class="problem__side">
-            <div class="problem__bg problem__bg--left" aria-hidden="true"></div>
+            <img src="assets/images/Place_Left.webp" alt="" loading="lazy" decoding="async">
             <aside class="image-placeholder-note">
               <span class="image-placeholder-note__title">Image · placeholder · open desert</span>
               <p class="image-placeholder-note__body">Open, unprotected desert tract. Tire tracks criss-crossing in foreground, no boundary markers, no sense of regulation. Generic, disordered.</p>
@@ -567,7 +553,7 @@
             </div>
           </div>
           <div class="problem__side">
-            <div class="problem__bg problem__bg--right" aria-hidden="true"></div>
+            <img src="assets/images/Place_Right_DDCR.webp" alt="" loading="lazy" decoding="async">
             <aside class="image-placeholder-note">
               <span class="image-placeholder-note__title">Image · placeholder · DDCR reserve</span>
               <p class="image-placeholder-note__body">DDCR landscape reading as a reserve — oryx or gazelle in habitat, ghaf trees, preserved wildness. Low light, atmospheric.</p>
@@ -702,7 +688,7 @@
       <h2 id="collections-intro-headline" class="headline headline--lg headline--bone" style="text-align:center; margin-inline:auto; max-width: 22ch;">Two access levels. One ethos.</h2>
       <div class="collections-intro" style="margin-top: var(--space-6);">
         <div class="collections-intro__side">
-          <div class="collections-intro__bg collections-intro__bg--heritage" aria-hidden="true"></div>
+          <img src="assets/images/Slide10_Heritage.webp" alt="" loading="lazy" decoding="async">
           <aside class="image-placeholder-note">
             <span class="image-placeholder-note__title">Image · Heritage Collection · placeholder</span>
             <p class="image-placeholder-note__body">Torch-lit communal Bedouin camp at dusk. Bedouin host telling a story at low fire. Guests seated on cushions at long shared table. Optional vintage Land Rover at frame edge in soft focus. Documentary register.</p>
@@ -716,7 +702,7 @@
           </div>
         </div>
         <div class="collections-intro__side">
-          <div class="collections-intro__bg collections-intro__bg--platinum" aria-hidden="true"></div>
+          <img src="assets/images/Slide10_Platinum.webp" alt="" loading="lazy" decoding="async">
           <aside class="image-placeholder-note">
             <span class="image-placeholder-note__title">Image · Platinum Collection · placeholder</span>
             <p class="image-placeholder-note__body">Private cabana at fire-lit oasis. Antique brass lamps. Small table set for two. Dunes losing light. No marble. No champagne flutes. No gold leaf. Documentary register.</p>
@@ -771,7 +757,7 @@
        ===================================================== -->
   <section class="section" id="sec-solution" data-slide="12" data-mode="immersive" data-image="full-bleed" aria-labelledby="solution-headline">
     <div class="full-bleed full-bleed--soft-dim" aria-hidden="true">
-      <img src="assets/images/07-solution.jpg" alt="" loading="lazy" decoding="async">
+      <img src="assets/images/07-solution.webp" alt="" loading="lazy" decoding="async">
     </div>
 
     <div class="section__meta meta">
@@ -865,7 +851,7 @@
       <div class="tab-panel-editorial is-active" data-tab="conservation" role="tabpanel">
         <div class="thread-spread">
           <div class="thread-spread__image">
-            <img src="assets/images/08-5-conservation.jpg" alt="" loading="lazy" decoding="async">
+            <img src="assets/images/08-5-conservation.webp" alt="" loading="lazy" decoding="async">
           </div>
           <div class="thread-spread__copy">
             <h3 class="thread-spread__label">Conservation</h3>
@@ -882,7 +868,7 @@
       <div class="tab-panel-editorial" data-tab="culture" role="tabpanel">
         <div class="thread-spread">
           <div class="thread-spread__image">
-            <img src="assets/images/08-5-culture.jpg" alt="" loading="lazy" decoding="async">
+            <img src="assets/images/08-5-culture.webp" alt="" loading="lazy" decoding="async">
           </div>
           <div class="thread-spread__copy">
             <h3 class="thread-spread__label">Culture</h3>
@@ -899,7 +885,7 @@
       <div class="tab-panel-editorial" data-tab="education" role="tabpanel">
         <div class="thread-spread">
           <div class="thread-spread__image">
-            <img src="assets/images/08-5-education.jpg" alt="" loading="lazy" decoding="async">
+            <img src="assets/images/08-5-education.webp" alt="" loading="lazy" decoding="async">
           </div>
           <div class="thread-spread__copy">
             <h3 class="thread-spread__label">Education</h3>
@@ -1125,7 +1111,7 @@
       </div>
 
       <div class="timeline__horizon" aria-hidden="true">
-        <img src="assets/images/11-horizon.jpg" alt="" loading="lazy" decoding="async">
+        <img src="assets/images/11-horizon.webp" alt="" loading="lazy" decoding="async">
       </div>
     </div>
   </section>
@@ -1136,7 +1122,7 @@
        ===================================================== -->
   <section class="section" id="sec-big-idea" data-slide="19" data-mode="immersive" data-image="full-bleed" aria-labelledby="big-idea-quote">
     <div class="full-bleed full-bleed--deep-dim" aria-hidden="true">
-      <img src="assets/images/12-big-idea.jpg" alt="" loading="lazy" decoding="async" style="object-position: center 55%;">
+      <img src="assets/images/Camels-Platinum-27.webp" alt="" loading="lazy" decoding="async" style="object-position: center 60%;">
     </div>
 
     <div class="section__meta meta">
@@ -1196,7 +1182,7 @@
        ===================================================== -->
   <section class="section" id="sec-closing" data-slide="21" data-mode="immersive" data-image="full-bleed" aria-labelledby="closing-headline">
     <div class="full-bleed full-bleed--soft-dim" aria-hidden="true">
-      <img src="assets/images/13-closing.jpg" alt="" loading="lazy" decoding="async" style="object-position: center 65%;">
+      <img src="assets/images/13-closing.webp" alt="" loading="lazy" decoding="async" style="object-position: center 65%;">
     </div>
 
     <div class="section__meta meta">
