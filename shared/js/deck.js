@@ -348,29 +348,55 @@
 
     var imgs  = qsa("img", doc.body);
     var total = imgs.length || 1;
-    var loaded = 0;
+    var done  = 0;
+    var ready = false;
 
-    function tick(img) {
-      loaded++;
-      var pct = Math.min(100, Math.round((loaded / total) * 100));
-      if (bar)   bar.style.width = pct + "%";
-      /* Enable button once eager images (≈ first 3) are done */
-      if (loaded >= Math.min(3, total)) {
-        btn.disabled = false;
-        btn.removeAttribute("aria-disabled");
-      }
-      if (loaded >= total && label) {
-        label.textContent = "Ready";
-      }
+    function enable() {
+      if (ready) return;
+      ready = true;
+      btn.disabled = false;
+      btn.removeAttribute("aria-disabled");
+      if (label) label.textContent = "Ready";
+      if (bar)   bar.style.width = "100%";
     }
 
+    function tick() {
+      done++;
+      var pct = Math.min(100, Math.round((done / total) * 100));
+      if (bar)   bar.style.width = pct + "%";
+      if (label && !ready) label.textContent = "Loading… " + pct + "%";
+      if (done >= total) enable();
+    }
+
+    /* Force every image — including off-screen lazy ones — to fetch AND
+     * decode now, so no slide stutters when it first becomes visible.
+     * img.decode() resolves only once the bitmap is paint-ready. */
     imgs.forEach(function (img) {
-      if (img.complete) { tick(img); return; }
-      img.addEventListener("load",  function () { tick(img); }, { once: true });
-      img.addEventListener("error", function () { tick(img); }, { once: true });
+      try { img.loading = "eager"; } catch (e) {}
+
+      function settle() { tick(); }
+
+      if (typeof img.decode === "function") {
+        img.decode().then(settle, function () {
+          /* decode() can reject before load resolves or on detached nodes;
+           * fall back to the load/error events. */
+          if (img.complete) { settle(); return; }
+          img.addEventListener("load",  settle, { once: true });
+          img.addEventListener("error", settle, { once: true });
+        });
+      } else if (img.complete) {
+        settle();
+      } else {
+        img.addEventListener("load",  settle, { once: true });
+        img.addEventListener("error", settle, { once: true });
+      }
     });
 
+    /* Safety net — never trap the user behind a slow/failed asset. */
+    var fallback = setTimeout(enable, 10000);
+
     btn.addEventListener("click", function () {
+      clearTimeout(fallback);
       requestFullscreenSafe();
       splash.classList.add("is-hidden");
       setTimeout(function () {
