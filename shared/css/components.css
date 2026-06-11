@@ -576,7 +576,8 @@
   flex: 1;
   display: block;
   position: relative;
-  height: 52px;
+  aspect-ratio: 16 / 9;   /* landscape — shows more of each image, adapts to pair count */
+  height: auto;
   overflow: hidden;
   cursor: pointer;
   border: 0;
@@ -606,9 +607,6 @@
   object-fit: cover;
 }
 
-@media (min-width: 64em) {
-  .compare-grid__thumb { height: 68px; }
-}
 
 /* ---- Large image panel — fills remaining height ---- */
 

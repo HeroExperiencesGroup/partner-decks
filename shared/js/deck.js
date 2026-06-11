@@ -274,37 +274,37 @@
    * ------------------------------------------------- */
 
   function initCompareGrid() {
-    var grid = qs("[data-compare-grid]");
-    if (!grid) return;
-
-    var thumbs     = qsa(".compare-grid__thumb",      grid);
-    var largeCells = qsa(".compare-grid__large-cell", grid);
-
-    /* Show a pair: activate all thumbs + large cells with matching data-pair */
-    function showPair(pair) {
-      thumbs.forEach(function (t) {
-        t.classList.toggle("is-active", t.getAttribute("data-pair") === pair);
-      });
-      largeCells.forEach(function (c) {
-        c.classList.toggle("is-active", c.getAttribute("data-pair") === pair);
-      });
-    }
+    /* Supports multiple [data-compare-grid] instances (e.g. Atmosphere tab
+     * and Practice tab in the same section). Each grid is independent. */
+    var grids  = qsa("[data-compare-grid]");
+    if (!grids.length) return;
 
     var hoverMq = window.matchMedia("(hover: hover) and (pointer: fine)");
 
-    thumbs.forEach(function (thumb) {
-      if (hoverMq.matches) {
-        /* Desktop: hover thumbnail to switch pair. State persists until
-         * another thumb is hovered — no revert on mouseleave. */
-        thumb.addEventListener("mouseenter", function () {
-          showPair(thumb.getAttribute("data-pair"));
+    grids.forEach(function (grid) {
+      var thumbs     = qsa(".compare-grid__thumb",      grid);
+      var largeCells = qsa(".compare-grid__large-cell", grid);
+
+      function showPair(pair) {
+        thumbs.forEach(function (t) {
+          t.classList.toggle("is-active", t.getAttribute("data-pair") === pair);
         });
-      } else {
-        /* Touch / coarse pointer: tap to select pair */
-        thumb.addEventListener("click", function () {
-          showPair(thumb.getAttribute("data-pair"));
+        largeCells.forEach(function (c) {
+          c.classList.toggle("is-active", c.getAttribute("data-pair") === pair);
         });
       }
+
+      thumbs.forEach(function (thumb) {
+        if (hoverMq.matches) {
+          thumb.addEventListener("mouseenter", function () {
+            showPair(thumb.getAttribute("data-pair"));
+          });
+        } else {
+          thumb.addEventListener("click", function () {
+            showPair(thumb.getAttribute("data-pair"));
+          });
+        }
+      });
     });
   }
 
