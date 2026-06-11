@@ -295,15 +295,9 @@
       }
 
       thumbs.forEach(function (thumb) {
-        if (hoverMq.matches) {
-          thumb.addEventListener("mouseenter", function () {
-            showPair(thumb.getAttribute("data-pair"));
-          });
-        } else {
-          thumb.addEventListener("click", function () {
-            showPair(thumb.getAttribute("data-pair"));
-          });
-        }
+        thumb.addEventListener("click", function () {
+          showPair(thumb.getAttribute("data-pair"));
+        });
       });
     });
   }

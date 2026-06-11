@@ -18,6 +18,17 @@
   scroll-behavior: smooth;
   overscroll-behavior: contain; /* keep browser chrome out of pull-down gestures */
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* IE/Edge legacy */
+}
+.deck::-webkit-scrollbar { display: none; } /* Chrome/Safari/Edge */
+
+/* Prevent Edge's image hover toolbar and image drag on all deck images */
+.section img {
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* =========================================================
