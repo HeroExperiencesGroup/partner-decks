@@ -77,7 +77,11 @@
        ===================================================== -->
   <section class="section" id="sec-cover" data-slide="1" data-mode="immersive" data-image="full-bleed" aria-labelledby="cover-label">
     <div class="full-bleed full-bleed--soft-dim" aria-hidden="true">
-      <img src="assets/images/01-cover.webp" alt="" loading="eager" decoding="async">
+      <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/01-cover-desktop.webp 1306w" sizes="100vw">
+        <source type="image/jpeg" srcset="assets/images/01-cover-desktop.jpg 1306w" sizes="100vw">
+        <img src="assets/images/01-cover-desktop.jpg" alt="" loading="eager" decoding="async" width="1306" height="871" fetchpriority="high">
+      </picture>
     </div>
 
     <div class="section__meta meta">
@@ -147,7 +151,11 @@
           <p class="paradox__close">The Arabian desert deserves an expedition that refuses the trade-off.</p>
         </div>
         <div class="paradox__image" aria-hidden="true">
-          <img src="assets/images/02-paradox.webp" alt="" loading="lazy" decoding="async">
+          <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/02-paradox-mobile.webp 960w, assets/images/02-paradox-desktop.webp 1200w" sizes="(max-width: 48em) 100vw, 33vw">
+        <source type="image/jpeg" srcset="assets/images/02-paradox-mobile.jpg 960w, assets/images/02-paradox-desktop.jpg 1200w" sizes="(max-width: 48em) 100vw, 33vw">
+        <img src="assets/images/02-paradox-desktop.jpg" alt="" loading="lazy" decoding="async" width="1200" height="1800">
+      </picture>
         </div>
       </div>
     </div>
@@ -159,7 +167,11 @@
        ===================================================== -->
   <section class="section" id="sec-vision" data-slide="3" data-mode="immersive" data-image="full-bleed" aria-labelledby="vision-headline">
     <div class="full-bleed full-bleed--soft-dim" aria-hidden="true">
-      <img src="assets/images/03-vision.webp" alt="" loading="lazy" decoding="async">
+      <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/03-vision-mobile.webp 960w, assets/images/03-vision-desktop.webp 1920w" sizes="100vw">
+        <source type="image/jpeg" srcset="assets/images/03-vision-mobile.jpg 960w, assets/images/03-vision-desktop.jpg 1920w" sizes="100vw">
+        <img src="assets/images/03-vision-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="2881">
+      </picture>
     </div>
 
     <div class="section__meta meta">
@@ -189,7 +201,11 @@
        ===================================================== -->
   <section class="section" id="sec-arabia" data-slide="4" data-mode="immersive" data-image="full-bleed" aria-labelledby="arabia-headline">
     <div class="full-bleed full-bleed--lower-band" aria-hidden="true">
-      <img src="assets/images/03-5-arabia.webp" alt="" loading="lazy" decoding="async">
+      <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/03-5-arabia-mobile.webp 960w, assets/images/03-5-arabia-desktop.webp 1672w" sizes="100vw">
+        <source type="image/jpeg" srcset="assets/images/03-5-arabia-mobile.jpg 960w, assets/images/03-5-arabia-desktop.jpg 1672w" sizes="100vw">
+        <img src="assets/images/03-5-arabia-desktop.jpg" alt="" loading="lazy" decoding="async" width="1672" height="941">
+      </picture>
     </div>
 
     <div class="section__meta meta">
@@ -282,7 +298,11 @@
           </div>
         </div>
         <div class="split__image" aria-hidden="true">
-          <img src="assets/images/05a-hero.webp" alt="" loading="lazy" decoding="async">
+          <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/05a-hero-mobile.webp 960w, assets/images/05a-hero-desktop.webp 1400w" sizes="(max-width: 48em) 100vw, 50vw">
+        <source type="image/jpeg" srcset="assets/images/05a-hero-mobile.jpg 960w, assets/images/05a-hero-desktop.jpg 1400w" sizes="(max-width: 48em) 100vw, 50vw">
+        <img src="assets/images/05a-hero-desktop.jpg" alt="" loading="lazy" decoding="async" width="1400" height="2100">
+      </picture>
         </div>
       </div>
     </div>
@@ -394,28 +414,44 @@
 
             <div class="compare-grid__large">
               <div class="compare-grid__large-cell is-active" data-pair="1">
-                <img src="assets/images/Atmosphere_Right_Pair1.webp" alt="" loading="eager" decoding="async">
+                <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/Atmosphere_Right_Pair1-mobile.webp 960w, assets/images/Atmosphere_Right_Pair1-desktop.webp 1915w" sizes="(max-width: 48em) 100vw, 50vw">
+        <source type="image/jpeg" srcset="assets/images/Atmosphere_Right_Pair1-mobile.jpg 960w, assets/images/Atmosphere_Right_Pair1-desktop.jpg 1915w" sizes="(max-width: 48em) 100vw, 50vw">
+        <img src="assets/images/Atmosphere_Right_Pair1-desktop.jpg" alt="" loading="lazy" decoding="async" width="1915" height="1067">
+      </picture>
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">Dust, queues, engines</p>
                   <p class="compare-grid__large-caption-sub">Typical · Arrival</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="2">
-                <img src="assets/images/Atmosphere_Right_Pair2.webp" alt="" loading="eager" decoding="async">
+                <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/Atmosphere_Right_Pair2-desktop.webp 866w" sizes="(max-width: 48em) 100vw, 50vw">
+        <source type="image/jpeg" srcset="assets/images/Atmosphere_Right_Pair2-desktop.jpg 866w" sizes="(max-width: 48em) 100vw, 50vw">
+        <img src="assets/images/Atmosphere_Right_Pair2-desktop.jpg" alt="" loading="lazy" decoding="async" width="866" height="576">
+      </picture>
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">A commercial camp for hundreds</p>
                   <p class="compare-grid__large-caption-sub">Typical · Setting</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="3">
-                <img src="assets/images/Atmosphere_Right_Pair3.webp" alt="" loading="eager" decoding="async" style="object-position: right center;">
+                <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/Atmosphere_Right_Pair3-mobile.webp 960w, assets/images/Atmosphere_Right_Pair3-desktop.webp 1916w" sizes="(max-width: 48em) 100vw, 50vw">
+        <source type="image/jpeg" srcset="assets/images/Atmosphere_Right_Pair3-mobile.jpg 960w, assets/images/Atmosphere_Right_Pair3-desktop.jpg 1916w" sizes="(max-width: 48em) 100vw, 50vw">
+        <img src="assets/images/Atmosphere_Right_Pair3-desktop.jpg" alt="" loading="lazy" decoding="async" width="1916" height="1061" style="object-position: right center;">
+      </picture>
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">Catering for coach groups</p>
                   <p class="compare-grid__large-caption-sub">Typical · Dining</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="4">
-                <img src="assets/images/Atmosphere_Right_Pair4.webp" alt="" loading="eager" decoding="async">
+                <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/Atmosphere_Right_Pair4-mobile.webp 960w, assets/images/Atmosphere_Right_Pair4-desktop.webp 1916w" sizes="(max-width: 48em) 100vw, 50vw">
+        <source type="image/jpeg" srcset="assets/images/Atmosphere_Right_Pair4-mobile.jpg 960w, assets/images/Atmosphere_Right_Pair4-desktop.jpg 1916w" sizes="(max-width: 48em) 100vw, 50vw">
+        <img src="assets/images/Atmosphere_Right_Pair4-desktop.jpg" alt="" loading="lazy" decoding="async" width="1916" height="1071">
+      </picture>
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">Neon, performance, shisha</p>
                   <p class="compare-grid__large-caption-sub">Typical · Evening</p>
@@ -430,28 +466,44 @@
 
             <div class="compare-grid__large">
               <div class="compare-grid__large-cell is-active" data-pair="1">
-                <img src="assets/images/Atmosphere_Left_Pair1.webp" alt="" loading="eager" decoding="async">
+                <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/Atmosphere_Left_Pair1-mobile.webp 960w, assets/images/Atmosphere_Left_Pair1-desktop.webp 1920w" sizes="(max-width: 48em) 100vw, 50vw">
+        <source type="image/jpeg" srcset="assets/images/Atmosphere_Left_Pair1-mobile.jpg 960w, assets/images/Atmosphere_Left_Pair1-desktop.jpg 1920w" sizes="(max-width: 48em) 100vw, 50vw">
+        <img src="assets/images/Atmosphere_Left_Pair1-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1281">
+      </picture>
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">Arabic coffee welcome</p>
                   <p class="compare-grid__large-caption-sub">Heritage · Arrival</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="2">
-                <img src="assets/images/Atmosphere_Left_Pair2.webp" alt="" loading="eager" decoding="async">
+                <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/Atmosphere_Left_Pair2-mobile.webp 960w, assets/images/Atmosphere_Left_Pair2-desktop.webp 1920w" sizes="(max-width: 48em) 100vw, 50vw">
+        <source type="image/jpeg" srcset="assets/images/Atmosphere_Left_Pair2-mobile.jpg 960w, assets/images/Atmosphere_Left_Pair2-desktop.jpg 1920w" sizes="(max-width: 48em) 100vw, 50vw">
+        <img src="assets/images/Atmosphere_Left_Pair2-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1280">
+      </picture>
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">Platinum camp beneath the desert sky</p>
                   <p class="compare-grid__large-caption-sub">Platinum · Setting</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="3">
-                <img src="assets/images/Atmosphere_Left_Pair3.webp" alt="" loading="eager" decoding="async">
+                <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/Atmosphere_Left_Pair3-mobile.webp 960w, assets/images/Atmosphere_Left_Pair3-desktop.webp 1920w" sizes="(max-width: 48em) 100vw, 50vw">
+        <source type="image/jpeg" srcset="assets/images/Atmosphere_Left_Pair3-mobile.jpg 960w, assets/images/Atmosphere_Left_Pair3-desktop.jpg 1920w" sizes="(max-width: 48em) 100vw, 50vw">
+        <img src="assets/images/Atmosphere_Left_Pair3-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1281">
+      </picture>
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">Personal service, one guest at a time</p>
                   <p class="compare-grid__large-caption-sub">Heritage · Dining</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="4">
-                <img src="assets/images/Atmosphere_Left_Pair4.webp" alt="" loading="eager" decoding="async">
+                <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/Atmosphere_Left_Pair4-mobile.webp 960w, assets/images/Atmosphere_Left_Pair4-desktop.webp 1920w" sizes="(max-width: 48em) 100vw, 50vw">
+        <source type="image/jpeg" srcset="assets/images/Atmosphere_Left_Pair4-mobile.jpg 960w, assets/images/Atmosphere_Left_Pair4-desktop.jpg 1920w" sizes="(max-width: 48em) 100vw, 50vw">
+        <img src="assets/images/Atmosphere_Left_Pair4-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1280">
+      </picture>
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">Guests invited to drum alongside the performers</p>
                   <p class="compare-grid__large-caption-sub">Heritage · Cultural</p>
@@ -482,21 +534,33 @@
           <div class="compare-grid__half compare-grid__half--left">
             <div class="compare-grid__large">
               <div class="compare-grid__large-cell is-active" data-pair="1">
-                <img src="assets/images/Practice_DuneBashing.webp" alt="" loading="eager" decoding="async">
+                <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/Practice_DuneBashing-mobile.webp 960w, assets/images/Practice_DuneBashing-desktop.webp 1159w" sizes="(max-width: 48em) 100vw, 50vw">
+        <source type="image/jpeg" srcset="assets/images/Practice_DuneBashing-mobile.jpg 960w, assets/images/Practice_DuneBashing-desktop.jpg 1159w" sizes="(max-width: 48em) 100vw, 50vw">
+        <img src="assets/images/Practice_DuneBashing-desktop.jpg" alt="" loading="lazy" decoding="async" width="1159" height="771">
+      </picture>
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">Dune-bashing</p>
                   <p class="compare-grid__large-caption-sub">Habitat disturbed for adrenaline</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="2">
-                <img src="assets/images/Practice_Habitat.webp" alt="" loading="eager" decoding="async">
+                <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/Practice_Habitat-mobile.webp 960w, assets/images/Practice_Habitat-desktop.webp 1779w" sizes="(max-width: 48em) 100vw, 50vw">
+        <source type="image/jpeg" srcset="assets/images/Practice_Habitat-mobile.jpg 960w, assets/images/Practice_Habitat-desktop.jpg 1779w" sizes="(max-width: 48em) 100vw, 50vw">
+        <img src="assets/images/Practice_Habitat-desktop.jpg" alt="" loading="lazy" decoding="async" width="1779" height="884">
+      </picture>
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">Machines in the desert</p>
                   <p class="compare-grid__large-caption-sub">Noise, dust, carbon</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="3">
-                <img src="assets/images/Practice_Evening.webp" alt="" loading="eager" decoding="async">
+                <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/Practice_Evening-mobile.webp 960w, assets/images/Practice_Evening-desktop.webp 1648w" sizes="(max-width: 48em) 100vw, 50vw">
+        <source type="image/jpeg" srcset="assets/images/Practice_Evening-mobile.jpg 960w, assets/images/Practice_Evening-desktop.jpg 1648w" sizes="(max-width: 48em) 100vw, 50vw">
+        <img src="assets/images/Practice_Evening-desktop.jpg" alt="" loading="lazy" decoding="async" width="1648" height="957">
+      </picture>
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">A show performed at you</p>
                   <p class="compare-grid__large-caption-sub">Watched from a crowd</p>
@@ -509,21 +573,33 @@
           <div class="compare-grid__half compare-grid__half--right">
             <div class="compare-grid__large">
               <div class="compare-grid__large-cell is-active" data-pair="1">
-                <img src="assets/images/Practice_RangeRovers.webp" alt="" loading="eager" decoding="async">
+                <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/Practice_RangeRovers-mobile.webp 960w, assets/images/Practice_RangeRovers-desktop.webp 1920w" sizes="(max-width: 48em) 100vw, 50vw">
+        <source type="image/jpeg" srcset="assets/images/Practice_RangeRovers-mobile.jpg 960w, assets/images/Practice_RangeRovers-desktop.jpg 1920w" sizes="(max-width: 48em) 100vw, 50vw">
+        <img src="assets/images/Practice_RangeRovers-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1204">
+      </picture>
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">Range Rovers in the conservation reserve</p>
                   <p class="compare-grid__large-caption-sub">Observing wildlife — never disturbing it</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="2">
-                <img src="assets/images/Falcons-Platinum-100.webp" alt="" loading="eager" decoding="async">
+                <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/Falcons-Platinum-100-mobile.webp 960w, assets/images/Falcons-Platinum-100-desktop.webp 1559w" sizes="(max-width: 48em) 100vw, 50vw">
+        <source type="image/jpeg" srcset="assets/images/Falcons-Platinum-100-mobile.jpg 960w, assets/images/Falcons-Platinum-100-desktop.jpg 1559w" sizes="(max-width: 48em) 100vw, 50vw">
+        <img src="assets/images/Falcons-Platinum-100-desktop.jpg" alt="" loading="lazy" decoding="async" width="1559" height="1009">
+      </picture>
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">Falcon in the living desert</p>
                   <p class="compare-grid__large-caption-sub">Ancient practice, living ecosystem</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="3">
-                <img src="assets/images/Campfire-Platinum-27.webp" alt="" loading="eager" decoding="async">
+                <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/Campfire-Platinum-27-mobile.webp 960w, assets/images/Campfire-Platinum-27-desktop.webp 1920w" sizes="(max-width: 48em) 100vw, 50vw">
+        <source type="image/jpeg" srcset="assets/images/Campfire-Platinum-27-mobile.jpg 960w, assets/images/Campfire-Platinum-27-desktop.jpg 1920w" sizes="(max-width: 48em) 100vw, 50vw">
+        <img src="assets/images/Campfire-Platinum-27-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1512">
+      </picture>
                 <div class="compare-grid__large-caption">
                   <p class="compare-grid__large-caption-lead">Three guests. One fire. A billion stars.</p>
                   <p class="compare-grid__large-caption-sub">An evening that belongs to you</p>
@@ -541,7 +617,11 @@
       <div class="tab-panel-editorial" data-tab="place" role="tabpanel">
         <div class="problem">
           <div class="problem__side">
-            <img src="assets/images/Place_Left.webp" alt="" loading="lazy" decoding="async">
+            <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/Place_Left-mobile.webp 960w, assets/images/Place_Left-desktop.webp 1636w" sizes="(max-width: 48em) 100vw, 50vw">
+        <source type="image/jpeg" srcset="assets/images/Place_Left-mobile.jpg 960w, assets/images/Place_Left-desktop.jpg 1636w" sizes="(max-width: 48em) 100vw, 50vw">
+        <img src="assets/images/Place_Left-desktop.jpg" alt="" loading="lazy" decoding="async" width="1636" height="1057">
+      </picture>
             <aside class="image-placeholder-note">
               <span class="image-placeholder-note__title">Image · placeholder · open desert</span>
               <p class="image-placeholder-note__body">Open, unprotected desert tract. Tire tracks criss-crossing in foreground, no boundary markers, no sense of regulation. Generic, disordered.</p>
@@ -553,7 +633,11 @@
             </div>
           </div>
           <div class="problem__side">
-            <img src="assets/images/Place_Right_DDCR.webp" alt="" loading="lazy" decoding="async">
+            <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/Place_Right_DDCR-mobile.webp 960w, assets/images/Place_Right_DDCR-desktop.webp 1920w" sizes="(max-width: 48em) 100vw, 50vw">
+        <source type="image/jpeg" srcset="assets/images/Place_Right_DDCR-mobile.jpg 960w, assets/images/Place_Right_DDCR-desktop.jpg 1920w" sizes="(max-width: 48em) 100vw, 50vw">
+        <img src="assets/images/Place_Right_DDCR-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1080">
+      </picture>
             <aside class="image-placeholder-note">
               <span class="image-placeholder-note__title">Image · placeholder · DDCR reserve</span>
               <p class="image-placeholder-note__body">DDCR landscape reading as a reserve — oryx or gazelle in habitat, ghaf trees, preserved wildness. Low light, atmospheric.</p>
@@ -688,7 +772,11 @@
       <h2 id="collections-intro-headline" class="headline headline--lg headline--bone" style="text-align:center; margin-inline:auto; max-width: 22ch;">Two access levels. One ethos.</h2>
       <div class="collections-intro" style="margin-top: var(--space-6);">
         <div class="collections-intro__side">
-          <img src="assets/images/Slide10_Heritage.webp" alt="" loading="lazy" decoding="async">
+          <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/Slide10_Heritage-mobile.webp 960w, assets/images/Slide10_Heritage-desktop.webp 1920w" sizes="(max-width: 48em) 100vw, 50vw">
+        <source type="image/jpeg" srcset="assets/images/Slide10_Heritage-mobile.jpg 960w, assets/images/Slide10_Heritage-desktop.jpg 1920w" sizes="(max-width: 48em) 100vw, 50vw">
+        <img src="assets/images/Slide10_Heritage-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1280">
+      </picture>
           <aside class="image-placeholder-note">
             <span class="image-placeholder-note__title">Image · Heritage Collection · placeholder</span>
             <p class="image-placeholder-note__body">Torch-lit communal Bedouin camp at dusk. Bedouin host telling a story at low fire. Guests seated on cushions at long shared table. Optional vintage Land Rover at frame edge in soft focus. Documentary register.</p>
@@ -702,7 +790,11 @@
           </div>
         </div>
         <div class="collections-intro__side">
-          <img src="assets/images/Slide10_Platinum.webp" alt="" loading="lazy" decoding="async">
+          <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/Slide10_Platinum-mobile.webp 960w, assets/images/Slide10_Platinum-desktop.webp 1920w" sizes="(max-width: 48em) 100vw, 50vw">
+        <source type="image/jpeg" srcset="assets/images/Slide10_Platinum-mobile.jpg 960w, assets/images/Slide10_Platinum-desktop.jpg 1920w" sizes="(max-width: 48em) 100vw, 50vw">
+        <img src="assets/images/Slide10_Platinum-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1281">
+      </picture>
           <aside class="image-placeholder-note">
             <span class="image-placeholder-note__title">Image · Platinum Collection · placeholder</span>
             <p class="image-placeholder-note__body">Private cabana at fire-lit oasis. Antique brass lamps. Small table set for two. Dunes losing light. No marble. No champagne flutes. No gold leaf. Documentary register.</p>
@@ -757,7 +849,11 @@
        ===================================================== -->
   <section class="section" id="sec-solution" data-slide="12" data-mode="immersive" data-image="full-bleed" aria-labelledby="solution-headline">
     <div class="full-bleed full-bleed--soft-dim" aria-hidden="true">
-      <img src="assets/images/07-solution.webp" alt="" loading="lazy" decoding="async">
+      <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/07-solution-mobile.webp 960w, assets/images/07-solution-desktop.webp 1920w" sizes="100vw">
+        <source type="image/jpeg" srcset="assets/images/07-solution-mobile.jpg 960w, assets/images/07-solution-desktop.jpg 1920w" sizes="100vw">
+        <img src="assets/images/07-solution-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1281">
+      </picture>
     </div>
 
     <div class="section__meta meta">
@@ -851,7 +947,11 @@
       <div class="tab-panel-editorial is-active" data-tab="conservation" role="tabpanel">
         <div class="thread-spread">
           <div class="thread-spread__image">
-            <img src="assets/images/08-5-conservation.webp" alt="" loading="lazy" decoding="async">
+            <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/08-5-conservation-desktop.webp 900w" sizes="(max-width: 48em) 100vw, 50vw">
+        <source type="image/jpeg" srcset="assets/images/08-5-conservation-desktop.jpg 900w" sizes="(max-width: 48em) 100vw, 50vw">
+        <img src="assets/images/08-5-conservation-desktop.jpg" alt="" loading="lazy" decoding="async" width="900" height="1125">
+      </picture>
           </div>
           <div class="thread-spread__copy">
             <h3 class="thread-spread__label">Conservation</h3>
@@ -868,7 +968,11 @@
       <div class="tab-panel-editorial" data-tab="culture" role="tabpanel">
         <div class="thread-spread">
           <div class="thread-spread__image">
-            <img src="assets/images/08-5-culture.webp" alt="" loading="lazy" decoding="async">
+            <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/08-5-culture-mobile.webp 960w, assets/images/08-5-culture-desktop.webp 1920w" sizes="(max-width: 48em) 100vw, 50vw">
+        <source type="image/jpeg" srcset="assets/images/08-5-culture-mobile.jpg 960w, assets/images/08-5-culture-desktop.jpg 1920w" sizes="(max-width: 48em) 100vw, 50vw">
+        <img src="assets/images/08-5-culture-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1280">
+      </picture>
           </div>
           <div class="thread-spread__copy">
             <h3 class="thread-spread__label">Culture</h3>
@@ -885,7 +989,11 @@
       <div class="tab-panel-editorial" data-tab="education" role="tabpanel">
         <div class="thread-spread">
           <div class="thread-spread__image">
-            <img src="assets/images/08-5-education.webp" alt="" loading="lazy" decoding="async">
+            <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/08-5-education-desktop.webp 900w" sizes="(max-width: 48em) 100vw, 50vw">
+        <source type="image/jpeg" srcset="assets/images/08-5-education-desktop.jpg 900w" sizes="(max-width: 48em) 100vw, 50vw">
+        <img src="assets/images/08-5-education-desktop.jpg" alt="" loading="lazy" decoding="async" width="900" height="1125">
+      </picture>
           </div>
           <div class="thread-spread__copy">
             <h3 class="thread-spread__label">Education</h3>
@@ -1111,7 +1219,11 @@
       </div>
 
       <div class="timeline__horizon" aria-hidden="true">
-        <img src="assets/images/11-horizon.webp" alt="" loading="lazy" decoding="async">
+        <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/11-horizon-mobile.webp 960w, assets/images/11-horizon-desktop.webp 1920w" sizes="100vw">
+        <source type="image/jpeg" srcset="assets/images/11-horizon-mobile.jpg 960w, assets/images/11-horizon-desktop.jpg 1920w" sizes="100vw">
+        <img src="assets/images/11-horizon-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1080">
+      </picture>
       </div>
     </div>
   </section>
@@ -1122,7 +1234,11 @@
        ===================================================== -->
   <section class="section" id="sec-big-idea" data-slide="19" data-mode="immersive" data-image="full-bleed" aria-labelledby="big-idea-quote">
     <div class="full-bleed full-bleed--deep-dim" aria-hidden="true">
-      <img src="assets/images/Camels-Platinum-27.webp" alt="" loading="lazy" decoding="async" style="object-position: center 60%;">
+      <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/Camels-Platinum-27-mobile.webp 960w, assets/images/Camels-Platinum-27-desktop.webp 1800w" sizes="100vw">
+        <source type="image/jpeg" srcset="assets/images/Camels-Platinum-27-mobile.jpg 960w, assets/images/Camels-Platinum-27-desktop.jpg 1800w" sizes="100vw">
+        <img src="assets/images/Camels-Platinum-27-desktop.jpg" alt="" loading="lazy" decoding="async" width="1800" height="1200" style="object-position: center 60%;">
+      </picture>
     </div>
 
     <div class="section__meta meta">
@@ -1182,7 +1298,11 @@
        ===================================================== -->
   <section class="section" id="sec-closing" data-slide="21" data-mode="immersive" data-image="full-bleed" aria-labelledby="closing-headline">
     <div class="full-bleed full-bleed--soft-dim" aria-hidden="true">
-      <img src="assets/images/13-closing.webp" alt="" loading="lazy" decoding="async" style="object-position: center 65%;">
+      <picture class="responsive-image">
+        <source type="image/webp" srcset="assets/images/13-closing-mobile.webp 960w, assets/images/13-closing-desktop.webp 1749w" sizes="100vw">
+        <source type="image/jpeg" srcset="assets/images/13-closing-mobile.jpg 960w, assets/images/13-closing-desktop.jpg 1749w" sizes="100vw">
+        <img src="assets/images/13-closing-desktop.jpg" alt="" loading="lazy" decoding="async" width="1749" height="2624" style="object-position: center 65%;">
+      </picture>
     </div>
 
     <div class="section__meta meta">

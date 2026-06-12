@@ -31,6 +31,17 @@
   -webkit-user-select: none;
 }
 
+.responsive-image {
+  display: block;
+}
+
+.responsive-image > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 /* =========================================================
  * Slide viewport — 16:9 letterbox wrapper (added by deck.js)
  *
@@ -439,6 +450,7 @@
 }
 
 .problem__side > img,
+.problem__side > picture,
 .problem__side > .problem__bg {
   position: absolute;
   inset: 0;
@@ -720,6 +732,7 @@
 }
 
 .compare-grid__large-cell > img,
+.compare-grid__large-cell > picture,
 .compare-grid__large-cell > .compare-grid__bg {
   position: absolute;
   inset: 0;
@@ -857,6 +870,7 @@ body[data-review="true"] .compare-grid__large-cell .image-placeholder-note {
   background: linear-gradient(to bottom, #d8c7a4 0%, #b89968 60%, #8b6a44 100%);
 }
 
+.timeline__horizon picture,
 .timeline__horizon img {
   width: 100%;
   height: 100%;
@@ -899,6 +913,7 @@ body[data-review="true"] .compare-grid__large-cell .image-placeholder-note {
   overflow: hidden;
 }
 
+.magazine-cell__image picture,
 .magazine-cell__image img {
   width: 100%;
   height: 100%;
@@ -2114,6 +2129,7 @@ body[data-rotate-hint="portrait"] .rotate-hint__icon--rotate {
 }
 
 .collections-intro__side > img,
+.collections-intro__side > picture,
 .collections-intro__side > .collections-intro__bg {
   position: absolute;
   inset: 0;

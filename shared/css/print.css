@@ -88,7 +88,15 @@
   .full-bleed picture,
   .full-bleed img,
   .split__image img,
-  .split__image picture {
+  .split__image picture,
+  .problem__side picture,
+  .problem__side img,
+  .compare-grid__large-cell picture,
+  .compare-grid__large-cell img,
+  .collections-intro__side picture,
+  .collections-intro__side img,
+  .thread-spread__image picture,
+  .thread-spread__image img {
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }

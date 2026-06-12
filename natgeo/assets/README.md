@@ -5,15 +5,17 @@ Image manifest for the Hero × Nat Geo deck. Every image used in the build is li
 ## Image discipline (PRD 9.7 / locked B1 decisions)
 
 - Placeholder imagery acceptable in B1. CSS gradients in `shared/css/components.css` (`.full-bleed--placeholder`, `.split__image--placeholder`) stand in until real assets arrive.
-- Every image: WebP primary + JPG fallback (PRD 4.2). Currently JPG only — WebP variants to be generated when real imagery is commissioned.
-- Lazy-load below the fold. Cover (slide 1) uses `loading="eager"`. All others `loading="lazy"`.
+- Every image is now served through `<picture>` with WebP primary + JPG fallback (PRD 4.2).
+- Responsive variants generated 2026-06-12: `*-desktop` (max 1920px wide, no upscaling) and `*-mobile` (max 960px wide, no upscaling). Cover uses the 58KB desktop WebP only to avoid duplicate responsive fetches.
+- Original `.webp` files are retained as source material; the deck HTML references the generated `*-desktop` / `*-mobile` variants.
+- Lazy-load below the fold. Cover (slide 1) uses `loading="eager"` with `fetchpriority="high"`. All others use `loading="lazy"`.
 - Mobile-first crop preserves the dominant compositional element in portrait orientation.
 - Documentary register only. Never advertising-lit. No vehicles in frame (PRD 6.5). No people in cover, vision, or Arabia slides.
-- Target weight: cover under 800KB; each subsequent image under 600KB. (Current vision image is 1.1MB — acceptable for B1 placeholder; will be re-sized or replaced with commissioned imagery for final.)
+- Target weight: cover under 800KB; each subsequent image under 600KB. Current desktop WebP set is ~2.86MB total; mobile WebP set is ~1.09MB total.
 
-## Image status (2026-05-14)
+## Image status (updated 2026-06-12)
 
-**All 14 slots now wired with real photography.** 13 from Hero's own Platinum Heritage / DDCR archive, 1 kept Unsplash (Slide 3 vision, approved by Jcamp). All images compressed via sharp (mozjpeg) — total ~2.5MB for all wired images.
+**All image slots now use responsive generated assets.** The v5 deck references 30 `<picture>` blocks with WebP + JPG sources. Large archive originals remain in `natgeo/assets/images/` for traceability but are no longer loaded by the deck.
 
 | Slot | Source | Status |
 |---|---|---|

@@ -12,7 +12,7 @@
  *      and `?review=1` query string. Persisted in localStorage.
  *   5. Lazy-load below-the-fold images via IntersectionObserver.
  *   6. Briefly show then fade the keyboard-hint chip on first load.
- *   7. Splash screen — progress bar while images load, Begin button triggers fullscreen.
+ *   7. Splash screen — progress bar while opening imagery loads, Begin button triggers fullscreen.
  *   8. Compare-grid hover interaction for Slide 8.
  */
 
@@ -335,7 +335,7 @@
   }
 
   /* -------------------------------------------------
-   * Splash screen — blocks interaction until images are ready,
+   * Splash screen — blocks interaction until opening imagery is ready,
    * then lets the user choose to enter fullscreen via the button.
    * ------------------------------------------------- */
 
@@ -346,7 +346,7 @@
     var label    = doc.getElementById("splashLoadingLabel");
     if (!splash || !btn) return;
 
-    var imgs  = qsa("img", doc.body);
+    var imgs  = qsa("img[loading='eager'], img[data-splash-preload='true']", doc.body);
     var total = imgs.length || 1;
     var done  = 0;
     var ready = false;
@@ -368,32 +368,36 @@
       if (done >= total) enable();
     }
 
-    /* Force every image — including off-screen lazy ones — to fetch AND
-     * decode now, so no slide stutters when it first becomes visible.
-     * img.decode() resolves only once the bitmap is paint-ready. */
+    /* Wait only for the opening image set. Below-fold imagery must stay
+     * lazy; otherwise a 21-slide deck pays the full image cost up front. */
+    if (!imgs.length) enable();
     imgs.forEach(function (img) {
-      try { img.loading = "eager"; } catch (e) {}
-
+      var settled = false;
       function settle() { tick(); }
+      function settleOnce() {
+        if (settled) return;
+        settled = true;
+        settle();
+      }
 
       if (typeof img.decode === "function") {
-        img.decode().then(settle, function () {
+        img.decode().then(settleOnce, function () {
           /* decode() can reject before load resolves or on detached nodes;
            * fall back to the load/error events. */
-          if (img.complete) { settle(); return; }
-          img.addEventListener("load",  settle, { once: true });
-          img.addEventListener("error", settle, { once: true });
+          if (img.complete) { settleOnce(); return; }
+          img.addEventListener("load",  settleOnce, { once: true });
+          img.addEventListener("error", settleOnce, { once: true });
         });
       } else if (img.complete) {
-        settle();
+        settleOnce();
       } else {
-        img.addEventListener("load",  settle, { once: true });
-        img.addEventListener("error", settle, { once: true });
+        img.addEventListener("load",  settleOnce, { once: true });
+        img.addEventListener("error", settleOnce, { once: true });
       }
     });
 
-    /* Safety net — never trap the user behind a slow/failed asset. */
-    var fallback = setTimeout(enable, 10000);
+    /* Safety net — never trap the user behind a slow/failed opening asset. */
+    var fallback = setTimeout(enable, 3000);
 
     btn.addEventListener("click", function () {
       clearTimeout(fallback);
