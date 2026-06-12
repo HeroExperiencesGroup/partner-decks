@@ -3,23 +3,29 @@
  * Vanilla JS, no dependencies. Mobile-first.
  *
  * Responsibilities:
- *   1. Wrap each .section in a .slide-viewport for 16:9 letterboxing.
- *   2. Keyboard navigation between sections (Arrow keys, Page Up/Down,
+ *   1. Wrap each .section in a .slide-viewport for letterboxing.
+ *   2. Lock layout: scale each section (fixed 1920×1080 design ref) to fit
+ *      the viewport uniformly — same appearance on every screen size.
+ *   3. Pinch-to-zoom: zoom into any slide, pan around, pinch back to default.
+ *      Double-tap toggles 2.5× zoom at the tap point.
+ *   4. Keyboard navigation between sections (Arrow keys, Page Up/Down,
  *      Home/End, j/k as fallback).
- *   3. Track the current section and update aria-current on the
+ *   5. Track the current section and update aria-current on the
  *      progress dots + page-meta page-number readout.
- *   4. Toggle review mode (body[data-review="true"]) on `R` keypress
+ *   6. Toggle review mode (body[data-review="true"]) on `R` keypress
  *      and `?review=1` query string. Persisted in localStorage.
- *   5. Lazy-load below-the-fold images via IntersectionObserver.
- *   6. Briefly show then fade the keyboard-hint chip on first load.
- *   7. Splash screen — progress bar while opening imagery loads, Begin button triggers fullscreen.
- *   8. Compare-grid hover interaction for Slide 8.
+ *   7. Lazy-load below-the-fold images via IntersectionObserver.
+ *   8. Briefly show then fade the keyboard-hint chip on first load.
+ *   9. Splash screen — progress bar while opening imagery loads, Begin button triggers fullscreen.
+ *  10. Compare-grid hover interaction for Slide 8.
  */
 
 (function () {
   "use strict";
 
-  var REVIEW_KEY = "partner-decks:review";
+  var REVIEW_KEY  = "partner-decks:review";
+  var DESIGN_W    = 1920;   /* design reference width  (px) */
+  var DESIGN_H    = 1080;   /* design reference height (px) */
   var doc = document;
   var html = doc.documentElement;
   var body = doc.body;
@@ -27,6 +33,7 @@
   var sections  = [];   /* .section elements — content / observation */
   var viewports = [];   /* .slide-viewport elements — scroll / snap */
   var progressLinks = [];
+  var sectionBaseScales = [];  /* letterbox scale per section, set by updateSectionScales */
 
   function ready(fn) {
     if (doc.readyState !== "loading") fn();
@@ -39,21 +46,192 @@
   }
 
   /* -------------------------------------------------
+   * Layout lock — scale each section to fit its viewport.
+   *
+   * The section is fixed at DESIGN_W × DESIGN_H in CSS.
+   * JS calculates a uniform scale factor so the entire design
+   * fits within the viewport (letterbox / pillarbox bars are
+   * handled by the slide-viewport's ink background). This means
+   * every screen sees an identical layout, just scaled.
+   * ------------------------------------------------- */
+
+  function setSectionTransform(section, lbScale, userZoom, tx, ty, animate) {
+    var combined = lbScale * userZoom;
+    var xform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + combined + ')';
+    if (animate) {
+      section.style.transition = 'transform 300ms ease-out';
+      section.style.transform = xform;
+      setTimeout(function () { section.style.transition = ''; }, 320);
+    } else {
+      section.style.transition = '';
+      section.style.transform = xform;
+    }
+  }
+
+  function updateSectionScales() {
+    if (!viewports.length) return;
+    viewports.forEach(function (vp, i) {
+      var s = sections[i];
+      if (!s) return;
+      var scale = Math.min(vp.clientWidth / DESIGN_W, vp.clientHeight / DESIGN_H);
+      sectionBaseScales[i] = scale;
+      var userZoom = parseFloat(s.dataset.userZoom || '1');
+      var tx = parseFloat(s.dataset.userTx || '0');
+      var ty = parseFloat(s.dataset.userTy || '0');
+      setSectionTransform(s, scale, userZoom, tx, ty, false);
+    });
+  }
+
+  /* -------------------------------------------------
+   * Pinch-to-zoom — per slide-viewport touch handler.
+   *
+   * Pinch-out  → zoom in around the pinch centroid.
+   * 1-finger   → pan while zoomed; navigation while not.
+   * Pinch-in / zoom < 1.1 → snap back to letterbox scale.
+   * Double-tap → toggle 2.5× zoom at tap point / reset.
+   *
+   * While zoomed, touchmove preventDefault stops the deck's
+   * scroll-snap from triggering slide navigation.
+   * ------------------------------------------------- */
+
+  function initPinchZoom(vp, sectionIdx) {
+    var section = sections[sectionIdx];
+    if (!section) return;
+
+    var startDist = 0, startZoom = 1, startTx = 0, startTy = 0;
+    var startCx = 0, startCy = 0;
+    var isPinching = false, isPanning = false;
+    var lastPanX = 0, lastPanY = 0;
+    var lastTapEndTime = 0;
+
+    function getZoom() { return parseFloat(section.dataset.userZoom || '1'); }
+    function getTx()   { return parseFloat(section.dataset.userTx   || '0'); }
+    function getTy()   { return parseFloat(section.dataset.userTy   || '0'); }
+    function getLb()   { return sectionBaseScales[sectionIdx] || 1; }
+    function isZoomed(){ return getZoom() > 1.05; }
+
+    function applyZoom(zoom, tx, ty, animate) {
+      var lb   = getLb();
+      var vpW  = vp.clientWidth;
+      var vpH  = vp.clientHeight;
+      zoom = Math.max(1, Math.min(zoom, 8));
+      /* Clamp translation so the scaled slide never drifts fully off-screen */
+      var maxTx = Math.max(0, (DESIGN_W * lb * zoom - vpW)  / 2);
+      var maxTy = Math.max(0, (DESIGN_H * lb * zoom - vpH)  / 2);
+      tx = Math.max(-maxTx, Math.min(maxTx, tx));
+      ty = Math.max(-maxTy, Math.min(maxTy, ty));
+      section.dataset.userZoom = zoom;
+      section.dataset.userTx   = tx;
+      section.dataset.userTy   = ty;
+      setSectionTransform(section, lb, zoom, tx, ty, animate);
+    }
+
+    function resetZoom() {
+      section.dataset.userZoom = '1';
+      section.dataset.userTx   = '0';
+      section.dataset.userTy   = '0';
+      setSectionTransform(section, getLb(), 1, 0, 0, true);
+    }
+
+    function touchDist(t) {
+      var dx = t[1].clientX - t[0].clientX;
+      var dy = t[1].clientY - t[0].clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    function touchMid(t) {
+      return {
+        x: (t[0].clientX + t[1].clientX) / 2,
+        y: (t[0].clientY + t[1].clientY) / 2
+      };
+    }
+
+    vp.addEventListener('touchstart', function (e) {
+      var t = e.touches;
+      if (t.length === 2) {
+        isPinching = true;
+        isPanning  = false;
+        startDist  = touchDist(t);
+        startZoom  = getZoom();
+        startTx    = getTx();
+        startTy    = getTy();
+        var m = touchMid(t);
+        startCx = m.x;
+        startCy = m.y;
+      } else if (t.length === 1) {
+        isPinching = false;
+        lastPanX   = t[0].clientX;
+        lastPanY   = t[0].clientY;
+        isPanning  = isZoomed();
+        /* double-tap detection: compare against last touchend time */
+        var now = Date.now();
+        if (now - lastTapEndTime < 280) {
+          lastTapEndTime = 0; /* reset so triple-tap doesn't fire again */
+          if (isZoomed()) {
+            resetZoom();
+          } else {
+            /* Zoom 2.5× around the tap point */
+            var cx = t[0].clientX, cy = t[0].clientY;
+            var vpW = vp.clientWidth, vpH = vp.clientHeight;
+            var z   = 2.5;
+            applyZoom(z, (cx - vpW / 2) * (1 - z), (cy - vpH / 2) * (1 - z), true);
+          }
+        }
+      }
+    }, { passive: true });
+
+    vp.addEventListener('touchmove', function (e) {
+      var t = e.touches;
+      if (t.length === 2 && isPinching) {
+        e.preventDefault(); /* stop scroll-snap during pinch */
+        var d     = touchDist(t);
+        var zoom  = startZoom * (d / startDist);
+        var ratio = zoom / startZoom;
+        var vpW   = vp.clientWidth, vpH = vp.clientHeight;
+        /* Zoom around the initial pinch centroid */
+        var tx = startTx * ratio + (startCx - vpW / 2) * (1 - ratio);
+        var ty = startTy * ratio + (startCy - vpH / 2) * (1 - ratio);
+        applyZoom(zoom, tx, ty, false);
+      } else if (t.length === 1 && isPanning) {
+        e.preventDefault(); /* stop scroll-snap while panning a zoomed slide */
+        var dx = t[0].clientX - lastPanX;
+        var dy = t[0].clientY - lastPanY;
+        lastPanX = t[0].clientX;
+        lastPanY = t[0].clientY;
+        applyZoom(getZoom(), getTx() + dx, getTy() + dy, false);
+      }
+    }, { passive: false });
+
+    vp.addEventListener('touchend', function (e) {
+      if (e.touches.length < 2) { isPinching = false; }
+      if (e.touches.length === 0) {
+        isPanning      = false;
+        lastTapEndTime = Date.now(); /* record for double-tap detection */
+        if (getZoom() < 1.1) { resetZoom(); }
+      }
+    }, { passive: true });
+  }
+
+  /* -------------------------------------------------
    * 16:9 viewport wrappers
    *
    * Wraps every .section in a .slide-viewport div.
    * The viewport is the scroll-snap target (100dvh).
-   * The section inside is sized to 16:9 via CSS.
+   * The section inside is fixed at 1920×1080 and scaled
+   * by updateSectionScales() to fit the current viewport.
    * ------------------------------------------------- */
 
   function wrapSections() {
-    sections.forEach(function (s) {
+    sections.forEach(function (s, i) {
       var vp = doc.createElement("div");
       vp.className = "slide-viewport";
       s.parentNode.insertBefore(vp, s);
       vp.appendChild(s);
     });
     viewports = qsa(".slide-viewport", deck);
+    viewports.forEach(function (vp, i) {
+      initPinchZoom(vp, i);
+    });
   }
 
   /* -------------------------------------------------
@@ -532,6 +710,14 @@
     progressLinks = qsa(".deck-progress a");
 
     wrapSections();                /* must run before nav setup */
+    updateSectionScales();         /* apply initial letterbox scale to every section */
+
+    /* Re-scale on viewport resize (orientation change, browser resize, etc.) */
+    var resizeTimer;
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(updateSectionScales, 80);
+    });
 
     window.addEventListener("keydown", handleKey);
     initTopNav();

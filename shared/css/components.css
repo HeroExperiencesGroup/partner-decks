@@ -43,12 +43,14 @@
 }
 
 /* =========================================================
- * Slide viewport — 16:9 letterbox wrapper (added by deck.js)
+ * Slide viewport — locked-layout letterbox wrapper (added by deck.js)
  *
  * Each section is wrapped in a .slide-viewport by JS on init.
  * The viewport is the scroll-snap target (100dvh). The section
- * inside is constrained to 16:9 so wide/narrow screens see
- * letterbox bars in --ink rather than stretched content.
+ * inside is fixed at 1920×1080 (design reference) and scaled
+ * uniformly by deck.js so every device sees an identical layout
+ * — letterbox / pillarbox bars appear in --ink when needed.
+ * Pinch-to-zoom is also handled by deck.js per viewport.
  * ========================================================= */
 
 .slide-viewport {
@@ -63,11 +65,15 @@
   overflow: hidden;
 }
 
-/* Section inside viewport: 16:9 constrained box */
+/* Section inside viewport: fixed 1920×1080 design reference.
+ * JS in deck.js applies transform: scale() to fit the current viewport,
+ * locking the layout so every screen sees identical proportions.
+ * Pinch-to-zoom is handled in deck.js (initPinchZoom). */
 .slide-viewport > .section {
-  width: min(100vw, calc(100dvh * 16 / 9));
-  height: min(100dvh, calc(100vw * 9 / 16));
+  width: 1920px;
+  height: 1080px;
   flex-shrink: 0;
+  transform-origin: center center;
 }
 
 /* =========================================================
