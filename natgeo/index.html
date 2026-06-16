@@ -11,6 +11,7 @@
 
 <link rel="preload" href="../shared/fonts/playfair-display-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../shared/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../shared/fonts/newsreader-400-italic.woff2" as="font" type="font/woff2" crossorigin>
 
 <link rel="stylesheet" href="../shared/css/tokens.css">
 <link rel="stylesheet" href="../shared/css/base.css">
@@ -58,7 +59,7 @@
     <h1 class="splash__title" id="splashTitle">The Desert Expedition</h1>
     <p class="splash__subtitle">A partnership proposal</p>
     <div class="splash__divider" aria-hidden="true"></div>
-    <p class="splash__hint-text">This presentation is interactive — navigate with arrow keys, scroll, or swipe.</p>
+    <p class="splash__hint-text">This presentation is interactive. Navigate with arrow keys, scroll, or swipe.</p>
     <div class="splash__loader" aria-label="Loading images" id="splashLoader">
       <div class="splash__loader-bar" id="splashLoaderBar"></div>
     </div>
@@ -110,9 +111,17 @@
     </div>
 
     <div class="section__foot">
-      <div class="cover__logos" aria-label="Partner wordmarks">
-        <span class="cover__logo">National Geographic</span>
-        <span class="cover__logo">Hero Experiences</span>
+      <!-- Partner logo lockups (dark-background variants). NatGeo + Hero
+           official marks; white wordmarks sit on the dimmed slide footer. -->
+      <div class="cover__logos" aria-label="Partner brandmarks">
+        <picture class="brandmark__logo brandmark__logo--natgeo">
+          <source type="image/webp" srcset="assets/images/natgeo-logo.webp">
+          <img src="assets/images/natgeo-logo.png" alt="National Geographic" width="400" height="119" decoding="async">
+        </picture>
+        <picture class="brandmark__logo brandmark__logo--hero">
+          <source type="image/webp" srcset="assets/images/hero-logo.webp">
+          <img src="assets/images/hero-logo.png" alt="Hero Experiences Group" width="400" height="155" decoding="async">
+        </picture>
       </div>
     </div>
   </section>
@@ -190,7 +199,7 @@
     <div class="section__inner">
       <div class="overlay">
         <h2 id="vision-headline" class="headline headline--lg headline--bone">One expedition. Two access levels. One ethos.</h2>
-        <p class="caption">A co-created experience between National Geographic and Hero Experiences Group — delivered through the Heritage Collection (documentary, communal, cultural) and the Platinum Collection (private, 1:2-staffed, Michelin-curated). Both inside the UAE's first national park. Both grounded in Bedouin tradition. Both worthy of the Arabian desert.</p>
+        <p class="caption">A co-created experience between National Geographic and Hero Experiences Group, delivered through the Heritage Collection (documentary, communal, cultural) and the Platinum Collection (private, 1:2-staffed, Michelin-curated). Both inside the UAE's first national park. Both grounded in Bedouin tradition. Both worthy of the Arabian desert.</p>
       </div>
     </div>
   </section>
@@ -225,7 +234,7 @@
       <div class="overlay overlay--lower-band">
         <h2 id="arabia-headline" class="headline headline--lg headline--bone">The desert is older than the city around it.</h2>
         <div class="body">
-          <p>The Arabian desert holds 12,000 years of human cultural memory and one of the most distinctive arid ecosystems on Earth. The Bedouin tradition that mapped it is still alive. The wildlife that defined it — oryx, gazelle, sand fox — is returning. This landscape predates Dubai by millennia. It is the heritage Dubai is built on top of.</p>
+          <p>The Arabian desert holds 12,000 years of human cultural memory and one of the most distinctive arid ecosystems on Earth. The Bedouin tradition that mapped it is still alive. The wildlife that defined it (oryx, gazelle, sand fox) is returning. This landscape predates Dubai by millennia. It is the heritage Dubai is built on top of.</p>
         </div>
       </div>
     </div>
@@ -258,7 +267,7 @@
         <li>Unmatched storytelling power</li>
         <li>A mission rooted in conservation and education</li>
       </ul>
-      <p class="pull pull--with-rule">This is not branding. This is co-creation of a new category standard — across the access tiers Nat Geo's travel portfolio already accommodates.</p>
+      <p class="pull pull--with-rule">This is not branding. This is co-creation of a new category standard, across the access tiers Nat Geo's travel portfolio already accommodates.</p>
     </div>
   </section>
 
@@ -294,7 +303,7 @@
         <div class="split__copy">
           <h2 id="hero-headline" class="headline">We already operate at the standard.</h2>
           <div class="body">
-            <p>Hero Experiences Group operates Dubai's only ecotourism-certified desert safari, inside the UAE's first national park — the Dubai Desert Conservation Reserve. Exclusive operating access on Royal Family private property within the reserve. Camps run on solar power. Guides speak 9 languages. The Platinum Collection runs at a 1:2 staff-to-guest ratio. Dining curated by Michelin-starred Chef Claudio Filippone.</p>
+            <p>Hero Experiences Group operates Dubai's only ecotourism-certified desert safari, inside the UAE's first national park, the Dubai Desert Conservation Reserve. Exclusive operating access on Royal Family private property within the reserve. Camps run on solar power. Guides speak 9 languages. The Platinum Collection runs at a 1:2 staff-to-guest ratio. Dining curated by Michelin-starred Chef Claudio Filippone.</p>
           </div>
         </div>
         <div class="split__image" aria-hidden="true">
@@ -340,18 +349,18 @@
         <div class="museum__group">
           <p class="section-label">Travel &amp; hospitality</p>
           <ul class="list list--ruled">
-            <li>World Travel Awards — Middle East's Leading Desert Safari Company, 8 wins between 2016 and 2024</li>
-            <li>World Travel Awards — Leading Balloon Ride Operator (Middle East 2020–2025; World's 2020–2023)</li>
-            <li>Layalina Editor's Choice Award — The Dubai Balloon, 2024</li>
-            <li>Luxury Lifestyle Awards — Luxury Travel Dubai, 2025</li>
-            <li>TripAdvisor — Certificate of Excellence 2013–2019 (Hall of Fame); Travelers' Choice 2020–2025</li>
+            <li>World Travel Awards: Middle East's Leading Desert Safari Company, 8 wins between 2016 and 2024</li>
+            <li>World Travel Awards: Leading Balloon Ride Operator (Middle East 2020–2025; World's 2020–2023)</li>
+            <li>Layalina Editor's Choice Award: The Dubai Balloon, 2024</li>
+            <li>Luxury Lifestyle Awards: Luxury Travel Dubai, 2025</li>
+            <li>TripAdvisor: Certificate of Excellence 2013–2019 (Hall of Fame); Travelers' Choice 2020–2025</li>
           </ul>
         </div>
 
         <div class="museum__group">
           <p class="section-label">Sustainability &amp; conservation</p>
           <ul class="list list--ruled">
-            <li>Gulf Sustainability &amp; CSR Awards — Winner, 2018</li>
+            <li>Gulf Sustainability &amp; CSR Awards: Winner, 2018</li>
             <li>International Sustainable Luxury Awards, 2023</li>
             <li>Dubai Sustainable Tourism · Dubai Green Tourism (Dubai DET certifications)</li>
           </ul>
@@ -574,13 +583,13 @@
             <div class="compare-grid__large">
               <div class="compare-grid__large-cell is-active" data-pair="1">
                 <picture class="responsive-image">
-        <source type="image/webp" srcset="assets/images/Practice_RangeRovers-mobile.webp 960w, assets/images/Practice_RangeRovers-desktop.webp 1920w" sizes="(max-width: 48em) 100vw, 50vw">
-        <source type="image/jpeg" srcset="assets/images/Practice_RangeRovers-mobile.jpg 960w, assets/images/Practice_RangeRovers-desktop.jpg 1920w" sizes="(max-width: 48em) 100vw, 50vw">
-        <img src="assets/images/Practice_RangeRovers-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1204">
+        <source type="image/webp" srcset="assets/images/Practice_Defender-Platinum-mobile.webp 960w, assets/images/Practice_Defender-Platinum-desktop.webp 1584w" sizes="(max-width: 48em) 100vw, 50vw">
+        <source type="image/jpeg" srcset="assets/images/Practice_Defender-Platinum-mobile.jpg 960w, assets/images/Practice_Defender-Platinum-desktop.jpg 1584w" sizes="(max-width: 48em) 100vw, 50vw">
+        <img src="assets/images/Practice_Defender-Platinum-desktop.jpg" alt="" loading="lazy" decoding="async" width="1584" height="993">
       </picture>
                 <div class="compare-grid__large-caption">
-                  <p class="compare-grid__large-caption-lead">Range Rovers in the conservation reserve</p>
-                  <p class="compare-grid__large-caption-sub">Observing wildlife — never disturbing it</p>
+                  <p class="compare-grid__large-caption-lead">Land Rover Defenders in the conservation reserve</p>
+                  <p class="compare-grid__large-caption-sub">Observing wildlife, never disturbing it</p>
                 </div>
               </div>
               <div class="compare-grid__large-cell" data-pair="2">
@@ -691,12 +700,12 @@
           <tr>
             <td class="spec-table__attribute">Terrain access</td>
             <td class="spec-table__typical">Public desert</td>
-            <td class="spec-table__hero">Dubai Desert Conservation Reserve — UAE's first national park; Royal Family private-property access within the reserve</td>
+            <td class="spec-table__hero">Dubai Desert Conservation Reserve, UAE's first national park; Royal Family private-property access within the reserve</td>
           </tr>
           <tr>
             <td class="spec-table__attribute">Driving practice</td>
             <td class="spec-table__typical">Dune-bashing</td>
-            <td class="spec-table__hero">Gentle-drive policy — only operator in Dubai to refuse dune-bashing</td>
+            <td class="spec-table__hero">Gentle-drive policy; only operator in Dubai to refuse dune-bashing</td>
           </tr>
           <tr>
             <td class="spec-table__attribute">Guide qualification</td>
@@ -871,7 +880,7 @@
 
     <div class="section__inner">
       <div class="overlay overlay--lower-band">
-        <h2 id="solution-headline" class="headline headline--lg headline--bone">A new benchmark: the National Geographic Desert Expedition — UAE.</h2>
+        <h2 id="solution-headline" class="headline headline--lg headline--bone">A new benchmark: the National Geographic Desert Expedition, UAE.</h2>
         <div class="body body--wide" style="margin-top: var(--space-5);">
           <p>A layered expedition, not a tour</p>
           <p>A standard delivered today, at two access tiers</p>
@@ -903,11 +912,11 @@
     <div class="section__inner">
       <h2 id="framework-headline" class="headline headline--lg">Five pillars. One expedition. Two access levels.</h2>
       <ul class="list list--framework" style="margin-top: var(--space-7);">
-        <li><strong>Exploration</strong> — guided by trained Conservation Guides; geology, ecology, navigation; available at both tiers</li>
-        <li><strong>Wildlife and conservation</strong> — Arabian oryx, gazelle, and desert fox tracking; gentle-drive policy; partnership with DDCR</li>
-        <li><strong>Cultural heritage</strong> — Bedouin tradition and falconry as living practice, not performance; not actors</li>
-        <li><strong>Immersion</strong> — silence zones; night-sky astronomy with telescope-led talks (Private Night Safari product); protected reserve</li>
-        <li><strong>Storytelling</strong> — each expedition framed as documentary; guests as participants, not spectators</li>
+        <li><strong>Exploration</strong> Guided by trained Conservation Guides; geology, ecology, navigation; available at both tiers</li>
+        <li><strong>Wildlife and conservation</strong> Arabian oryx, gazelle, and desert fox tracking; gentle-drive policy; partnership with DDCR</li>
+        <li><strong>Cultural heritage</strong> Bedouin tradition and falconry as living practice, not performance; not actors</li>
+        <li><strong>Immersion</strong> Silence zones; night-sky astronomy with telescope-led talks (Private Night Safari product); protected reserve</li>
+        <li><strong>Storytelling</strong> Each expedition framed as documentary; guests as participants, not spectators</li>
       </ul>
       <p class="footnote">Aligned with the values Nat Geo applies across its travel partnerships: conservation, authenticity, sustainability, guest experience, and community benefit.</p>
     </div>
@@ -976,7 +985,7 @@
           </div>
           <div class="thread-spread__copy">
             <h3 class="thread-spread__label">Culture</h3>
-            <p class="thread-spread__body">Bedouin storytellers, falconers, and guides — not actors. The traditions guests encounter are still practised by the families that practise them. Living heritage, not performance.</p>
+            <p class="thread-spread__body">Bedouin storytellers, falconers, and guides, not actors. The traditions guests encounter are still practised by the families that practise them. Living heritage, not performance.</p>
             <ul class="thread-spread__facts">
               <li>Bedouin host families · 9-language guide capability</li>
               <li>Falconry as practice, not show</li>
@@ -997,7 +1006,7 @@
           </div>
           <div class="thread-spread__copy">
             <h3 class="thread-spread__label">Education</h3>
-            <p class="thread-spread__body">Each expedition framed as field learning. Geology, ecology, navigation, astronomy, anthropology — taught by domain practitioners, not narrators. 500,000+ visitors connected to date.</p>
+            <p class="thread-spread__body">Each expedition framed as field learning. Geology, ecology, navigation, astronomy, anthropology, taught by domain practitioners, not narrators. 500,000+ visitors connected to date.</p>
             <ul class="thread-spread__facts">
               <li>Field learning · domain practitioners</li>
               <li>Telescope-led astronomy (Private Night Safari)</li>
@@ -1149,9 +1158,9 @@
     <div class="section__inner">
       <h2 id="commercial-headline" class="headline headline--lg">What this opens for Nat Geo.</h2>
       <ul class="list" style="margin-top: var(--space-7);">
-        <li>Entry into ultra-premium experiential travel in the GCC at two access tiers — broadening the addressable audience</li>
+        <li>Entry into ultra-premium experiential travel in the GCC at two access tiers, broadening the addressable audience</li>
         <li>A flagship product family in one of the world's top tourism hubs</li>
-        <li>A content pipeline: documentary, digital, editorial, education — drawn from a full range of experience types</li>
+        <li>A content pipeline drawn from a full range of experience types: documentary, digital, editorial, education</li>
         <li>A scalable model: UAE → Saudi Arabia → arid landscapes worldwide</li>
         <li>A licensing/royalty model that compounds across tiers, not a single SKU</li>
       </ul>
@@ -1187,7 +1196,7 @@
 
       <div class="tab-panel-editorial is-active" data-tab="codesign" role="tabpanel">
         <h3 class="timeline__label">Co-design with Nat Geo experts</h3>
-        <p class="body body--wide" style="margin-top: var(--space-4);">Experience framework developed with Nat Geo experts across both tiers. Scientific and cultural validation. Editorial discipline applied to every guest-facing element — guide briefings, narrative arcs, content delivery, photography standards.</p>
+        <p class="body body--wide" style="margin-top: var(--space-4);">Experience framework developed with Nat Geo experts across both tiers. Scientific and cultural validation. Editorial discipline applied to every guest-facing element: guide briefings, narrative arcs, content delivery, photography standards.</p>
         <ul class="list list--ruled" style="margin-top: var(--space-5);">
           <li>Cross-tier expedition framework developed jointly</li>
           <li>Scientific and cultural advisory panel convened</li>
@@ -1200,8 +1209,8 @@
         <h3 class="timeline__label">Pilot launch (Dubai), at both access levels</h3>
         <p class="body body--wide" style="margin-top: var(--space-4);">Limited-capacity, invitation-only flagship launch at both Heritage and Platinum access levels. Validate experience design, measure guest response, refine before scaling.</p>
         <ul class="list list--ruled" style="margin-top: var(--space-5);">
-          <li>Heritage-tier pilot programme — communal, documentary, cultural</li>
-          <li>Platinum-tier pilot programme — private, 1:2-staffed, Michelin-curated</li>
+          <li>Heritage-tier pilot programme: communal, documentary, cultural</li>
+          <li>Platinum-tier pilot programme: private, 1:2-staffed, Michelin-curated</li>
           <li>Documentation pipeline live (photo, film, editorial)</li>
           <li>Post-pilot evaluation against editorial and commercial criteria</li>
         </ul>
@@ -1286,9 +1295,9 @@
     <div class="section__inner" style="text-align: center;">
       <h2 id="ask-headline" class="headline headline--lg" style="margin-inline: auto;">The proposal.</h2>
       <blockquote class="declaration" style="margin-top: var(--space-7); max-width: 38ch;">
-        We are asking National Geographic to enter a structured co-design process with Hero Experiences — to define, validate, and pilot the first National Geographic desert expedition product family in the UAE, across the Heritage and Platinum access tiers.
+        We are asking National Geographic to enter a structured co-design process with Hero Experiences, to define, validate, and pilot the first National Geographic desert expedition product family in the UAE, across the Heritage and Platinum access tiers.
       </blockquote>
-      <p class="close-line" style="margin-inline: auto; margin-top: var(--space-7); padding-top: var(--space-5); border-top: var(--rule-hairline) solid var(--rule-fine); max-width: 30ch;">A pilot. A standard. A new category — co-created, across two access levels.</p>
+      <p class="close-line" style="margin-inline: auto; margin-top: var(--space-7); padding-top: var(--space-5); border-top: var(--rule-hairline) solid var(--rule-fine); max-width: 30ch;">A pilot. A standard. A new category, co-created across two access levels.</p>
     </div>
   </section>
 
@@ -1334,9 +1343,17 @@
     </div>
 
     <div class="section__foot">
-      <div class="cover__logos" aria-label="Partner wordmarks">
-        <span class="cover__logo">National Geographic</span>
-        <span class="cover__logo">Hero Experiences</span>
+      <!-- Partner logo lockups (dark-background variants). NatGeo + Hero
+           official marks; white wordmarks sit on the dimmed slide footer. -->
+      <div class="cover__logos" aria-label="Partner brandmarks">
+        <picture class="brandmark__logo brandmark__logo--natgeo">
+          <source type="image/webp" srcset="assets/images/natgeo-logo.webp">
+          <img src="assets/images/natgeo-logo.png" alt="National Geographic" width="400" height="119" decoding="async">
+        </picture>
+        <picture class="brandmark__logo brandmark__logo--hero">
+          <source type="image/webp" srcset="assets/images/hero-logo.webp">
+          <img src="assets/images/hero-logo.png" alt="Hero Experiences Group" width="400" height="155" decoding="async">
+        </picture>
       </div>
     </div>
   </section>
@@ -1354,13 +1371,6 @@
     <span class="top-nav__counter">01 / 21</span>
   </div>
 </nav>
-
-<div class="kbd-hint" role="note" aria-hidden="true">
-  <span><kbd>↓</kbd> Next</span>
-  <span><kbd>↑</kbd> Prev</span>
-  <span><kbd>R</kbd> Review</span>
-  <span><kbd>V</kbd> §2 image</span>
-</div>
 
 <script src="../shared/js/deck.js" defer></script>
 
