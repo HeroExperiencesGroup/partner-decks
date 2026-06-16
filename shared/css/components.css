@@ -1014,6 +1014,19 @@ body[data-review="true"] .compare-grid__large-cell .image-placeholder-note {
   text-transform: uppercase;
   color: var(--deep-sand);
   margin-bottom: var(--space-4);
+  /* theme_v2: NatGeo yellow keyline tab preceding the label */
+  position: relative;
+  padding-left: calc(var(--space-3) + var(--space-2));
+}
+
+.section-label::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.04em;
+  width: var(--space-3);
+  height: 0.85em;
+  background: var(--accent);
 }
 
 /* =========================================================
@@ -1036,6 +1049,18 @@ body[data-review="true"] .compare-grid__large-cell .image-placeholder-note {
   gap: var(--space-4);
   color: var(--text-on-dark);
   padding-bottom: var(--space-7);
+}
+
+/* theme_v2: NatGeo yellow bookend keyline above the cover/closing title
+ * (slides 1 & 21). A short solid bar — the brand's identity rectangle
+ * reduced to a keyline, sitting over the dimmed image. */
+.cover__type::before {
+  content: "";
+  display: block;
+  width: var(--space-7);
+  height: 4px;
+  background: var(--accent);
+  margin-bottom: var(--space-2);
 }
 
 .cover__type .meta { color: var(--text-on-dark); opacity: 0.85; }
@@ -1384,7 +1409,7 @@ body[data-review="true"] .section[data-mode="immersive"] .review-note--intent {
 
 .tab-btn-editorial.is-active {
   color: var(--ink);
-  border-bottom-color: var(--warm-rust);
+  border-bottom-color: var(--accent); /* theme_v2: yellow active underline */
 }
 
 /* Immersive (dark) override — colors invert for dark slides */
@@ -1401,7 +1426,7 @@ body[data-review="true"] .section[data-mode="immersive"] .review-note--intent {
 .section[data-mode="immersive"] .tab-btn-editorial.is-active {
   color: var(--text-on-dark);
   opacity: 1;
-  border-bottom-color: var(--deep-sand);
+  border-bottom-color: var(--accent); /* theme_v2: yellow pops on dark */
 }
 
 /* Tab panels — only the active one is laid out. Crossfade on switch. */
@@ -1765,7 +1790,7 @@ body[data-review="true"] .review-banner {
 .deck-progress a:hover,
 .deck-progress a:focus-visible { opacity: 0.95; width: 26px; }
 
-.deck-progress a[aria-current="true"] { opacity: 1; width: 30px; background: var(--warm-rust); }
+.deck-progress a[aria-current="true"] { opacity: 1; width: 30px; background: var(--accent); } /* theme_v2: yellow active marker */
 
 /* =========================================================
  * Rotate-to-landscape hint

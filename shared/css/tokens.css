@@ -127,6 +127,18 @@
   --rule-fine: var(--warm-rust);
   --meta: var(--deep-sand);
 
+  /* --- accent role (theme_v2 experiment) ---
+   * theme_v2 promotes the National Geographic identity yellow from the
+   * bookend-only role (PRD 6.1) to the deck's active/emphasis accent.
+   * It threads through three places only: the signature label keyline,
+   * active navigation + tab states, and the cover/closing bookend keyline.
+   * Discipline that survives the experiment: fine structural hairlines
+   * stay --rule-fine (warm rust) for legibility on the bone ground, and
+   * yellow NEVER carries body text or fills a body surface (no gold-on-
+   * black). Yellow appears as solid keylines/markers against ink or bone. */
+  --accent: var(--natgeo-yellow);
+  --accent-contrast: var(--ink); /* text/marks that sit on a yellow fill */
+
   /* --- font families (commercial fonts swap by editing these only) --- */
   --font-display: "Playfair Display", "Georgia", "Times New Roman", serif;
   --font-accent: "Newsreader", "Georgia", "Times New Roman", serif;
