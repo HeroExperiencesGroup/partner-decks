@@ -2491,3 +2491,189 @@ body[data-review="true"] .image-placeholder-note {
   background: var(--deep-sand);
   color: var(--ink);
 }
+
+/* =========================================================
+ * Locked 16:9 deck layout
+ *
+ * deck.js scales each slide from a fixed 1920x1080 canvas. In that mode,
+ * viewport-based responsive rules must not change the slide composition:
+ * a phone viewport should receive the same CSS layout as desktop, then the
+ * whole canvas is scaled/zoomed uniformly by JS.
+ * ========================================================= */
+
+html[data-deck-layout="locked"] {
+  --type-display-sm: 1.5rem;
+  --type-display: 3.5rem;
+  --type-display-lg: 5rem;
+  --type-display-xl: 6.5rem;
+  --section-padding-y: var(--space-9);
+}
+
+html[data-deck-layout="locked"] .slide-viewport > .section {
+  padding: var(--section-padding-y) var(--space-8);
+}
+
+html[data-deck-layout="locked"] .section__meta {
+  top: var(--space-6);
+  right: var(--space-6);
+  gap: var(--space-1);
+}
+
+html[data-deck-layout="locked"] .cover-label {
+  font-size: var(--type-display-lg);
+  max-width: 18ch;
+}
+
+html[data-deck-layout="locked"] .subhead {
+  font-size: var(--type-display-sm);
+}
+
+html[data-deck-layout="locked"] .cover__type {
+  gap: var(--space-4);
+  padding-bottom: var(--space-7);
+}
+
+html[data-deck-layout="locked"] .cover__logos {
+  padding-top: var(--space-5);
+}
+
+html[data-deck-layout="locked"] .compare,
+html[data-deck-layout="locked"] .problem,
+html[data-deck-layout="locked"] .collections-intro,
+html[data-deck-layout="locked"] .collections-detail,
+html[data-deck-layout="locked"] .magazine-grid,
+html[data-deck-layout="locked"] .timeline,
+html[data-deck-layout="locked"] .thread-spread,
+html[data-deck-layout="locked"] .split,
+html[data-deck-layout="locked"] .paradox {
+  gap: 0;
+}
+
+html[data-deck-layout="locked"] .compare,
+html[data-deck-layout="locked"] .problem,
+html[data-deck-layout="locked"] .collections-intro {
+  grid-template-columns: 1fr 1fr;
+}
+
+html[data-deck-layout="locked"] .compare > * + *,
+html[data-deck-layout="locked"] .problem__side + .problem__side,
+html[data-deck-layout="locked"] .collections-intro__side + .collections-intro__side {
+  border-left: var(--rule-hairline) solid var(--rule-fine);
+}
+
+html[data-deck-layout="locked"] .compare > * + * {
+  padding-left: var(--space-6);
+}
+
+html[data-deck-layout="locked"] .compare > *:not(:last-child) {
+  padding-right: var(--space-6);
+}
+
+html[data-deck-layout="locked"] .problem__side,
+html[data-deck-layout="locked"] .collections-intro__side {
+  padding: var(--space-6);
+}
+
+html[data-deck-layout="locked"] .timeline,
+html[data-deck-layout="locked"] .magazine-grid {
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-6);
+}
+
+html[data-deck-layout="locked"] .timeline {
+  gap: var(--space-7);
+}
+
+html[data-deck-layout="locked"] .thread-spread {
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: var(--space-8);
+}
+
+html[data-deck-layout="locked"] .split {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-8);
+}
+
+html[data-deck-layout="locked"] .paradox {
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--space-8);
+}
+
+html[data-deck-layout="locked"] .section[data-image="sparse"] .paradox__image {
+  margin-top: var(--space-7);
+  margin-right: var(--space-5);
+}
+
+html[data-deck-layout="locked"] .overlay--lower-band {
+  padding-bottom: var(--space-8);
+}
+
+html[data-deck-layout="locked"] .collections-detail {
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-8);
+}
+
+html[data-deck-layout="locked"] .spec-table {
+  display: table;
+  width: 100%;
+}
+
+html[data-deck-layout="locked"] .spec-table thead {
+  display: table-header-group;
+}
+
+html[data-deck-layout="locked"] .spec-table tbody {
+  display: table-row-group;
+}
+
+html[data-deck-layout="locked"] .spec-table tr {
+  display: table-row;
+  width: auto;
+  padding: 0;
+  border-top: 0;
+}
+
+html[data-deck-layout="locked"] .spec-table th,
+html[data-deck-layout="locked"] .spec-table td {
+  display: table-cell;
+  width: auto;
+}
+
+html[data-deck-layout="locked"] .spec-table thead th {
+  padding: 0 var(--space-3) var(--space-3);
+  border-bottom: var(--rule-hairline) solid var(--rule-fine);
+}
+
+html[data-deck-layout="locked"] .spec-table tbody td,
+html[data-deck-layout="locked"] .spec-table tbody th {
+  padding: var(--space-4) var(--space-3);
+  border-top: var(--rule-hairline) solid var(--rule-fine);
+}
+
+html[data-deck-layout="locked"] .spec-table tbody tr:first-child td,
+html[data-deck-layout="locked"] .spec-table tbody tr:first-child th {
+  border-top: 0;
+}
+
+html[data-deck-layout="locked"] .spec-table__attribute {
+  width: 22%;
+}
+
+html[data-deck-layout="locked"] .spec-table__typical {
+  width: 32%;
+}
+
+html[data-deck-layout="locked"] .spec-table__hero {
+  width: 46%;
+}
+
+html[data-deck-layout="locked"] .spec-table__typical::before,
+html[data-deck-layout="locked"] .spec-table__hero::before {
+  content: none;
+  display: none;
+}
+
+html[data-deck-layout="locked"] body[data-review="true"] .review-notes {
+  right: var(--space-5);
+  max-width: 18rem;
+}
