@@ -2,12 +2,13 @@
 
 **Project codename:** `hero-natgeo-deck`
 **Owner:** Jcamp (Hero Experiences)
-**Status:** Draft v5 — full restructure around the two-tier (Platinum + Heritage) thesis
-**Last updated:** May 14, 2026
+**Status:** Draft v6 — narrative pivot (branch `b2-NatGeo_x_Hero`)
+**Last updated:** June 19, 2026
 
 ## Version history
 
-- **v5 (current)** — Complete restructure. Thesis pivoted from anti-luxury documentary register to *editorial luxury*: Hero is the only Gulf operator where luxury and conservation are inseparable, delivered through two collections (Platinum + Heritage) within a single conservation mandate. Driven by higher-up feedback that v4 (a) under-represented Hero's actual brand (Platinum Heritage's own positioning is "Sustainable-Luxury Desert Safaris" / "rustic luxury"), (b) made the comparison argument too vague ("falcon, silence, fire, story" describes a register, not Hero), and (c) failed to surface concrete differentiators the leadership audience needs. Three new slides added: *The two collections* (intro), *Hero vs typical Dubai operator* (spec comparison), *Inside the collections* (experience detail spread). Slide 6 (Problem) revised from vague-noun parallel to concrete contrast. NatGeo Unique Lodges and Singita / Asilia / Bushcamp Company precedent now load-bearing in §3 — luxury permitted *if* shown through access, scarcity, and expertise rather than material signifiers. Banned-words list narrowed: *exclusive* and *private* permitted in factual constructions; *luxurious* / *bespoke* / *premium* still banned. Source pack updated: #8 ecotourism resolved as verified (self-source on Platinum Heritage site); #14 Michelin chef resolved (Chef Claudio Filippone, named on `/platinum-desert-safari`); new entries seeded for 1:2 staff-to-guest ratio (Platinum), 4-guest vehicle cap (Platinum), Royal Family private-property access, Al Maha Desert Resort partnership, gentle-drive policy, 650-cars-not-produced, 200,000-bottles-saved, 500,000-visitors-cultural-connection. §6.5 Land Rover rule relaxed: vehicles may appear in experience photography (they are inherent to both tiers); fleet-specific environmental claims with figures still restricted pending Hero confirmation. Total slide count: 21 (was 17). Phase B HTML (v4) will require partial rebuild; this is accepted as the cost of coherence over patching.
+- **v6 (current — branch `b2-NatGeo_x_Hero`)** — Full narrative pivot directed by management 2026-06-19. The deck is rewritten from a 21-slide business case into an 18-slide editorial story. The v5 *editorial luxury / two-tier* thesis is retired for this branch. The new thesis is *the spirit of exploration in Arabia*: the deck leads with curiosity, discovery, and landscape before naming the partnership opportunity. Hard-sell slides retired (Recognition/awards wall, Hero-vs-typical spec table, Commercial value, formal Ask). Hero's credentials appear as prose in Slide 9 ("Why We Believe This Matters"), not as a credentials slide. The geography opening shifts from Dubai/DDCR to Abu Dhabi (Empty Quarter, mangroves, islands, dark skies, coastal/maritime heritage). Image directive: replace credential imagery with field-evidence photography (guides in the field, wildlife encounters, balloon flights at dawn, conservation landscapes, Emirati cultural interactions). Slide count: 18. The `/shared/` design system and all existing image assets are preserved; only `natgeo/index.html` is rewritten. PRD §3.5 slide rhythm table updated for the 18-slide narrative.
+- **v5** — Complete restructure. Thesis pivoted from anti-luxury documentary register to *editorial luxury*: Hero is the only Gulf operator where luxury and conservation are inseparable, delivered through two collections (Platinum + Heritage) within a single conservation mandate. Driven by higher-up feedback that v4 (a) under-represented Hero's actual brand (Platinum Heritage's own positioning is "Sustainable-Luxury Desert Safaris" / "rustic luxury"), (b) made the comparison argument too vague ("falcon, silence, fire, story" describes a register, not Hero), and (c) failed to surface concrete differentiators the leadership audience needs. Three new slides added: *The two collections* (intro), *Hero vs typical Dubai operator* (spec comparison), *Inside the collections* (experience detail spread). Slide 6 (Problem) revised from vague-noun parallel to concrete contrast. NatGeo Unique Lodges and Singita / Asilia / Bushcamp Company precedent now load-bearing in §3 — luxury permitted *if* shown through access, scarcity, and expertise rather than material signifiers. Banned-words list narrowed: *exclusive* and *private* permitted in factual constructions; *luxurious* / *bespoke* / *premium* still banned. Source pack updated: #8 ecotourism resolved as verified (self-source on Platinum Heritage site); #14 Michelin chef resolved (Chef Claudio Filippone, named on `/platinum-desert-safari`); new entries seeded for 1:2 staff-to-guest ratio (Platinum), 4-guest vehicle cap (Platinum), Royal Family private-property access, Al Maha Desert Resort partnership, gentle-drive policy, 650-cars-not-produced, 200,000-bottles-saved, 500,000-visitors-cultural-connection. §6.5 Land Rover rule relaxed: vehicles may appear in experience photography (they are inherent to both tiers); fleet-specific environmental claims with figures still restricted pending Hero confirmation. Total slide count: 21 (was 17). Phase B HTML (v4) will require partial rebuild; this is accepted as the cost of coherence over patching.
 - **v4.1** — Source pack verifications applied from hero-experiences.com/why-us awards screenshots (2026-05-12). WTA Desert Safari Company years confirmed 2016–2022. WTA Balloon Ride Operator split into two distinct awards (Middle East 2020–2024; World's 2020–2023). TripAdvisor framing corrected to Certificate of Excellence 2013–2019 + Hall of Fame + Travelers' Choice 2020–2025. Four sustainability/conservation awards added. Slide 5b restructured into two groupings. Canonical source pack file created at `/reference/source-pack.md`.
 - **v4** — Aesthetic direction locked as *Editorial Cinematic*. Replaced black/gold accents with desert palette. Land Rovers reduced to a single minimal mention in Slide 5a. Re-anchored slide flow to original 11 narrative pillars — added Slide 3.5 (Why Arabia) and 8.5 (Conservation/Culture/Education). Honest attribution tracking.
 - **v3** — Softened Unique Lodges framing into values alignment. Broadened audience wording. Source pack with verification status. Added Why-Now and The-Ask slides. Cloudflare Access locked.
@@ -126,33 +127,58 @@ Editorial Cinematic is the register Nat Geo's own coverage occupies, including f
 | Logos | Quiet typographic treatment — never badges |
 | Page metadata | Page number, date, location coordinates set in small caps in the margin (Nat Geo signature) |
 
-### 3.5 Slide rhythm — which slides are immersive vs. restrained (21 slides — v5)
+### 3.5 Slide rhythm — which slides are immersive vs. restrained
+
+#### v6 narrative deck — 18 slides (branch `b2-NatGeo_x_Hero`)
 
 | # | Slide | Mode | Why |
 |---|---|---|---|
-| 1 | Cover | Immersive | First impression must carry atmosphere |
-| 2 | The paradox | Restrained | Idea must land in words |
-| 3 | The vision | Immersive | Emotional reframe — let imagery carry it |
-| 4 | Why the Arabian desert matters | Immersive | Heritage and landscape are the argument |
-| 5 | Why National Geographic | Restrained | Their authority is typographic, not visual |
-| 6 | Who Hero is | Restrained | Credibility, not glamour |
-| 7 | Recognition | Restrained | Museum-wall treatment of awards |
-| 8 | The problem | Immersive (split) | Side-by-side photography does the argument; now with concrete contrast |
-| 9 | Hero vs typical Dubai operator (spec sheet) | Restrained | Fact-box format — typography carries the receipts |
-| 10 | The two collections — introduction | Immersive (split) | Two atmospheric photographs introduce the range |
-| 11 | Why now | Restrained | Urgency lands in declarative type |
-| 12 | The solution | Immersive | The benchmark deserves the cinematic frame |
-| 13 | Experience design framework | Restrained | Pillars are structured, typographic |
-| 14 | Conservation, culture, education | Immersive | Three atmospheric images, one per pillar |
-| 15 | Inside the collections (experience detail) | Restrained (magazine spread) | Two-column experience cards; product-page register |
-| 16 | What makes this unmatched | Restrained | Two-column logic, typographic |
-| 17 | Commercial and brand value | Restrained | Decision-maker information |
-| 18 | Implementation | Restrained | Roadmap clarity |
-| 19 | The big idea | Immersive | Emotional peak — full-bleed pull quote |
-| 20 | The ask | Restrained | Direct, declarative, no ornament |
-| 21 | Closing | Immersive | Closes the visual loop with the cover |
+| 1 | Cover — The Spirit of Exploration in Arabia | Immersive | Opens to silence; atmosphere before words |
+| 2 | The Joy of Discovery | Immersive | Falcon image does the emotional work |
+| 3 | Looking Closer | Restrained (split) | Restraint earns the lesson; gazelle + prose |
+| 4 | Arabia | Immersive | Geological and cultural scale — landscape as argument |
+| 5 | A Region of Stories | Restrained (split) | Stories land in words and faces, not vistas |
+| 6 | What Makes a Place Memorable | Immersive | Fire under stars; the emotional thesis |
+| 7 | The National Geographic Spirit | Restrained | NatGeo's authority is typographic, not visual |
+| 8 | Why This Feels Natural | Immersive | Partnership as inevitability — landscape carries it |
+| 9 | Why We Believe This Matters | Restrained (split) | Hero's field evidence in prose; guide photograph |
+| 10 | The Opportunity | Immersive | First time the proposition is named — deserves atmosphere |
+| 11 | Beginning in Abu Dhabi | Immersive (list) | The landscape opens the chapter |
+| 12 | The Expedition Experience | Restrained (split) | Field disciplines — typographic list + education photo |
+| 13 | Conservation in Action | Immersive | Witnessed, not claimed — wildlife in restored habitat |
+| 14 | Stories That Travel | Restrained (split) | Storytelling argument lands in words + camel image |
+| 15 | Looking Beyond the Horizon | Immersive | Ambition stated quietly against the horizon |
+| 16 | A Shared Approach to Exploration | Restrained | Simplest form of the partnership argument — typography |
+| 17 | An Invitation | Restrained | The soft close — declarative, warm, no ornament |
+| 18 | Closing — Exploring Arabia | Immersive | Bookend; same register as the cover |
 
-Immersive count: 8 (was 8 in v4). Restrained count: 13 (was 9 in v4). The added slides skew restrained because they carry comparison/spec/detail information — the deck gains evidentiary weight without losing atmospheric pacing.
+Immersive count: 9. Restrained count: 9. The rhythm matches the story: atmosphere → reflection → atmosphere throughout, with the invitation and its bookend closing in quiet warmth.
+
+#### v5 slide rhythm (21 slides — superseded on `b1-natgeo-foundation`, preserved for reference)
+
+| # | Slide | Mode |
+|---|---|---|
+| 1 | Cover | Immersive |
+| 2 | The paradox | Restrained |
+| 3 | The vision | Immersive |
+| 4 | Why the Arabian desert matters | Immersive |
+| 5 | Why National Geographic | Restrained |
+| 6 | Who Hero is | Restrained |
+| 7 | Recognition | Restrained |
+| 8 | The problem | Immersive (split) |
+| 9 | Hero vs typical Dubai operator | Restrained |
+| 10 | The two collections — introduction | Immersive (split) |
+| 11 | Why now | Restrained |
+| 12 | The solution | Immersive |
+| 13 | Experience design framework | Restrained |
+| 14 | Conservation, culture, education | Immersive |
+| 15 | Inside the collections | Restrained |
+| 16 | What makes this unmatched | Restrained |
+| 17 | Commercial and brand value | Restrained |
+| 18 | Implementation | Restrained |
+| 19 | The big idea | Immersive |
+| 20 | The ask | Restrained |
+| 21 | Closing | Immersive |
 
 ### 3.6 What this direction is NOT
 
