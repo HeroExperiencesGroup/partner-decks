@@ -500,33 +500,59 @@
     <div class="review-notes">
       <aside class="review-note review-note--intent" aria-label="Editorial intent">
         <span class="review-note__title">Intent</span>
-        Same split pattern as Slide 9 — narrative carries the three-landscape thesis on the left, landscape photograph holds the atmosphere on the right. The two paragraphs make the coastal argument without a bullet list.
+        Brief headline + one sentence of context, then the three-landscape gallery does the work. Each tab caption carries the specific landscape detail — desert, coastal, mountain — so the reader discovers the argument as they explore. Images cropped to show landscape, not sky.
       </aside>
       <aside class="review-note review-note--image" aria-label="Image-sourcing annotation">
-        <span class="review-note__title">Image · Hero archive / to be replaced · Abu Dhabi</span>
-        Current image: DDCR desert reserve (placeholder until an Abu Dhabi-specific landscape is commissioned). Final image should show coastal mangroves, the Empty Quarter, or an Emirati heritage moment. Documentary register.
+        <span class="review-note__title">Images · Desert (archive) · Coastal + Mountain (to commission)</span>
+        Desert: DDCR reserve (existing). Coastal: mangrove channel at low tide, golden hour — no staged people. Mountain: Ras Al Khaimah ridgeline at blue hour — landscape only. Both documentary register.
       </aside>
     </div>
 
     <div class="section__inner">
-      <div class="split">
-        <div class="split__copy">
-          <p class="section-label">Beginning in Abu Dhabi</p>
-          <h2 id="abudhabi-headline" class="headline">Every great expedition needs a place to begin.</h2>
-          <div class="body">
-            <p>In Abu Dhabi, different worlds come into close proximity. Vast desert horizons meet coastal ecosystems. Protected wildlife landscapes sit alongside living cultural traditions that remain closely tied to place.</p>
-            <p>Across the UAE, identity is shaped by three interconnected landscapes and ways of life: desert, coastal, and mountain. The coastal heritage of the UAE, rooted in its founding communities, maritime traditions, and seafaring culture, remains one of its least interpreted dimensions for contemporary travelers. Here, that coastal story is not separate from the desert, but part of a continuous landscape of movement, trade, and survival shaped over generations.</p>
-          </div>
-          <p class="pull pull--with-rule">Taken together, these elements create the conditions for something uncommon in the region: an experience where landscape, heritage, and identity are understood as one interconnected story.</p>
-        </div>
-        <div class="split__image" aria-hidden="true">
+      <p class="section-label">Beginning in Abu Dhabi</p>
+      <h2 id="abudhabi-headline" class="headline">Every great expedition needs a place to begin.</h2>
+      <p class="body" style="margin-top: var(--space-4);">In Abu Dhabi, different worlds come into close proximity. Vast desert horizons meet coastal ecosystems. Protected wildlife landscapes sit alongside living cultural traditions that remain closely tied to place.</p>
+
+      <div class="tabs-editorial" role="tablist" data-tabs-editorial style="margin-top: var(--space-6);">
+        <button class="tab-btn-editorial is-active" type="button" role="tab" data-tab="desert" aria-selected="true">Desert</button>
+        <button class="tab-btn-editorial" type="button" role="tab" data-tab="coastal" aria-selected="false">Coastal</button>
+        <button class="tab-btn-editorial" type="button" role="tab" data-tab="mountain" aria-selected="false">Mountain</button>
+      </div>
+
+      <div class="tab-panel-editorial is-active" data-tab="desert" role="tabpanel">
+        <div class="landscape-tab">
           <picture class="responsive-image">
-            <source type="image/webp" srcset="assets/images/Place_Right_DDCR-mobile.webp 960w, assets/images/Place_Right_DDCR-desktop.webp 1920w" sizes="(max-width: 48em) 100vw, 50vw">
-            <source type="image/jpeg" srcset="assets/images/Place_Right_DDCR-mobile.jpg 960w, assets/images/Place_Right_DDCR-desktop.jpg 1920w" sizes="(max-width: 48em) 100vw, 50vw">
-            <img src="assets/images/Place_Right_DDCR-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1080" style="object-position: center 70%;">
+            <source type="image/webp" srcset="assets/images/Place_Right_DDCR-mobile.webp 960w, assets/images/Place_Right_DDCR-desktop.webp 1920w" sizes="100vw">
+            <source type="image/jpeg" srcset="assets/images/Place_Right_DDCR-mobile.jpg 960w, assets/images/Place_Right_DDCR-desktop.jpg 1920w" sizes="100vw">
+            <img src="assets/images/Place_Right_DDCR-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1080" style="object-position: center 80%;">
           </picture>
         </div>
+        <p class="landscape-tab__caption">The Dubai Desert Conservation Reserve — UAE's first national park. Vast dunes, oryx, and ghaf forest within a protected landscape shaped by three decades of active conservation.</p>
       </div>
+
+      <div class="tab-panel-editorial" data-tab="coastal" role="tabpanel">
+        <div class="landscape-tab landscape-tab--placeholder" role="img" aria-label="Coastal landscape — image to be commissioned">
+          <aside class="image-placeholder-note">
+            <span class="image-placeholder-note__title">Image · to be commissioned · Coastal</span>
+            <p class="image-placeholder-note__body">Mangrove channel at low tide, golden hour. Kayak or small boat in mid-ground. Roots visible, water reflective. No people staged.</p>
+            <span class="image-placeholder-note__test">Test: conservation geography magazine, not a tourism brochure.</span>
+          </aside>
+        </div>
+        <p class="landscape-tab__caption">The coastal heritage of the UAE — mangrove ecosystems, island wildlife habitats, and living Emirati culture shaped by land and sea. One of the region's least interpreted landscapes for contemporary travelers.</p>
+      </div>
+
+      <div class="tab-panel-editorial" data-tab="mountain" role="tabpanel">
+        <div class="landscape-tab landscape-tab--placeholder" role="img" aria-label="Mountain landscape — image to be commissioned">
+          <aside class="image-placeholder-note">
+            <span class="image-placeholder-note__title">Image · to be commissioned · Mountain</span>
+            <p class="image-placeholder-note__body">Ras Al Khaimah ridgeline at blue hour. Dramatic relief, rocky terrain. No figures — landscape only.</p>
+            <span class="image-placeholder-note__test">Test: Nat Geo geography feature, not a hiking brochure.</span>
+          </aside>
+        </div>
+        <p class="landscape-tab__caption">The mountains of Ras Al Khaimah and the wadis of the northern emirates — increasingly visible to travelers, and shaped by the same patterns of movement and survival as the desert below.</p>
+      </div>
+
+      <p class="pull pull--with-rule" style="margin-top: var(--space-5);">Taken together, these elements create the conditions for something uncommon in the region: an experience where landscape, heritage, and identity are understood as one interconnected story.</p>
     </div>
   </section>
 
