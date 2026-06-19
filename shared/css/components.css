@@ -2739,7 +2739,7 @@ html[data-deck-layout="locked"] body[data-review="true"] .review-notes {
 }
 
 html[data-deck-layout="locked"] .landscape-tab {
-  max-height: 400px;
+  max-height: 340px;
 }
 
 /* =========================================================
