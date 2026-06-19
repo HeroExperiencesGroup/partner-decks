@@ -344,17 +344,32 @@
     <div class="review-notes">
       <aside class="review-note review-note--intent" aria-label="Editorial intent">
         <span class="review-note__title">Intent</span>
-        Honours National Geographic without a single logo or badge — the spirit named in words, on the page, where it carries most weight. Pure typography, deliberately. Turns from Arabia toward the partner.
+        Honours National Geographic in words, not logos. The stargazing image on the right is the visual argument — a guide pointing at stars is the spirit of NatGeo exploration made literal and field-real.
+      </aside>
+      <aside class="review-note review-note--image" aria-label="Image-sourcing annotation">
+        <span class="review-note__title">Image · Hero archive</span>
+        Telescope-led astronomy with a guide — field science, field curiosity. The image is from slide 12 (Education) and echoes NatGeo's mission without using any NatGeo-owned imagery.
       </aside>
     </div>
 
     <div class="section__inner">
-      <p class="section-label">The National Geographic Spirit</p>
-      <h2 id="spirit-headline" class="headline">For more than a century, National Geographic has inspired people to explore the world with curiosity and purpose.</h2>
-      <div class="body" style="margin-top: var(--space-6);">
-        <p>Its legacy is rooted in discovery, science, conservation, and storytelling. Through its work, generations have been encouraged not only to see new places, but to understand them more deeply.</p>
+      <div class="split">
+        <div class="split__copy">
+          <p class="section-label">The National Geographic Spirit</p>
+          <h2 id="spirit-headline" class="headline">For more than a century, National Geographic has inspired people to explore the world with curiosity and purpose.</h2>
+          <div class="body" style="margin-top: var(--space-5);">
+            <p>Its legacy is rooted in discovery, science, conservation, and storytelling. Through its work, generations have been encouraged not only to see new places, but to understand them more deeply.</p>
+          </div>
+          <p class="pull pull--with-rule">That spirit of exploration continues to resonate today, and it is one of the reasons Arabia presents such a compelling opportunity. Beneath its dramatic landscapes lies a wealth of natural, cultural, and human stories waiting to be explored.</p>
+        </div>
+        <div class="split__image" aria-hidden="true" style="max-height: 680px;">
+          <picture class="responsive-image">
+            <source type="image/webp" srcset="assets/images/08-5-education-desktop.webp 900w" sizes="(max-width: 48em) 100vw, 50vw">
+            <source type="image/jpeg" srcset="assets/images/08-5-education-desktop.jpg 900w" sizes="(max-width: 48em) 100vw, 50vw">
+            <img src="assets/images/08-5-education-desktop.jpg" alt="" loading="lazy" decoding="async" width="900" height="1125">
+          </picture>
+        </div>
       </div>
-      <p class="pull pull--with-rule">That spirit of exploration continues to resonate today, and it is one of the reasons Arabia presents such a compelling opportunity. Beneath its dramatic landscapes lies a wealth of natural, cultural, and human stories waiting to be explored.</p>
     </div>
   </section>
 
@@ -474,14 +489,7 @@
   <!-- =====================================================
        Slide 11 — 10. Beginning in Abu Dhabi (Immersive — list)
        ===================================================== -->
-  <section class="section" id="sec-abu-dhabi" data-slide="11" data-mode="immersive" data-image="full-bleed" aria-labelledby="abudhabi-headline">
-    <div class="full-bleed full-bleed--deep-dim" aria-hidden="true">
-      <picture class="responsive-image">
-        <source type="image/webp" srcset="assets/images/Place_Right_DDCR-mobile.webp 960w, assets/images/Place_Right_DDCR-desktop.webp 1920w" sizes="100vw">
-        <source type="image/jpeg" srcset="assets/images/Place_Right_DDCR-mobile.jpg 960w, assets/images/Place_Right_DDCR-desktop.jpg 1920w" sizes="100vw">
-        <img src="assets/images/Place_Right_DDCR-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1080">
-      </picture>
-    </div>
+  <section class="section" id="sec-abu-dhabi" data-slide="11" data-mode="restrained" aria-labelledby="abudhabi-headline">
 
     <div class="section__meta meta">
       <span>11</span>
@@ -492,30 +500,55 @@
     <div class="review-notes">
       <aside class="review-note review-note--intent" aria-label="Editorial intent">
         <span class="review-note__title">Intent</span>
-        Every great expedition needs a place to begin. Abu Dhabi brings desert, coast, and mountain into a single journey — with the coastal and maritime story surfaced as the region's least-interpreted dimension. The bullet list reads as a survey of one continuous landscape.
+        The three tabs turn the Abu Dhabi chapter into a curated field survey — reader moves through Desert, Coastal, Mountain like turning pages in a NatGeo feature. Each landscape photograph is evidence that the expedition has range.
       </aside>
       <aside class="review-note review-note--image" aria-label="Image-sourcing annotation">
-        <span class="review-note__title">Image · to be commissioned · Abu Dhabi</span>
-        Placeholder uses a DDCR reserve frame. For final delivery this chapter needs Abu Dhabi material we do not yet hold: Empty Quarter dunes, coastal mangrove channels, island wildlife habitat, dark-sky night, and an Emirati maritime/seafaring heritage moment. Test: Nat Geo Traveler feature — continuous landscape of movement, trade, and survival.
+        <span class="review-note__title">Images · to be commissioned (Coastal + Mountain)</span>
+        Desert tab uses existing Hero archive (DDCR reserve). Coastal and Mountain tabs are placeholders — commission: mangrove channel (coastal), Ras Al Khaimah ridgeline (mountain). Both at golden hour, documentary register.
       </aside>
     </div>
 
-    <div class="section__inner" style="align-self: end;">
-      <div class="overlay overlay--lower-band">
-        <p class="meta meta--on-dark">Beginning in Abu Dhabi</p>
-        <h2 id="abudhabi-headline" class="headline headline--bone">Every great expedition needs a place to begin.</h2>
-        <div class="body">
-          <p>In Abu Dhabi, different worlds come into close proximity. Vast desert horizons meet coastal ecosystems. Protected wildlife landscapes sit alongside living cultural traditions that remain closely tied to place.</p>
+    <div class="section__inner">
+      <p class="section-label">Beginning in Abu Dhabi</p>
+      <h2 id="abudhabi-headline" class="headline">Every great expedition needs a place to begin.</h2>
+
+      <div class="tabs-editorial" role="tablist" data-tabs-editorial style="margin-top: var(--space-5);">
+        <button class="tab-btn-editorial is-active" type="button" role="tab" data-tab="desert" aria-selected="true">Desert</button>
+        <button class="tab-btn-editorial" type="button" role="tab" data-tab="coastal" aria-selected="false">Coastal</button>
+        <button class="tab-btn-editorial" type="button" role="tab" data-tab="mountain" aria-selected="false">Mountain</button>
+      </div>
+
+      <div class="tab-panel-editorial is-active" data-tab="desert" role="tabpanel">
+        <div class="landscape-tab">
+          <picture class="responsive-image">
+            <source type="image/webp" srcset="assets/images/Place_Right_DDCR-mobile.webp 960w, assets/images/Place_Right_DDCR-desktop.webp 1920w" sizes="100vw">
+            <source type="image/jpeg" srcset="assets/images/Place_Right_DDCR-mobile.jpg 960w, assets/images/Place_Right_DDCR-desktop.jpg 1920w" sizes="100vw">
+            <img src="assets/images/Place_Right_DDCR-desktop.jpg" alt="Dubai Desert Conservation Reserve — vast dunes and ghaf trees in a protected landscape" loading="lazy" decoding="async" width="1920" height="1080" style="object-position: center 75%;">
+          </picture>
         </div>
-        <ul class="list list--ruled">
-          <li>The vast dunes of the Empty Quarter</li>
-          <li>Coastal mangrove ecosystems</li>
-          <li>Island wildlife habitats</li>
-          <li>Dark skies untouched by urban light</li>
-          <li>Living Emirati culture shaped by land and sea</li>
-          <li>Conservation landscapes where nature is actively being restored</li>
-        </ul>
-        <p class="caption">Taken together, these elements create the conditions for something uncommon in the region: an experience where landscape, heritage, and identity are understood as one interconnected story.</p>
+        <p class="landscape-tab__caption">The Dubai Desert Conservation Reserve — UAE's first national park. Vast dunes, oryx, gazelle, and ghaf forest restored over three decades of active conservation.</p>
+      </div>
+
+      <div class="tab-panel-editorial" data-tab="coastal" role="tabpanel">
+        <div class="landscape-tab landscape-tab--placeholder" role="img" aria-label="Coastal landscape — image to be commissioned">
+          <aside class="image-placeholder-note">
+            <span class="image-placeholder-note__title">Image · to be commissioned · Coastal</span>
+            <p class="image-placeholder-note__body">Mangrove channel at low tide, golden hour. Kayak or small boat in mid-ground. Roots visible, water reflective. Documentary register — no people staged.</p>
+            <span class="image-placeholder-note__test">Test: conservation geography magazine, not a tourism brochure.</span>
+          </aside>
+        </div>
+        <p class="landscape-tab__caption">Mangrove ecosystems, island wildlife habitats, and the maritime heritage of the UAE's founding communities — among the region's least interpreted landscapes for contemporary travelers.</p>
+      </div>
+
+      <div class="tab-panel-editorial" data-tab="mountain" role="tabpanel">
+        <div class="landscape-tab landscape-tab--placeholder" role="img" aria-label="Mountain landscape — image to be commissioned">
+          <aside class="image-placeholder-note">
+            <span class="image-placeholder-note__title">Image · to be commissioned · Mountain</span>
+            <p class="image-placeholder-note__body">Ras Al Khaimah ridgeline at blue hour. Dramatic relief, rocky terrain. No figures — landscape only. Atmospheric mist optional.</p>
+            <span class="image-placeholder-note__test">Test: Nat Geo geography feature, not a hiking brochure.</span>
+          </aside>
+        </div>
+        <p class="landscape-tab__caption">The mountains of Ras Al Khaimah and the wadis of the northern emirates — a dramatic counterpoint to the desert, shaped by the same patterns of movement and survival.</p>
       </div>
     </div>
   </section>
@@ -543,27 +576,80 @@
     </div>
 
     <div class="section__inner">
-      <div class="split">
+      <div class="split" data-swap-gallery>
         <div class="split__copy" style="gap: var(--space-3); padding-block: var(--space-3);">
           <p class="section-label">The Expedition Experience</p>
           <h2 id="expedition-headline" class="headline">Each journey would be built around curiosity, exploration, and understanding.</h2>
-          <ul class="list list--ruled" style="margin-top: var(--space-4);">
-            <li>Wildlife observation and tracking</li>
-            <li>Conservation programs and field experiences</li>
-            <li>Desert ecology and geology</li>
-            <li>Astronomy and navigation</li>
-            <li>Photography and storytelling</li>
-            <li>Cultural encounters and heritage interpretation</li>
-            <li>Exploration of coastal and island ecosystems</li>
+          <ul class="list list--ruled list--swap" role="list" style="margin-top: var(--space-4);">
+            <li data-swap="wildlife" class="is-active">Wildlife observation and tracking</li>
+            <li data-swap="conservation">Conservation programs and field experiences</li>
+            <li data-swap="ecology">Desert ecology and geology</li>
+            <li data-swap="astronomy">Astronomy and navigation</li>
+            <li data-swap="photography">Photography and storytelling</li>
+            <li data-swap="culture">Cultural encounters and heritage interpretation</li>
+            <li data-swap="coastal">Exploration of coastal and island ecosystems</li>
           </ul>
           <p class="pull pull--with-rule">Together, these experiences create a deeper and more complete understanding of Arabia and its people, landscapes, and wildlife.</p>
         </div>
         <div class="split__image" aria-hidden="true" style="max-height: 680px;">
-          <picture class="responsive-image">
-            <source type="image/webp" srcset="assets/images/08-5-education-desktop.webp 900w" sizes="(max-width: 48em) 100vw, 50vw">
-            <source type="image/jpeg" srcset="assets/images/08-5-education-desktop.jpg 900w" sizes="(max-width: 48em) 100vw, 50vw">
-            <img src="assets/images/08-5-education-desktop.jpg" alt="" loading="lazy" decoding="async" width="900" height="1125">
-          </picture>
+
+          <div class="swap-panel is-active" data-swap-panel="wildlife">
+            <picture class="responsive-image">
+              <source type="image/webp" srcset="assets/images/Falcons-Platinum-100-mobile.webp 960w, assets/images/Falcons-Platinum-100-desktop.webp 1559w" sizes="50vw">
+              <source type="image/jpeg" srcset="assets/images/Falcons-Platinum-100-mobile.jpg 960w, assets/images/Falcons-Platinum-100-desktop.jpg 1559w" sizes="50vw">
+              <img src="assets/images/Falcons-Platinum-100-desktop.jpg" alt="" loading="lazy" decoding="async" width="1559" height="1009">
+            </picture>
+          </div>
+
+          <div class="swap-panel" data-swap-panel="conservation">
+            <picture class="responsive-image">
+              <source type="image/webp" srcset="assets/images/08-5-conservation-desktop.webp 900w" sizes="50vw">
+              <source type="image/jpeg" srcset="assets/images/08-5-conservation-desktop.jpg 900w" sizes="50vw">
+              <img src="assets/images/08-5-conservation-desktop.jpg" alt="" loading="lazy" decoding="async" width="900" height="1125">
+            </picture>
+          </div>
+
+          <div class="swap-panel" data-swap-panel="ecology">
+            <picture class="responsive-image">
+              <source type="image/webp" srcset="assets/images/03-5-arabia-mobile.webp 960w, assets/images/03-5-arabia-desktop.webp 1672w" sizes="50vw">
+              <source type="image/jpeg" srcset="assets/images/03-5-arabia-mobile.jpg 960w, assets/images/03-5-arabia-desktop.jpg 1672w" sizes="50vw">
+              <img src="assets/images/03-5-arabia-desktop.jpg" alt="" loading="lazy" decoding="async" width="1672" height="941">
+            </picture>
+          </div>
+
+          <div class="swap-panel" data-swap-panel="astronomy">
+            <picture class="responsive-image">
+              <source type="image/webp" srcset="assets/images/08-5-education-desktop.webp 900w" sizes="50vw">
+              <source type="image/jpeg" srcset="assets/images/08-5-education-desktop.jpg 900w" sizes="50vw">
+              <img src="assets/images/08-5-education-desktop.jpg" alt="" loading="lazy" decoding="async" width="900" height="1125">
+            </picture>
+          </div>
+
+          <div class="swap-panel" data-swap-panel="photography">
+            <picture class="responsive-image">
+              <source type="image/webp" srcset="assets/images/Camels-Platinum-27-mobile.webp 960w, assets/images/Camels-Platinum-27-desktop.webp 1800w" sizes="50vw">
+              <source type="image/jpeg" srcset="assets/images/Camels-Platinum-27-mobile.jpg 960w, assets/images/Camels-Platinum-27-desktop.jpg 1800w" sizes="50vw">
+              <img src="assets/images/Camels-Platinum-27-desktop.jpg" alt="" loading="lazy" decoding="async" width="1800" height="1200">
+            </picture>
+          </div>
+
+          <div class="swap-panel" data-swap-panel="culture">
+            <picture class="responsive-image">
+              <source type="image/webp" srcset="assets/images/08-5-culture-mobile.webp 960w, assets/images/08-5-culture-desktop.webp 1920w" sizes="50vw">
+              <source type="image/jpeg" srcset="assets/images/08-5-culture-mobile.jpg 960w, assets/images/08-5-culture-desktop.jpg 1920w" sizes="50vw">
+              <img src="assets/images/08-5-culture-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1280">
+            </picture>
+          </div>
+
+          <div class="swap-panel" data-swap-panel="coastal">
+            <div style="width:100%;height:100%;background:linear-gradient(135deg,#2d5a6b,#1c3a45);display:flex;align-items:center;justify-content:center;">
+              <aside class="image-placeholder-note" style="position:relative;inset:auto;background:transparent;">
+                <span class="image-placeholder-note__title">Image · to be commissioned · Coastal ecosystem</span>
+                <p class="image-placeholder-note__body">Mangrove channel, island habitat, or dhow in coastal waters. Golden hour, documentary register.</p>
+              </aside>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>

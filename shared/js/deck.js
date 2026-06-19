@@ -443,6 +443,29 @@
   }
 
   /* -------------------------------------------------
+   * Swap gallery — [data-swap-gallery] containers.
+   * List items with [data-swap="key"] swap the matching
+   * .swap-panel[data-swap-panel="key"] inside the same gallery.
+   * ------------------------------------------------- */
+
+  function initSwapGallery() {
+    qsa("[data-swap-gallery]").forEach(function (gallery) {
+      var triggers = qsa("[data-swap]", gallery);
+      var panels   = qsa(".swap-panel[data-swap-panel]", gallery);
+      triggers.forEach(function (trigger) {
+        trigger.addEventListener("click", function () {
+          var key = trigger.getAttribute("data-swap");
+          triggers.forEach(function (t) { t.classList.remove("is-active"); });
+          panels.forEach(function (p)   { p.classList.remove("is-active"); });
+          trigger.classList.add("is-active");
+          var target = gallery.querySelector(".swap-panel[data-swap-panel='" + key + "']");
+          if (target) target.classList.add("is-active");
+        });
+      });
+    });
+  }
+
+  /* -------------------------------------------------
    * Compare grid — Slide 8 hover-expand interaction
    *
    * Hovering any cell expands that cell and its counterpart
@@ -723,6 +746,7 @@
     initTopNav();
     setupSectionObserver();
     initEditorialTabs();
+    initSwapGallery();
     initCompareGrid();
     initReviewMode();
     initRotateHint();
