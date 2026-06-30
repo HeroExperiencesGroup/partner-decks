@@ -1,15 +1,16 @@
 /* editor.js — personal in-browser slide editor
  *
  * Toggle with E key. Provides inline content editing, font-size
- * control, position nudging, and full undo/redo.
+ * control, position nudging, multi-select move, and full undo/redo.
  *
  * Keyboard:
- *   E              — toggle edit mode
- *   Click text     — select element for editing
- *   Esc            — deselect
- *   Alt + ↑↓←→    — nudge 2px  (Shift = 10px)
- *   Ctrl + Z       — undo
- *   Ctrl + Shift + Z (or Ctrl+Y) — redo
+ *   E                    — toggle edit mode
+ *   Click text           — select element, enable text editing
+ *   Shift + Click text   — add / remove element from selection
+ *   Esc                  — deselect all
+ *   Alt + ↑↓←→          — nudge 2px (Shift = 10px); moves ALL selected
+ *   Ctrl + Z             — undo
+ *   Ctrl + Shift + Z / Y — redo
  *
  * TO DISABLE FOR CLIENT: remove the two lines tagged
  * data-editor-remove in natgeo/index.html.
@@ -18,22 +19,27 @@
 (function () {
   'use strict';
 
-  var STORE_KEY = 'partner-decks:editor-v1';
-  var doc      = document;
-  var body     = doc.body;
-  var store    = {};
-  var originals = {};
-  var activeEl  = null;
-  var toolbar   = null;
-  var isOn      = false;
+  var STORE_KEY  = 'partner-decks:editor-v1';
+  var doc        = document;
+  var body       = doc.body;
+  var store      = {};
+  var originals  = {};
+  var toolbar    = null;
+  var isOn       = false;
 
-  /* Undo / redo stacks — each entry: { eid, before, after }
-   * where before/after are { html, fontSize, nudgeX, nudgeY } */
+  /* Selection state
+   * activeEl    — primary element (text-editable, size controls apply to this)
+   * selectedEls — full set including activeEl; nudge applies to all */
+  var activeEl    = null;
+  var selectedEls = [];
+
+  /* Undo / redo — each entry is an ARRAY of { eid, before, after }
+   * so a multi-element nudge is one undo step. */
   var undoStack = [];
   var redoStack = [];
   var MAX_HISTORY = 60;
 
-  /* Snapshot of element state when activated (for content-edit undo) */
+  /* Snapshot captured when activeEl is activated, for content-edit undo */
   var activationSnap = null;
 
   var EDITABLE = [
@@ -92,15 +98,14 @@
   }
 
   /* --------------------------------------------------
-   * State snapshot helpers
+   * State snapshot
    * -------------------------------------------------- */
 
   function snapState(el) {
-    var eid = el.dataset.eid;
-    var d   = store[eid] || {};
+    var d = store[el.dataset.eid] || {};
     return {
       html:     el.innerHTML,
-      fontSize: el.style.fontSize  || null,
+      fontSize: el.style.fontSize || null,
       nudgeX:   d.nudgeX || 0,
       nudgeY:   d.nudgeY || 0
     };
@@ -109,10 +114,10 @@
   function applyState(eid, state) {
     var el = qs('[data-eid="' + eid + '"]');
     if (!el) return;
-    el.innerHTML = state.html;
-    el.style.fontSize = state.fontSize || '';
+    el.innerHTML       = state.html;
+    el.style.fontSize  = state.fontSize || '';
     applyTransform(el, state.nudgeX || 0, state.nudgeY || 0);
-    var d = store[eid] || {};
+    var d      = store[eid] || {};
     d.html     = state.html;
     d.fontSize = state.fontSize;
     d.nudgeX   = state.nudgeX || 0;
@@ -124,42 +129,46 @@
 
   /* --------------------------------------------------
    * Undo / redo
+   * Each entry in the stack is an ARRAY of { eid, before, after }.
    * -------------------------------------------------- */
 
-  function pushHistory(eid, before, after) {
-    /* Don't push if nothing actually changed */
-    if (JSON.stringify(before) === JSON.stringify(after)) return;
-    undoStack.push({ eid: eid, before: before, after: after });
+  function pushHistory(entries) {
+    /* Drop entries where nothing changed */
+    var changed = entries.filter(function (e) {
+      return JSON.stringify(e.before) !== JSON.stringify(e.after);
+    });
+    if (!changed.length) return;
+    undoStack.push(changed);
     if (undoStack.length > MAX_HISTORY) undoStack.shift();
-    redoStack = [];  /* new action clears redo */
+    redoStack = [];
     refreshUndoButtons();
   }
 
   function undo() {
-    var entry = undoStack.pop();
-    if (!entry) return;
-    applyState(entry.eid, entry.before);
-    redoStack.push(entry);
+    var entries = undoStack.pop();
+    if (!entries) return;
+    entries.forEach(function (e) { applyState(e.eid, e.before); });
+    redoStack.push(entries);
     refreshUndoButtons();
   }
 
   function redo() {
-    var entry = redoStack.pop();
-    if (!entry) return;
-    applyState(entry.eid, entry.after);
-    undoStack.push(entry);
+    var entries = redoStack.pop();
+    if (!entries) return;
+    entries.forEach(function (e) { applyState(e.eid, e.after); });
+    undoStack.push(entries);
     refreshUndoButtons();
   }
 
   function refreshUndoButtons() {
-    var uBtn = qs('#etb-undo');
-    var rBtn = qs('#etb-redo');
-    if (uBtn) uBtn.disabled = undoStack.length === 0;
-    if (rBtn) rBtn.disabled = redoStack.length === 0;
+    var u = qs('#etb-undo');
+    var r = qs('#etb-redo');
+    if (u) u.disabled = !undoStack.length;
+    if (r) r.disabled = !redoStack.length;
   }
 
   /* --------------------------------------------------
-   * Apply saved state on load
+   * Apply saved state on page load
    * -------------------------------------------------- */
 
   function applyAll() {
@@ -193,37 +202,66 @@
     var banner = qs('#editor-banner');
     if (banner) banner.hidden = !on;
     if (toolbar) toolbar.hidden = !on;
-    if (!on && activeEl) deactivate();
+    if (!on) deactivateAll();
   }
 
   /* --------------------------------------------------
-   * Activate / deactivate element
+   * Selection management
    * -------------------------------------------------- */
 
+  function isSelected(el) {
+    return selectedEls.indexOf(el) !== -1;
+  }
+
+  /* Primary activate — makes element text-editable */
   function activate(el) {
     if (activeEl === el) return;
-    if (activeEl) deactivate();
-    activeEl = el;
-    activationSnap = snapState(el);  /* remember state before editing */
+
+    /* Commit any in-flight content edits on the previous primary */
+    if (activeEl) commitActive();
+
+    activeEl       = el;
+    activationSnap = snapState(el);
+
     el.contentEditable = 'true';
+    el.classList.remove('editor-in-selection');
     el.classList.add('editor-selected');
-    /* auto-save content to store on every keystroke */
+
     el._edInput = function () {
-      var eid = el.dataset.eid;
-      var d = store[eid] || {};
+      var d = store[el.dataset.eid] || {};
       d.html = el.innerHTML;
-      store[eid] = d;
+      store[el.dataset.eid] = d;
       save();
     };
     el.addEventListener('input', el._edInput);
+
+    /* Make sure it's in selectedEls */
+    if (!isSelected(el)) selectedEls.push(el);
+
     refreshToolbar();
   }
 
-  function deactivate() {
+  /* Add / remove a secondary element from the selection (Shift+click) */
+  function toggleSecondary(el) {
+    if (el === activeEl) return; /* primary handled by activate() */
+
+    if (isSelected(el)) {
+      /* Remove from selection */
+      selectedEls = selectedEls.filter(function (e) { return e !== el; });
+      el.classList.remove('editor-in-selection');
+    } else {
+      /* Add to selection */
+      selectedEls.push(el);
+      el.classList.add('editor-in-selection');
+    }
+    refreshToolbar();
+  }
+
+  /* Commit content edits on the active element and push history */
+  function commitActive() {
     if (!activeEl) return;
-    /* Push undo entry for content edits made during this session */
     var after = snapState(activeEl);
-    pushHistory(activeEl.dataset.eid, activationSnap, after);
+    pushHistory([{ eid: activeEl.dataset.eid, before: activationSnap, after: after }]);
     activationSnap = null;
 
     activeEl.contentEditable = 'false';
@@ -233,11 +271,20 @@
       delete activeEl._edInput;
     }
     activeEl = null;
+  }
+
+  /* Clear everything */
+  function deactivateAll() {
+    commitActive();
+    selectedEls.forEach(function (el) {
+      el.classList.remove('editor-selected', 'editor-in-selection');
+    });
+    selectedEls = [];
     refreshToolbar();
   }
 
   /* --------------------------------------------------
-   * Font size
+   * Font size (primary element only)
    * -------------------------------------------------- */
 
   function getSize(el) {
@@ -252,37 +299,42 @@
     var step   = cur >= 48 ? 4 : cur >= 24 ? 2 : 1;
     var next   = Math.max(6, Math.round(cur + dir * step));
     el.style.fontSize = next + 'px';
-    var eid = el.dataset.eid;
-    var d = store[eid] || {};
+    var d = store[el.dataset.eid] || {};
     d.fontSize = next + 'px';
-    store[eid] = d;
+    store[el.dataset.eid] = d;
     save();
-    var after = snapState(el);
-    pushHistory(eid, before, after);
+    pushHistory([{ eid: el.dataset.eid, before: before, after: snapState(el) }]);
     refreshToolbar();
   }
 
   /* --------------------------------------------------
-   * Nudge
+   * Nudge — applies to ALL selected elements
    * -------------------------------------------------- */
 
-  function nudge(el, dx, dy) {
-    var eid    = el.dataset.eid;
-    var before = snapState(el);
-    var d      = store[eid] || {};
-    d.nudgeX   = (d.nudgeX || 0) + dx;
-    d.nudgeY   = (d.nudgeY || 0) + dy;
-    store[eid] = d;
-    applyTransform(el, d.nudgeX, d.nudgeY);
+  function nudgeAll(dx, dy) {
+    if (!selectedEls.length) return;
+
+    var entries = selectedEls.map(function (el) {
+      return { eid: el.dataset.eid, before: snapState(el), el: el };
+    });
+
+    selectedEls.forEach(function (el) {
+      var d    = store[el.dataset.eid] || {};
+      d.nudgeX = (d.nudgeX || 0) + dx;
+      d.nudgeY = (d.nudgeY || 0) + dy;
+      store[el.dataset.eid] = d;
+      applyTransform(el, d.nudgeX, d.nudgeY);
+    });
     save();
-    var after = snapState(el);
-    pushHistory(eid, before, after);
+
+    pushHistory(entries.map(function (e) {
+      return { eid: e.eid, before: e.before, after: snapState(e.el) };
+    }));
     refreshToolbar();
   }
 
   function getNudge(el) {
-    var eid = el ? el.dataset.eid : null;
-    var d   = eid ? (store[eid] || {}) : {};
+    var d = store[el.dataset.eid] || {};
     return { x: d.nudgeX || 0, y: d.nudgeY || 0 };
   }
 
@@ -291,16 +343,40 @@
    * -------------------------------------------------- */
 
   function resetEl(el) {
-    var eid    = el.dataset.eid;
     var before = snapState(el);
+    var eid    = el.dataset.eid;
     delete store[eid];
     save();
     el.innerHTML       = originals[eid] != null ? originals[eid] : el.innerHTML;
     el.style.fontSize  = '';
     el.style.position  = '';
     el.style.transform = '';
-    var after = snapState(el);
-    pushHistory(eid, before, after);
+    pushHistory([{ eid: eid, before: before, after: snapState(el) }]);
+    refreshToolbar();
+  }
+
+  function resetSelection() {
+    if (!selectedEls.length) return;
+    var entries = selectedEls.map(function (el) {
+      return { eid: el.dataset.eid, before: snapState(el), el: el };
+    });
+    selectedEls.forEach(function (el) {
+      var eid = el.dataset.eid;
+      if (el === activeEl) {
+        el.innerHTML = originals[eid] != null ? originals[eid] : el.innerHTML;
+        activationSnap = snapState(el); /* update snap so commit doesn't override */
+      } else {
+        el.innerHTML = originals[eid] != null ? originals[eid] : el.innerHTML;
+      }
+      delete store[eid];
+      el.style.fontSize  = '';
+      el.style.position  = '';
+      el.style.transform = '';
+    });
+    save();
+    pushHistory(entries.map(function (e) {
+      return { eid: e.eid, before: e.before, after: snapState(e.el) };
+    }));
     refreshToolbar();
   }
 
@@ -312,15 +388,13 @@
   }
 
   /* --------------------------------------------------
-   * Export — download HTML with edits baked in, editor stripped
+   * Export
    * -------------------------------------------------- */
 
   function exportHTML() {
-    /* Deactivate first so current edits are committed */
-    if (activeEl) deactivate();
+    if (activeEl) commitActive();
 
     var clone = doc.documentElement.cloneNode(true);
-
     clone.querySelectorAll('[data-editor-remove]').forEach(function (el) {
       el.parentNode && el.parentNode.removeChild(el);
     });
@@ -330,10 +404,10 @@
     clone.querySelectorAll('[data-eid]').forEach(function (el) {
       el.removeAttribute('data-eid');
     });
-    clone.querySelectorAll('.editor-selected').forEach(function (el) {
-      el.classList.remove('editor-selected');
+    clone.querySelectorAll('.editor-selected,.editor-in-selection').forEach(function (el) {
+      el.classList.remove('editor-selected', 'editor-in-selection');
     });
-    clone.querySelectorAll('#editor-toolbar, #editor-banner').forEach(function (el) {
+    clone.querySelectorAll('#editor-toolbar,#editor-banner').forEach(function (el) {
       el.parentNode && el.parentNode.removeChild(el);
     });
     clone.removeAttribute('data-editor');
@@ -360,13 +434,11 @@
     t.innerHTML =
       '<span class="etb-label">✏ Editor</span>' +
 
-      /* Undo / redo */
       '<div class="etb-group">' +
         '<button id="etb-undo" data-ea="undo" title="Undo (Ctrl+Z)" disabled>↩ Undo</button>' +
         '<button id="etb-redo" data-ea="redo" title="Redo (Ctrl+Shift+Z)" disabled>↪ Redo</button>' +
       '</div>' +
 
-      /* Element controls — hidden until element selected */
       '<div class="etb-group" id="etb-el-group">' +
         '<span class="etb-hint" id="etb-hint">click text to select</span>' +
         '<span class="etb-el-name" id="etb-el-name" hidden></span>' +
@@ -387,7 +459,6 @@
         '<button class="etb-btn-danger" data-ea="reset" id="etb-reset" hidden>Reset</button>' +
       '</div>' +
 
-      /* Global controls */
       '<div class="etb-group">' +
         '<button class="etb-btn-danger" data-ea="reset-all">Reset all</button>' +
         '<button class="etb-btn-export" data-ea="export">Export HTML ↓</button>' +
@@ -400,15 +471,15 @@
       var step   = e.shiftKey ? 10 : 2;
       var action = btn.dataset.ea;
       switch (action) {
-        case 'undo':        undo(); break;
-        case 'redo':        redo(); break;
-        case 'size-up':     if (activeEl) stepSize(activeEl,  1);    break;
-        case 'size-down':   if (activeEl) stepSize(activeEl, -1);    break;
-        case 'nudge-left':  if (activeEl) nudge(activeEl, -step, 0); break;
-        case 'nudge-right': if (activeEl) nudge(activeEl,  step, 0); break;
-        case 'nudge-up':    if (activeEl) nudge(activeEl, 0, -step); break;
-        case 'nudge-down':  if (activeEl) nudge(activeEl, 0,  step); break;
-        case 'reset':       if (activeEl) resetEl(activeEl); break;
+        case 'undo':        undo();  break;
+        case 'redo':        redo();  break;
+        case 'size-up':     if (activeEl) stepSize(activeEl,  1);     break;
+        case 'size-down':   if (activeEl) stepSize(activeEl, -1);     break;
+        case 'nudge-left':  nudgeAll(-step, 0); break;
+        case 'nudge-right': nudgeAll( step, 0); break;
+        case 'nudge-up':    nudgeAll(0, -step); break;
+        case 'nudge-down':  nudgeAll(0,  step); break;
+        case 'reset':       resetSelection(); break;
         case 'reset-all':   resetAll(); break;
         case 'export':      exportHTML(); break;
       }
@@ -428,19 +499,39 @@
     var sizeVal  = qs('#etb-size-val');
     var nudgeVal = qs('#etb-nudge-val');
 
-    var hasEl = !!activeEl;
-    if (hint)     hint.hidden     = hasEl;
-    if (elName)   elName.hidden   = !hasEl;
-    if (sizeRow)  sizeRow.hidden  = !hasEl;
-    if (nudgeRow) nudgeRow.hidden = !hasEl;
-    if (resetBtn) resetBtn.hidden = !hasEl;
+    var count  = selectedEls.length;
+    var hasAny = count > 0;
+    var multi  = count > 1;
 
-    if (hasEl) {
-      var cls = (activeEl.className || '').replace('editor-selected', '').trim().split(/\s+/)[0];
-      if (elName)   elName.textContent  = cls || activeEl.tagName.toLowerCase();
+    if (hint)     hint.hidden     = hasAny;
+    if (elName)   elName.hidden   = !hasAny;
+    if (sizeRow)  sizeRow.hidden  = !hasAny || multi; /* size only for single */
+    if (nudgeRow) nudgeRow.hidden = !hasAny;
+    if (resetBtn) resetBtn.hidden = !hasAny;
+
+    if (!hasAny) { refreshUndoButtons(); return; }
+
+    if (elName) {
+      if (multi) {
+        elName.textContent = count + ' elements';
+      } else if (activeEl) {
+        var cls = (activeEl.className || '')
+          .replace(/editor-selected|editor-in-selection/g, '').trim()
+          .split(/\s+/)[0];
+        elName.textContent = cls || activeEl.tagName.toLowerCase();
+      }
+    }
+
+    if (!multi && activeEl) {
       if (sizeVal)  sizeVal.textContent = Math.round(getSize(activeEl)) + 'px';
       var n = getNudge(activeEl);
       if (nudgeVal) nudgeVal.textContent = n.x + ', ' + n.y;
+    } else if (multi) {
+      /* Show nudge of primary element as reference */
+      if (nudgeVal && activeEl) {
+        var nm = getNudge(activeEl);
+        nudgeVal.textContent = nm.x + ', ' + nm.y;
+      }
     }
 
     refreshUndoButtons();
@@ -455,13 +546,11 @@
     b.id = 'editor-banner';
     b.hidden = true;
     b.innerHTML =
-      '<span>✏ <strong>Edit mode</strong> — click text to edit &nbsp;|&nbsp; ' +
-      '<kbd>Alt+↑↓←→</kbd> nudge &nbsp;|&nbsp; ' +
-      '<kbd>Shift</kbd> ×5 &nbsp;|&nbsp; ' +
-      '<kbd>Ctrl+Z</kbd> undo &nbsp;|&nbsp; ' +
-      '<kbd>Ctrl+⇧+Z</kbd> redo &nbsp;|&nbsp; ' +
-      '<kbd>Esc</kbd> deselect &nbsp;|&nbsp; ' +
-      '<kbd>E</kbd> exit</span>';
+      '<span>✏ <strong>Edit mode</strong> — ' +
+      'click text &nbsp;|&nbsp; <kbd>Shift+click</kbd> multi-select &nbsp;|&nbsp; ' +
+      '<kbd>Alt+↑↓←→</kbd> nudge all &nbsp;|&nbsp; <kbd>Shift</kbd> ×5 &nbsp;|&nbsp; ' +
+      '<kbd>Ctrl+Z</kbd> undo &nbsp;|&nbsp; <kbd>Ctrl+⇧+Z</kbd> redo &nbsp;|&nbsp; ' +
+      '<kbd>Esc</kbd> deselect &nbsp;|&nbsp; <kbd>E</kbd> exit</span>';
     doc.body.appendChild(b);
   }
 
@@ -470,63 +559,77 @@
    * -------------------------------------------------- */
 
   function onKey(e) {
-    var tag = (e.target.tagName || '').toUpperCase();
+    var tag     = (e.target.tagName || '').toUpperCase();
     var inField = tag === 'INPUT' || tag === 'TEXTAREA';
 
-    /* Ctrl+Z — undo (works outside and inside contenteditable) */
-    if (e.ctrlKey && !e.altKey && e.key === 'z' && isOn) {
-      if (!inField) {
+    /* Ctrl+Z undo / Ctrl+Shift+Z or Ctrl+Y redo */
+    if (e.ctrlKey && !e.altKey && isOn) {
+      if (e.key === 'z' && !inField) {
         e.preventDefault();
-        if (e.shiftKey) redo();
-        else            undo();
+        if (e.shiftKey) redo(); else undo();
+        return;
       }
-      return;
+      if (e.key === 'y' && !e.shiftKey && !inField) {
+        e.preventDefault(); redo(); return;
+      }
     }
 
-    /* Ctrl+Y — redo (Windows convention) */
-    if (e.ctrlKey && !e.altKey && !e.shiftKey && e.key === 'y' && isOn) {
-      if (!inField) { e.preventDefault(); redo(); }
-      return;
-    }
-
-    /* E — toggle edit mode (not while typing) */
+    /* E — toggle edit mode */
     if ((e.key === 'e' || e.key === 'E') && !e.metaKey && !e.ctrlKey && !e.altKey) {
       if (!inField && !e.target.isContentEditable) {
-        setMode(!isOn);
-        return;
+        setMode(!isOn); return;
       }
     }
 
     if (!isOn) return;
 
-    /* Escape — deselect */
-    if (e.key === 'Escape' && activeEl) {
-      e.preventDefault();
-      deactivate();
-      return;
-    }
+    /* Escape — deselect all */
+    if (e.key === 'Escape') { e.preventDefault(); deactivateAll(); return; }
 
-    /* Alt + Arrow — nudge */
-    if (activeEl && e.altKey && !e.ctrlKey && !e.metaKey) {
+    /* Alt + Arrow — nudge all selected */
+    if (selectedEls.length && e.altKey && !e.ctrlKey && !e.metaKey) {
       var step = e.shiftKey ? 10 : 2;
       switch (e.key) {
-        case 'ArrowUp':    e.preventDefault(); nudge(activeEl, 0, -step); return;
-        case 'ArrowDown':  e.preventDefault(); nudge(activeEl, 0,  step); return;
-        case 'ArrowLeft':  e.preventDefault(); nudge(activeEl, -step, 0); return;
-        case 'ArrowRight': e.preventDefault(); nudge(activeEl,  step, 0); return;
+        case 'ArrowUp':    e.preventDefault(); nudgeAll(0, -step); return;
+        case 'ArrowDown':  e.preventDefault(); nudgeAll(0,  step); return;
+        case 'ArrowLeft':  e.preventDefault(); nudgeAll(-step, 0); return;
+        case 'ArrowRight': e.preventDefault(); nudgeAll( step, 0); return;
       }
     }
   }
 
   /* --------------------------------------------------
-   * Click-outside to deselect
+   * Click handling
    * -------------------------------------------------- */
 
+  function onEditableClick(el, e) {
+    if (!isOn) return;
+    e.stopPropagation();
+
+    if (e.shiftKey) {
+      /* Shift+click — toggle secondary selection */
+      if (el === activeEl) return; /* can't secondary-select the primary */
+      toggleSecondary(el);
+    } else {
+      /* Normal click — deselect others, activate this one */
+      /* Keep secondary selections but remove their class */
+      selectedEls.forEach(function (s) {
+        if (s !== el) {
+          s.classList.remove('editor-selected', 'editor-in-selection');
+        }
+      });
+      selectedEls = [];
+      activate(el);
+    }
+  }
+
   function onDocClick(e) {
-    if (!isOn || !activeEl) return;
-    if (activeEl.contains(e.target)) return;
+    if (!isOn || !selectedEls.length) return;
+    /* Clicked outside all selected elements and outside toolbar */
+    var inAny = selectedEls.some(function (el) { return el.contains(e.target); });
+    if (inAny) return;
     if (toolbar && toolbar.contains(e.target)) return;
-    deactivate();
+    deactivateAll();
   }
 
   /* --------------------------------------------------
@@ -547,11 +650,7 @@
     buildBanner();
 
     qsa(EDITABLE).forEach(function (el) {
-      el.addEventListener('click', function (e) {
-        if (!isOn) return;
-        e.stopPropagation();
-        activate(el);
-      });
+      el.addEventListener('click', function (e) { onEditableClick(el, e); });
     });
 
     window.addEventListener('keydown', onKey);

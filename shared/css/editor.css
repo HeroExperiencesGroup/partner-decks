@@ -27,10 +27,18 @@ body[data-editor="true"] [data-eid]:hover {
  * Selected / active element
  * -------------------------------------------------- */
 
+/* Primary — text-editable, warm amber */
 .editor-selected {
   outline: 2px solid rgba(210, 140, 60, 0.9) !important;
   outline-offset: 3px;
   cursor: text !important;
+}
+
+/* Secondary — in multi-select, teal — move only, no text editing */
+.editor-in-selection {
+  outline: 2px solid rgba(80, 180, 160, 0.8) !important;
+  outline-offset: 3px;
+  cursor: default !important;
 }
 
 /* --------------------------------------------------
