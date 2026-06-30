@@ -2782,3 +2782,114 @@ html[data-deck-layout="locked"] .landscape-tab {
   color: var(--deep-sand);
   padding-left: var(--space-3);
 }
+
+/* =========================================================
+ * Photo credit — small clickable attribution line
+ * Used below tab captions when image has a CC licence.
+ * ========================================================= */
+
+.photo-credit {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.6rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--meta);
+  text-decoration: none;
+}
+
+/* Inside an image panel: overlay at bottom-right, hidden until image hovered */
+.section__image .photo-credit {
+  position: absolute;
+  bottom: var(--space-3);
+  right: var(--space-3);
+  color: rgba(244, 239, 230, 0.75); /* bone, slightly muted */
+  background: rgba(28, 28, 26, 0.55);
+  padding: 0.3em 0.6em;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 240ms ease;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+.section__image:hover .photo-credit {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.section__image .photo-credit:hover {
+  color: var(--bone);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* =========================================================
+ * Bleed-right layout — text left column, image right to section edge.
+ *
+ * Usage: add class "section--bleed-right" to any <section>.
+ * The image lives in .section__image, a direct sibling of
+ * .section__inner (NOT inside it). This keeps section__inner's
+ * normal centering intact so text aligns with every other slide.
+ *
+ * padding-left on .section__inner is calculated to match the
+ * auto-margin of a centred 80rem container inside a 1920px
+ * section with 4rem (--space-8) horizontal padding on each side:
+ *   (1920px − 2×space-8 − 80rem) / 2 = 256px
+ * ========================================================= */
+
+/* Specificity must match the base rule:
+ * html[data-deck-layout="locked"] .slide-viewport > .section  →  (0,3,1)
+ * Using the same chain here so same-weight, later rule wins. */
+html[data-deck-layout="locked"] .slide-viewport > .section--bleed-right {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: 1fr;
+  padding-right: 0;
+  padding-block: 0;
+}
+
+html[data-deck-layout="locked"] .section--bleed-right .section__inner {
+  padding-block: var(--section-padding-y);
+  padding-left: calc((1920px - 2 * var(--space-8) - 80rem) / 2);
+  padding-right: var(--space-8);
+  max-width: none;
+}
+
+.section--bleed-right .section__image {
+  overflow: hidden;
+  align-self: stretch;
+}
+
+.section--bleed-right .section__image picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.section--bleed-right .section__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Tab-switched panels inside .section__image (Slide 11) */
+.section--bleed-right .section__image .tab-panel-editorial {
+  position: relative;
+  height: 100%;
+}
+
+.section--bleed-right .section__image .tab-panel-editorial.is-active {
+  display: block;
+  height: 100%;
+}
+
+/* =========================================================
+ * Slide 17 — An Invitation: step the declaration down in size
+ * so the thesis headline reads first, the proposition second.
+ * ========================================================= */
+
+#sec-invitation .declaration {
+  font-size: var(--type-display-sm);
+  max-width: 38ch;
+}
