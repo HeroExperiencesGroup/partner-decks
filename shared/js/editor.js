@@ -3,13 +3,19 @@
  * Toggle with E key.
  *
  * Selection model:
- *   Click            — select element (no text editing yet)
- *   Shift+click      — add / remove from multi-selection
- *   Toolbar "Edit Text" button — enter typing mode on primary element
- *   Esc (while typing)  — exit typing mode, keep selection
- *   Esc (not typing)    — deselect all
- *   Alt+↑↓←→            — nudge all selected (2px; Shift = 10px)
- *   Ctrl+Z / Ctrl+Shift+Z — undo / redo
+ *   Click              — select element
+ *   Shift+click        — add / remove from multi-selection
+ *   Toolbar "Edit Text"— enter typing mode on primary element
+ *   Esc (typing)       — exit typing mode, keep selection
+ *   Esc (selecting)    — deselect all
+ *   Alt+↑↓←→           — nudge all selected (2px; Shift = 10px)
+ *   Ctrl+Z / Ctrl+⇧+Z  — undo / redo
+ *
+ * Coordinate tools (edit mode):
+ *   Hover slide        — live x, y readout in toolbar (1920×1080 space)
+ *   P key / toolbar    — toggle pin mode; click slide to drop coord marker
+ *   Click pin          — remove that pin
+ *   Toolbar "Clear pins"— remove all pins
  *
  * TO DISABLE FOR CLIENT: remove the two lines tagged
  * data-editor-remove in natgeo/index.html.
@@ -18,26 +24,28 @@
 (function () {
   'use strict';
 
-  var STORE_KEY  = 'partner-decks:editor-v1';
-  var doc        = document;
-  var body       = doc.body;
-  var store      = {};
-  var originals  = {};
-  var toolbar    = null;
-  var isOn       = false;
+  var STORE_KEY = 'partner-decks:editor-v1';
+  var doc       = document;
+  var body      = doc.body;
+  var store     = {};
+  var originals = {};
+  var toolbar   = null;
+  var isOn      = false;
 
   /* Selection */
-  var activeEl    = null;   /* primary selected element */
-  var selectedEls = [];     /* full set; nudge applies to all */
-  var isTyping    = false;  /* whether activeEl is contentEditable */
+  var activeEl    = null;
+  var selectedEls = [];
+  var isTyping    = false;
+  var typingSnap  = null;
 
-  /* Undo/redo — each entry is an ARRAY of { eid, before, after } */
+  /* Pins */
+  var pinMode = false;
+  var pins    = [];   /* { el, section, cx, cy } */
+
+  /* Undo / redo — each entry is ARRAY of { eid, before, after } */
   var undoStack = [];
   var redoStack = [];
   var MAX_HISTORY = 60;
-
-  /* Snapshot captured when entering typing mode, for content undo */
-  var typingSnap = null;
 
   var EDITABLE = [
     '.section-label', '.headline', '.subhead',
@@ -80,12 +88,101 @@
         var eid = sid + ':' + i;
         el.dataset.eid = eid;
         originals[eid] = el.innerHTML;
-        /* Prevent browser text-selection on click while in edit mode */
         el.addEventListener('mousedown', function (e) {
-          if (isOn && !isTyping) e.preventDefault();
+          if (isOn && !isTyping && !pinMode) e.preventDefault();
         });
       });
     });
+  }
+
+  /* ------------------------------------------------
+   * Coordinate conversion
+   * screen px → 1920×1080 canvas px
+   * ---------------------------------------------- */
+
+  function screenToCanvas(section, sx, sy) {
+    var r = section.getBoundingClientRect();
+    var x = Math.round((sx - r.left) * 1920 / r.width);
+    var y = Math.round((sy - r.top)  * 1080 / r.height);
+    return {
+      x: Math.max(0, Math.min(1920, x)),
+      y: Math.max(0, Math.min(1080, y))
+    };
+  }
+
+  function updateCoordDisplay(x, y) {
+    var el = qs('#etb-coords');
+    if (!el) return;
+    el.textContent = (x !== null) ? 'x ' + x + '  y ' + y : '— —';
+  }
+
+  /* ------------------------------------------------
+   * Pins
+   * Positioned absolutely within the section (1920×1080 space)
+   * so they scale with the letterbox transform automatically.
+   * ---------------------------------------------- */
+
+  var pinCounter = 0;
+
+  function setPinMode(on) {
+    pinMode = on;
+    body.setAttribute('data-editor-pin', on ? 'true' : 'false');
+    var btn = qs('#etb-pin-toggle');
+    if (btn) {
+      btn.textContent = on ? '📍 Pinning…' : '📍 Drop pin';
+      btn.classList.toggle('etb-btn-active', on);
+    }
+  }
+
+  function dropPin(section, sx, sy) {
+    var c   = screenToCanvas(section, sx, sy);
+    var num = ++pinCounter;
+    var el  = doc.createElement('div');
+    el.className = 'editor-pin';
+    el.style.left = c.x + 'px';
+    el.style.top  = c.y + 'px';
+    el.innerHTML  =
+      '<div class="editor-pin__cross"></div>' +
+      '<div class="editor-pin__label">' +
+        '<span class="editor-pin__num">' + num + '</span>' +
+        ' ' + c.x + ', ' + c.y +
+      '</div>';
+    el.title = 'Pin ' + num + ' — ' + c.x + ', ' + c.y + ' (click to remove)';
+    el.addEventListener('click', function (e) {
+      e.stopPropagation();
+      removePin(el);
+    });
+    section.appendChild(el);
+    pins.push({ el: el, section: section, cx: c.x, cy: c.y, num: num });
+    updatePinCount();
+  }
+
+  function removePin(el) {
+    pins = pins.filter(function (p) {
+      if (p.el === el) {
+        if (p.el.parentNode) p.el.parentNode.removeChild(p.el);
+        return false;
+      }
+      return true;
+    });
+    updatePinCount();
+  }
+
+  function clearAllPins() {
+    pins.forEach(function (p) {
+      if (p.el.parentNode) p.el.parentNode.removeChild(p.el);
+    });
+    pins = [];
+    pinCounter = 0;
+    updatePinCount();
+  }
+
+  function updatePinCount() {
+    var btn = qs('#etb-pin-clear');
+    if (btn) {
+      btn.hidden = pins.length === 0;
+      btn.textContent = 'Clear pins (' + pins.length + ')';
+    }
   }
 
   /* ------------------------------------------------
@@ -173,7 +270,7 @@
     if (x === 0 && y === 0) {
       el.style.position = ''; el.style.transform = '';
     } else {
-      el.style.position = 'relative';
+      el.style.position  = 'relative';
       el.style.transform = 'translate(' + x + 'px,' + y + 'px)';
     }
   }
@@ -188,7 +285,7 @@
     var banner = qs('#editor-banner');
     if (banner) banner.hidden = !on;
     if (toolbar) toolbar.hidden = !on;
-    if (!on) deactivateAll();
+    if (!on) { deactivateAll(); setPinMode(false); }
   }
 
   /* ------------------------------------------------
@@ -197,10 +294,8 @@
 
   function isSelected(el) { return selectedEls.indexOf(el) !== -1; }
 
-  /* Set primary selection (single click) */
   function selectPrimary(el) {
     if (isTyping) exitTyping();
-    /* Clear all existing highlights */
     selectedEls.forEach(function (s) {
       s.classList.remove('editor-selected', 'editor-in-selection');
     });
@@ -210,7 +305,6 @@
     refreshToolbar();
   }
 
-  /* Toggle secondary selection (shift+click) */
   function toggleSecondary(el) {
     if (el === activeEl) return;
     if (isSelected(el)) {
@@ -223,7 +317,6 @@
     refreshToolbar();
   }
 
-  /* Deselect everything */
   function deactivateAll() {
     if (isTyping) exitTyping();
     selectedEls.forEach(function (el) {
@@ -235,22 +328,18 @@
   }
 
   /* ------------------------------------------------
-   * Text editing (explicit opt-in from toolbar)
+   * Typing mode
    * ---------------------------------------------- */
 
   function enterTyping() {
     if (!activeEl || isTyping) return;
-    isTyping    = true;
-    typingSnap  = snapState(activeEl);
+    isTyping   = true;
+    typingSnap = snapState(activeEl);
     activeEl.contentEditable = 'true';
     activeEl.classList.add('editor-typing');
     activeEl.focus();
-
-    /* Restore normal cursor/text-selection while typing */
     activeEl._edMouseDown = function (e) { e.stopPropagation(); };
     activeEl.addEventListener('mousedown', activeEl._edMouseDown);
-
-    /* Auto-save on every keystroke */
     activeEl._edInput = function () {
       var d = store[activeEl.dataset.eid] || {};
       d.html = activeEl.innerHTML;
@@ -258,19 +347,15 @@
       save();
     };
     activeEl.addEventListener('input', activeEl._edInput);
-
     refreshToolbar();
   }
 
   function exitTyping() {
     if (!isTyping || !activeEl) return;
-    var after = snapState(activeEl);
-    pushHistory([{ eid: activeEl.dataset.eid, before: typingSnap, after: after }]);
+    pushHistory([{ eid: activeEl.dataset.eid, before: typingSnap, after: snapState(activeEl) }]);
     typingSnap = null;
-
     activeEl.contentEditable = 'false';
     activeEl.classList.remove('editor-typing');
-
     if (activeEl._edMouseDown) {
       activeEl.removeEventListener('mousedown', activeEl._edMouseDown);
       delete activeEl._edMouseDown;
@@ -283,12 +368,10 @@
     refreshToolbar();
   }
 
-  function toggleTyping() {
-    if (isTyping) exitTyping(); else enterTyping();
-  }
+  function toggleTyping() { if (isTyping) exitTyping(); else enterTyping(); }
 
   /* ------------------------------------------------
-   * Font size (primary element only)
+   * Font size
    * ---------------------------------------------- */
 
   function getSize(el) {
@@ -388,14 +471,18 @@
     clone.querySelectorAll('.editor-selected,.editor-in-selection,.editor-typing').forEach(function (el) {
       el.classList.remove('editor-selected', 'editor-in-selection', 'editor-typing');
     });
+    clone.querySelectorAll('.editor-pin').forEach(function (el) {
+      el.parentNode && el.parentNode.removeChild(el);
+    });
     clone.querySelectorAll('#editor-toolbar,#editor-banner').forEach(function (el) {
       el.parentNode && el.parentNode.removeChild(el);
     });
     clone.removeAttribute('data-editor');
+    clone.removeAttribute('data-editor-pin');
     var html = '<!doctype html>\n' + clone.outerHTML;
     var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-    var a    = doc.createElement('a');
-    a.href   = URL.createObjectURL(blob);
+    var a = doc.createElement('a');
+    a.href = URL.createObjectURL(blob);
     a.download = 'natgeo-edited.html';
     doc.body.appendChild(a);
     a.click();
@@ -414,11 +501,13 @@
     t.innerHTML =
       '<span class="etb-label">✏ Editor</span>' +
 
+      /* Undo / redo */
       '<div class="etb-group">' +
-        '<button id="etb-undo" data-ea="undo" title="Ctrl+Z" disabled>↩ Undo</button>' +
-        '<button id="etb-redo" data-ea="redo" title="Ctrl+Shift+Z" disabled>↪ Redo</button>' +
+        '<button id="etb-undo" data-ea="undo" title="Ctrl+Z" disabled>↩</button>' +
+        '<button id="etb-redo" data-ea="redo" title="Ctrl+Shift+Z" disabled>↪</button>' +
       '</div>' +
 
+      /* Element controls */
       '<div class="etb-group">' +
         '<span class="etb-hint" id="etb-hint">click text to select</span>' +
         '<span class="etb-el-name" id="etb-el-name" hidden></span>' +
@@ -440,18 +529,26 @@
         '<button class="etb-btn-danger" data-ea="reset" id="etb-reset" hidden>Reset</button>' +
       '</div>' +
 
+      /* Coordinate tools */
+      '<div class="etb-group etb-group--coords">' +
+        '<span class="etb-section-label">Canvas</span>' +
+        '<span id="etb-coords" class="etb-coords">— —</span>' +
+        '<button id="etb-pin-toggle" data-ea="pin-toggle">📍 Drop pin</button>' +
+        '<button id="etb-pin-clear" data-ea="pin-clear" hidden>Clear pins (0)</button>' +
+      '</div>' +
+
+      /* Global */
       '<div class="etb-group">' +
         '<button class="etb-btn-danger" data-ea="reset-all">Reset all</button>' +
-        '<button class="etb-btn-export" data-ea="export">Export HTML ↓</button>' +
+        '<button class="etb-btn-export" data-ea="export">Export ↓</button>' +
       '</div>';
 
     t.addEventListener('mousedown', function (e) { e.preventDefault(); });
     t.addEventListener('click', function (e) {
       var btn = e.target.closest('[data-ea]');
       if (!btn) return;
-      var step   = e.shiftKey ? 10 : 2;
-      var action = btn.dataset.ea;
-      switch (action) {
+      var step = e.shiftKey ? 10 : 2;
+      switch (btn.dataset.ea) {
         case 'undo':        undo();  break;
         case 'redo':        redo();  break;
         case 'edit-text':   toggleTyping(); break;
@@ -464,6 +561,8 @@
         case 'reset':       resetSelection(); break;
         case 'reset-all':   resetAll(); break;
         case 'export':      exportHTML(); break;
+        case 'pin-toggle':  setPinMode(!pinMode); break;
+        case 'pin-clear':   clearAllPins(); break;
       }
     });
 
@@ -488,22 +587,19 @@
 
     if (hint)        hint.hidden        = hasAny;
     if (elName)      elName.hidden      = !hasAny;
-    if (editTextBtn) editTextBtn.hidden = !hasAny || multi; /* single selection only */
+    if (editTextBtn) editTextBtn.hidden = !hasAny || multi;
     if (sizeRow)     sizeRow.hidden     = !hasAny || multi || isTyping;
     if (nudgeRow)    nudgeRow.hidden    = !hasAny || isTyping;
     if (resetBtn)    resetBtn.hidden    = !hasAny;
 
-    /* Edit Text button label and state */
     if (editTextBtn && !multi) {
       editTextBtn.textContent = isTyping ? '✓ Done Editing' : 'Edit Text';
       editTextBtn.classList.toggle('etb-btn-active', isTyping);
     }
 
-    if (!hasAny) { refreshUndoButtons(); return; }
-
-    if (elName) {
+    if (hasAny && elName) {
       if (multi) {
-        elName.textContent = count + ' elements selected';
+        elName.textContent = count + ' selected';
       } else if (activeEl) {
         var cls = (activeEl.className || '')
           .replace(/editor-selected|editor-in-selection|editor-typing/g, '')
@@ -513,7 +609,7 @@
     }
 
     if (!multi && activeEl && !isTyping) {
-      if (sizeVal)  sizeVal.textContent  = Math.round(getSize(activeEl)) + 'px';
+      if (sizeVal) sizeVal.textContent = Math.round(getSize(activeEl)) + 'px';
       var n = getNudge(activeEl);
       if (nudgeVal) nudgeVal.textContent = n.x + ', ' + n.y;
     }
@@ -531,12 +627,41 @@
     b.hidden = true;
     b.innerHTML =
       '<span>✏ <strong>Edit mode</strong> — ' +
-      'click to select &nbsp;|&nbsp; <kbd>Shift+click</kbd> multi-select &nbsp;|&nbsp; ' +
-      '"Edit Text" button to type &nbsp;|&nbsp; ' +
+      'click to select &nbsp;|&nbsp; <kbd>Shift+click</kbd> multi &nbsp;|&nbsp; ' +
+      '"Edit Text" to type &nbsp;|&nbsp; ' +
       '<kbd>Alt+↑↓←→</kbd> nudge &nbsp;|&nbsp; <kbd>Shift</kbd> ×5 &nbsp;|&nbsp; ' +
-      '<kbd>Ctrl+Z</kbd> undo &nbsp;|&nbsp; <kbd>Ctrl+⇧+Z</kbd> redo &nbsp;|&nbsp; ' +
-      '<kbd>Esc</kbd> deselect &nbsp;|&nbsp; <kbd>E</kbd> exit</span>';
+      '<kbd>P</kbd> pin mode &nbsp;|&nbsp; ' +
+      '<kbd>Ctrl+Z</kbd> undo &nbsp;|&nbsp; <kbd>Esc</kbd> deselect &nbsp;|&nbsp; ' +
+      '<kbd>E</kbd> exit</span>';
     doc.body.appendChild(b);
+  }
+
+  /* ------------------------------------------------
+   * Coordinate tracking — mousemove on each section
+   * ---------------------------------------------- */
+
+  function initCoordTracking() {
+    qsa('.section').forEach(function (section) {
+      section.addEventListener('mousemove', function (e) {
+        if (!isOn) return;
+        var c = screenToCanvas(section, e.clientX, e.clientY);
+        updateCoordDisplay(c.x, c.y);
+      });
+      section.addEventListener('mouseleave', function () {
+        if (!isOn) return;
+        updateCoordDisplay(null, null);
+      });
+
+      /* Click to drop pin */
+      section.addEventListener('click', function (e) {
+        if (!isOn || !pinMode) return;
+        /* Don't pin if click was on an editable element */
+        if (e.target.dataset.eid) return;
+        /* Don't pin on toolbar / banner / existing pin */
+        if (e.target.closest('#editor-toolbar, #editor-banner, .editor-pin')) return;
+        dropPin(section, e.clientX, e.clientY);
+      });
+    });
   }
 
   /* ------------------------------------------------
@@ -547,34 +672,34 @@
     var tag     = (e.target.tagName || '').toUpperCase();
     var inField = tag === 'INPUT' || tag === 'TEXTAREA';
 
-    /* Ctrl+Z undo / Ctrl+Shift+Z or Ctrl+Y redo */
+    /* Ctrl+Z / Ctrl+Y */
     if (e.ctrlKey && !e.altKey && isOn && !inField) {
-      if (e.key === 'z') {
-        e.preventDefault();
-        if (e.shiftKey) redo(); else undo();
-        return;
-      }
-      if (e.key === 'y' && !e.shiftKey) {
-        e.preventDefault(); redo(); return;
-      }
+      if (e.key === 'z') { e.preventDefault(); if (e.shiftKey) redo(); else undo(); return; }
+      if (e.key === 'y' && !e.shiftKey) { e.preventDefault(); redo(); return; }
     }
 
-    /* E — toggle edit mode (only when not typing) */
+    /* E — toggle edit mode */
     if ((e.key === 'e' || e.key === 'E') && !e.metaKey && !e.ctrlKey && !e.altKey) {
       if (!inField && !isTyping) { setMode(!isOn); return; }
     }
 
     if (!isOn) return;
 
+    /* P — toggle pin mode */
+    if ((e.key === 'p' || e.key === 'P') && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      if (!inField && !isTyping) { setPinMode(!pinMode); return; }
+    }
+
     /* Escape */
     if (e.key === 'Escape') {
       e.preventDefault();
-      if (isTyping) exitTyping();    /* first Esc exits typing */
-      else          deactivateAll(); /* second Esc deselects */
+      if (pinMode)     { setPinMode(false); return; }
+      if (isTyping)    { exitTyping();      return; }
+      deactivateAll();
       return;
     }
 
-    /* Alt+Arrow nudge — only when not typing */
+    /* Alt+Arrow nudge */
     if (!isTyping && selectedEls.length && e.altKey && !e.ctrlKey && !e.metaKey) {
       var step = e.shiftKey ? 10 : 2;
       switch (e.key) {
@@ -591,13 +716,10 @@
    * ---------------------------------------------- */
 
   function onEditableClick(el, e) {
-    if (!isOn) return;
-    /* mousedown already called e.preventDefault() when not typing,
-       so no text selection happens. We just handle the selection here. */
+    if (!isOn || pinMode) return;
     if (e.shiftKey) {
-      if (el === activeEl) return;
-      /* If there's no primary yet, make this the primary */
       if (!activeEl) { selectPrimary(el); return; }
+      if (el === activeEl) return;
       toggleSecondary(el);
     } else {
       selectPrimary(el);
@@ -606,7 +728,6 @@
 
   function onDocClick(e) {
     if (!isOn || !selectedEls.length) return;
-    /* If typing, clicks inside the element are handled by the browser */
     if (isTyping && activeEl && activeEl.contains(e.target)) return;
     var inAny = selectedEls.some(function (el) { return el.contains(e.target); });
     if (inAny) return;
@@ -630,6 +751,7 @@
 
     toolbar = buildToolbar();
     buildBanner();
+    initCoordTracking();
 
     qsa(EDITABLE).forEach(function (el) {
       el.addEventListener('click', function (e) { onEditableClick(el, e); });
@@ -640,7 +762,7 @@
 
     window.__editor = {
       undo: undo, redo: redo, resetAll: resetAll, export: exportHTML,
-      store: store, history: { undo: undoStack, redo: redoStack }
+      store: store, pins: pins, history: { undo: undoStack, redo: redoStack }
     };
   });
 

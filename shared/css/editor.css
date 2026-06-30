@@ -215,3 +215,105 @@ body[data-editor="true"] [data-eid]:hover {
   cursor: not-allowed;
   pointer-events: none;
 }
+
+/* --------------------------------------------------
+ * Coordinate display
+ * -------------------------------------------------- */
+
+.etb-group--coords {
+  gap: 0.5rem;
+}
+
+.etb-coords {
+  font-variant-numeric: tabular-nums;
+  min-width: 7rem;
+  opacity: 0.9;
+  letter-spacing: 0.04em;
+}
+
+/* --------------------------------------------------
+ * Pin mode cursor
+ * -------------------------------------------------- */
+
+body[data-editor-pin="true"] .section {
+  cursor: crosshair !important;
+}
+
+body[data-editor-pin="true"] [data-eid] {
+  cursor: crosshair !important;
+}
+
+/* --------------------------------------------------
+ * Pin markers
+ * Positioned in the 1920×1080 section coordinate space;
+ * scale with the letterbox transform automatically.
+ * -------------------------------------------------- */
+
+.editor-pin {
+  position: absolute;
+  z-index: 9000;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.editor-pin__cross {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  transform: translate(-50%, -50%);
+}
+
+.editor-pin__cross::before,
+.editor-pin__cross::after {
+  content: '';
+  position: absolute;
+  background: rgba(255, 80, 80, 0.9);
+}
+
+.editor-pin__cross::before {
+  width: 2px;
+  height: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.editor-pin__cross::after {
+  height: 2px;
+  width: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.editor-pin__label {
+  position: absolute;
+  top: 14px;
+  left: 10px;
+  background: rgba(28, 28, 26, 0.88);
+  color: rgba(255, 180, 160, 0.95);
+  font-family: ui-monospace, 'SF Mono', monospace;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.editor-pin__num {
+  color: rgba(255, 120, 100, 1);
+  font-weight: bold;
+}
+
+.editor-pin:hover .editor-pin__cross::before,
+.editor-pin:hover .editor-pin__cross::after {
+  background: rgba(255, 50, 50, 1);
+}
+
+.editor-pin:hover .editor-pin__label::after {
+  content: ' ✕';
+  opacity: 0.6;
+}
