@@ -2,20 +2,25 @@
  *
  * Toggle with E key.
  *
- * Selection model:
- *   Click              — select element
- *   Shift+click        — add / remove from multi-selection
- *   Toolbar "Edit Text"— enter typing mode on primary element
- *   Esc (typing)       — exit typing mode, keep selection
- *   Esc (selecting)    — deselect all
- *   Alt+↑↓←→           — nudge all selected (2px; Shift = 10px)
- *   Ctrl+Z / Ctrl+⇧+Z  — undo / redo
+ * Selection:
+ *   Click text          — select element
+ *   Shift+click         — multi-select
+ *   "Edit Text" button  — enter typing mode
+ *   Click image         — select image, open brief panel
+ *   Esc                 — exit typing → deselect
+ *   Alt+↑↓←→            — nudge (2px; Shift=10px)
+ *   Ctrl+Z / Ctrl+⇧+Z   — undo / redo
  *
- * Coordinate tools (edit mode):
- *   Hover slide        — live x, y readout in toolbar (1920×1080 space)
- *   P key / toolbar    — toggle pin mode; click slide to drop coord marker
- *   Click pin          — remove that pin
- *   Toolbar "Clear pins"— remove all pins
+ * Coordinates:
+ *   Hover slide         — live x,y readout in toolbar
+ *   P / toolbar         — pin mode; click to drop coord marker
+ *   Click pin           — remove it
+ *
+ * Brief (image replacement workflow):
+ *   Click any image → type a note → "Add to Brief"
+ *   "Export Brief" → downloads editor-brief.json
+ *   Hand the JSON to Claude → Claude finds/converts/places the image
+ *   and applies any text edits from the brief automatically.
  *
  * TO DISABLE FOR CLIENT: remove the two lines tagged
  * data-editor-remove in natgeo/index.html.
@@ -32,19 +37,24 @@
   var toolbar   = null;
   var isOn      = false;
 
-  /* Selection */
+  /* Text selection */
   var activeEl    = null;
   var selectedEls = [];
   var isTyping    = false;
   var typingSnap  = null;
 
-  /* Pins */
-  var pinMode = false;
-  var pins    = [];   /* { el, section, cx, cy } */
+  /* Image selection */
+  var activeImg  = null;   /* selected <picture> element */
+  var briefItems = [];     /* accumulated image + note requests */
 
-  /* Undo / redo — each entry is ARRAY of { eid, before, after } */
-  var undoStack = [];
-  var redoStack = [];
+  /* Pins */
+  var pinMode  = false;
+  var pins     = [];
+  var pinCount = 0;
+
+  /* Undo/redo — entries are ARRAY of { eid, before, after } */
+  var undoStack   = [];
+  var redoStack   = [];
   var MAX_HISTORY = 60;
 
   var EDITABLE = [
@@ -78,7 +88,7 @@
   }
 
   /* ------------------------------------------------
-   * Element identification
+   * Element identification — text
    * ---------------------------------------------- */
 
   function assignIds() {
@@ -96,121 +106,145 @@
   }
 
   /* ------------------------------------------------
+   * Image identification
+   * Assign a stable data-iid to every <picture> and
+   * build a unique CSS selector for it.
+   * ---------------------------------------------- */
+
+  function assignImgIds() {
+    qsa('.section').forEach(function (section) {
+      var sid = section.id || 'global';
+      qsa('picture', section).forEach(function (pic, i) {
+        pic.dataset.iid = sid + ':pic:' + i;
+        pic.dataset.iidSelector = buildPicSelector(pic);
+        pic.dataset.iidSection  = sid;
+        pic.dataset.iidSlide    = section.dataset.slide || '';
+        var tabPanel = pic.closest('[data-tab]');
+        pic.dataset.iidTab = tabPanel ? tabPanel.getAttribute('data-tab') : '';
+      });
+    });
+  }
+
+  function buildPicSelector(pic) {
+    var section   = pic.closest('.section');
+    var tabPanel  = pic.closest('[data-tab]');
+    var base      = section && section.id ? '#' + section.id : '';
+    if (tabPanel) base += ' [data-tab="' + tabPanel.getAttribute('data-tab') + '"]';
+    /* find pic's index among siblings with same context */
+    var ctx  = tabPanel || (section || doc);
+    var pics = qsa('picture', ctx);
+    var idx  = pics.indexOf(pic);
+    base += ' picture' + (idx > 0 ? ':nth-of-type(' + (idx + 1) + ')' : '');
+    return base;
+  }
+
+  function getImgSrc(pic) {
+    var img = pic.querySelector('img');
+    return img ? (img.getAttribute('src') || '') : '';
+  }
+
+  function getImgSources(pic) {
+    return qsa('source', pic).map(function (s) {
+      return { type: s.getAttribute('type'), srcset: s.getAttribute('srcset') };
+    });
+  }
+
+  /* ------------------------------------------------
    * Coordinate conversion
-   * screen px → 1920×1080 canvas px
    * ---------------------------------------------- */
 
   function screenToCanvas(section, sx, sy) {
     var r = section.getBoundingClientRect();
-    var x = Math.round((sx - r.left) * 1920 / r.width);
-    var y = Math.round((sy - r.top)  * 1080 / r.height);
     return {
-      x: Math.max(0, Math.min(1920, x)),
-      y: Math.max(0, Math.min(1080, y))
+      x: Math.round(Math.max(0, Math.min(1920, (sx - r.left) * 1920 / r.width))),
+      y: Math.round(Math.max(0, Math.min(1080, (sy - r.top)  * 1080 / r.height)))
     };
   }
 
   function updateCoordDisplay(x, y) {
     var el = qs('#etb-coords');
-    if (!el) return;
-    el.textContent = (x !== null) ? 'x ' + x + '  y ' + y : '— —';
+    if (el) el.textContent = x !== null ? 'x ' + x + '  y ' + y : '— —';
   }
 
   /* ------------------------------------------------
    * Pins
-   * Positioned absolutely within the section (1920×1080 space)
-   * so they scale with the letterbox transform automatically.
    * ---------------------------------------------- */
-
-  var pinCounter = 0;
 
   function setPinMode(on) {
     pinMode = on;
     body.setAttribute('data-editor-pin', on ? 'true' : 'false');
     var btn = qs('#etb-pin-toggle');
     if (btn) {
-      btn.textContent = on ? '📍 Pinning…' : '📍 Drop pin';
+      btn.textContent = on ? '📍 Pinning…' : '📍 Pin';
       btn.classList.toggle('etb-btn-active', on);
     }
   }
 
   function dropPin(section, sx, sy) {
-    var c   = screenToCanvas(section, sx, sy);
-    var num = ++pinCounter;
-    var el  = doc.createElement('div');
+    var c  = screenToCanvas(section, sx, sy);
+    var n  = ++pinCount;
+    var el = doc.createElement('div');
     el.className = 'editor-pin';
     el.style.left = c.x + 'px';
     el.style.top  = c.y + 'px';
     el.innerHTML  =
       '<div class="editor-pin__cross"></div>' +
       '<div class="editor-pin__label">' +
-        '<span class="editor-pin__num">' + num + '</span>' +
-        ' ' + c.x + ', ' + c.y +
+        '<span class="editor-pin__num">' + n + '</span> ' + c.x + ', ' + c.y +
       '</div>';
-    el.title = 'Pin ' + num + ' — ' + c.x + ', ' + c.y + ' (click to remove)';
-    el.addEventListener('click', function (e) {
-      e.stopPropagation();
-      removePin(el);
-    });
+    el.title = 'Pin ' + n + ' — ' + c.x + ', ' + c.y + ' (click to remove)';
+    el.addEventListener('click', function (e) { e.stopPropagation(); removePin(el); });
     section.appendChild(el);
-    pins.push({ el: el, section: section, cx: c.x, cy: c.y, num: num });
-    updatePinCount();
+    pins.push({ el: el, section: section, num: n,
+                sectionId: section.id, slide: parseInt(section.dataset.slide) || 0,
+                cx: c.x, cy: c.y });
+    updatePinBtn();
   }
 
   function removePin(el) {
     pins = pins.filter(function (p) {
-      if (p.el === el) {
-        if (p.el.parentNode) p.el.parentNode.removeChild(p.el);
-        return false;
-      }
+      if (p.el === el) { el.parentNode && el.parentNode.removeChild(el); return false; }
       return true;
     });
-    updatePinCount();
+    updatePinBtn();
   }
 
   function clearAllPins() {
-    pins.forEach(function (p) {
-      if (p.el.parentNode) p.el.parentNode.removeChild(p.el);
-    });
-    pins = [];
-    pinCounter = 0;
-    updatePinCount();
+    pins.forEach(function (p) { p.el.parentNode && p.el.parentNode.removeChild(p.el); });
+    pins = []; pinCount = 0;
+    updatePinBtn();
   }
 
-  function updatePinCount() {
+  function updatePinBtn() {
     var btn = qs('#etb-pin-clear');
-    if (btn) {
-      btn.hidden = pins.length === 0;
-      btn.textContent = 'Clear pins (' + pins.length + ')';
-    }
+    if (btn) { btn.hidden = !pins.length; btn.textContent = 'Clear pins (' + pins.length + ')'; }
   }
 
   /* ------------------------------------------------
-   * State snapshot
+   * State snapshot — text elements
    * ---------------------------------------------- */
 
   function snapState(el) {
     var d = store[el.dataset.eid] || {};
-    return {
-      html:     el.innerHTML,
-      fontSize: el.style.fontSize || null,
-      nudgeX:   d.nudgeX || 0,
-      nudgeY:   d.nudgeY || 0
-    };
+    return { html: el.innerHTML, fontSize: el.style.fontSize || null,
+             nudgeX: d.nudgeX || 0, nudgeY: d.nudgeY || 0 };
   }
 
   function applyState(eid, state) {
     var el = qs('[data-eid="' + eid + '"]');
     if (!el) return;
-    el.innerHTML       = state.html;
-    el.style.fontSize  = state.fontSize || '';
+    el.innerHTML = state.html;
+    el.style.fontSize = state.fontSize || '';
     applyTransform(el, state.nudgeX || 0, state.nudgeY || 0);
     var d = store[eid] || {};
     d.html = state.html; d.fontSize = state.fontSize;
     d.nudgeX = state.nudgeX || 0; d.nudgeY = state.nudgeY || 0;
-    store[eid] = d;
-    save();
-    refreshToolbar();
+    store[eid] = d; save(); refreshToolbar();
+  }
+
+  function applyTransform(el, x, y) {
+    if (x === 0 && y === 0) { el.style.position = ''; el.style.transform = ''; }
+    else { el.style.position = 'relative'; el.style.transform = 'translate(' + x + 'px,' + y + 'px)'; }
   }
 
   /* ------------------------------------------------
@@ -229,36 +263,30 @@
   }
 
   function undo() {
-    var entries = undoStack.pop();
-    if (!entries) return;
-    entries.forEach(function (e) { applyState(e.eid, e.before); });
-    redoStack.push(entries);
-    refreshUndoButtons();
+    var e = undoStack.pop(); if (!e) return;
+    e.forEach(function (i) { applyState(i.eid, i.before); });
+    redoStack.push(e); refreshUndoButtons();
   }
 
   function redo() {
-    var entries = redoStack.pop();
-    if (!entries) return;
-    entries.forEach(function (e) { applyState(e.eid, e.after); });
-    undoStack.push(entries);
-    refreshUndoButtons();
+    var e = redoStack.pop(); if (!e) return;
+    e.forEach(function (i) { applyState(i.eid, i.after); });
+    undoStack.push(e); refreshUndoButtons();
   }
 
   function refreshUndoButtons() {
-    var u = qs('#etb-undo');
-    var r = qs('#etb-redo');
+    var u = qs('#etb-undo'); var r = qs('#etb-redo');
     if (u) u.disabled = !undoStack.length;
     if (r) r.disabled = !redoStack.length;
   }
 
   /* ------------------------------------------------
-   * Apply saved state on page load
+   * Apply saved state on load
    * ---------------------------------------------- */
 
   function applyAll() {
     Object.keys(store).forEach(function (eid) {
-      var el = qs('[data-eid="' + eid + '"]');
-      if (!el) return;
+      var el = qs('[data-eid="' + eid + '"]'); if (!el) return;
       var d = store[eid];
       if (d.html     != null) el.innerHTML = d.html;
       if (d.fontSize != null) el.style.fontSize = d.fontSize;
@@ -266,17 +294,8 @@
     });
   }
 
-  function applyTransform(el, x, y) {
-    if (x === 0 && y === 0) {
-      el.style.position = ''; el.style.transform = '';
-    } else {
-      el.style.position  = 'relative';
-      el.style.transform = 'translate(' + x + 'px,' + y + 'px)';
-    }
-  }
-
   /* ------------------------------------------------
-   * Edit mode on / off
+   * Edit mode
    * ---------------------------------------------- */
 
   function setMode(on) {
@@ -285,22 +304,22 @@
     var banner = qs('#editor-banner');
     if (banner) banner.hidden = !on;
     if (toolbar) toolbar.hidden = !on;
-    if (!on) { deactivateAll(); setPinMode(false); }
+    if (!on) { deactivateAll(); deselectImage(); setPinMode(false); }
   }
 
   /* ------------------------------------------------
-   * Selection
+   * Text selection
    * ---------------------------------------------- */
 
   function isSelected(el) { return selectedEls.indexOf(el) !== -1; }
 
   function selectPrimary(el) {
+    deselectImage();
     if (isTyping) exitTyping();
     selectedEls.forEach(function (s) {
       s.classList.remove('editor-selected', 'editor-in-selection');
     });
-    selectedEls = [el];
-    activeEl = el;
+    selectedEls = [el]; activeEl = el;
     el.classList.add('editor-selected');
     refreshToolbar();
   }
@@ -311,8 +330,7 @@
       selectedEls = selectedEls.filter(function (e) { return e !== el; });
       el.classList.remove('editor-in-selection');
     } else {
-      selectedEls.push(el);
-      el.classList.add('editor-in-selection');
+      selectedEls.push(el); el.classList.add('editor-in-selection');
     }
     refreshToolbar();
   }
@@ -322,8 +340,7 @@
     selectedEls.forEach(function (el) {
       el.classList.remove('editor-selected', 'editor-in-selection');
     });
-    selectedEls = [];
-    activeEl = null;
+    selectedEls = []; activeEl = null;
     refreshToolbar();
   }
 
@@ -333,20 +350,17 @@
 
   function enterTyping() {
     if (!activeEl || isTyping) return;
-    isTyping   = true;
-    typingSnap = snapState(activeEl);
+    isTyping = true; typingSnap = snapState(activeEl);
     activeEl.contentEditable = 'true';
     activeEl.classList.add('editor-typing');
     activeEl.focus();
-    activeEl._edMouseDown = function (e) { e.stopPropagation(); };
-    activeEl.addEventListener('mousedown', activeEl._edMouseDown);
-    activeEl._edInput = function () {
+    activeEl._edMD = function (e) { e.stopPropagation(); };
+    activeEl.addEventListener('mousedown', activeEl._edMD);
+    activeEl._edIn = function () {
       var d = store[activeEl.dataset.eid] || {};
-      d.html = activeEl.innerHTML;
-      store[activeEl.dataset.eid] = d;
-      save();
+      d.html = activeEl.innerHTML; store[activeEl.dataset.eid] = d; save();
     };
-    activeEl.addEventListener('input', activeEl._edInput);
+    activeEl.addEventListener('input', activeEl._edIn);
     refreshToolbar();
   }
 
@@ -356,16 +370,9 @@
     typingSnap = null;
     activeEl.contentEditable = 'false';
     activeEl.classList.remove('editor-typing');
-    if (activeEl._edMouseDown) {
-      activeEl.removeEventListener('mousedown', activeEl._edMouseDown);
-      delete activeEl._edMouseDown;
-    }
-    if (activeEl._edInput) {
-      activeEl.removeEventListener('input', activeEl._edInput);
-      delete activeEl._edInput;
-    }
-    isTyping = false;
-    refreshToolbar();
+    if (activeEl._edMD) { activeEl.removeEventListener('mousedown', activeEl._edMD); delete activeEl._edMD; }
+    if (activeEl._edIn) { activeEl.removeEventListener('input', activeEl._edIn); delete activeEl._edIn; }
+    isTyping = false; refreshToolbar();
   }
 
   function toggleTyping() { if (isTyping) exitTyping(); else enterTyping(); }
@@ -375,27 +382,24 @@
    * ---------------------------------------------- */
 
   function getSize(el) {
-    var inline = parseFloat(el.style.fontSize);
-    if (!isNaN(inline)) return inline;
-    return parseFloat(window.getComputedStyle(el).fontSize);
+    var v = parseFloat(el.style.fontSize);
+    return isNaN(v) ? parseFloat(window.getComputedStyle(el).fontSize) : v;
   }
 
   function stepSize(el, dir) {
     var before = snapState(el);
-    var cur    = getSize(el);
-    var step   = cur >= 48 ? 4 : cur >= 24 ? 2 : 1;
-    var next   = Math.max(6, Math.round(cur + dir * step));
+    var cur = getSize(el);
+    var step = cur >= 48 ? 4 : cur >= 24 ? 2 : 1;
+    var next = Math.max(6, Math.round(cur + dir * step));
     el.style.fontSize = next + 'px';
     var d = store[el.dataset.eid] || {};
-    d.fontSize = next + 'px';
-    store[el.dataset.eid] = d;
-    save();
+    d.fontSize = next + 'px'; store[el.dataset.eid] = d; save();
     pushHistory([{ eid: el.dataset.eid, before: before, after: snapState(el) }]);
     refreshToolbar();
   }
 
   /* ------------------------------------------------
-   * Nudge — all selected elements
+   * Nudge
    * ---------------------------------------------- */
 
   function nudgeAll(dx, dy) {
@@ -405,10 +409,8 @@
     });
     selectedEls.forEach(function (el) {
       var d = store[el.dataset.eid] || {};
-      d.nudgeX = (d.nudgeX || 0) + dx;
-      d.nudgeY = (d.nudgeY || 0) + dy;
-      store[el.dataset.eid] = d;
-      applyTransform(el, d.nudgeX, d.nudgeY);
+      d.nudgeX = (d.nudgeX || 0) + dx; d.nudgeY = (d.nudgeY || 0) + dy;
+      store[el.dataset.eid] = d; applyTransform(el, d.nudgeX, d.nudgeY);
     });
     save();
     pushHistory(entries.map(function (e) {
@@ -433,12 +435,9 @@
       return { eid: el.dataset.eid, before: snapState(el), el: el };
     });
     selectedEls.forEach(function (el) {
-      var eid = el.dataset.eid;
-      delete store[eid];
-      el.innerHTML       = originals[eid] != null ? originals[eid] : el.innerHTML;
-      el.style.fontSize  = '';
-      el.style.position  = '';
-      el.style.transform = '';
+      var eid = el.dataset.eid; delete store[eid];
+      el.innerHTML = originals[eid] != null ? originals[eid] : el.innerHTML;
+      el.style.fontSize = ''; el.style.position = ''; el.style.transform = '';
     });
     save();
     pushHistory(entries.map(function (e) {
@@ -453,40 +452,192 @@
   }
 
   /* ------------------------------------------------
-   * Export
+   * Image selection + brief
+   * ---------------------------------------------- */
+
+  function selectImage(pic) {
+    deactivateAll();
+    if (activeImg) activeImg.classList.remove('editor-img-selected');
+    activeImg = pic;
+    pic.classList.add('editor-img-selected');
+    refreshToolbar();
+    /* scroll the brief note into view */
+    var noteEl = qs('#etb-img-note');
+    if (noteEl) setTimeout(function () { noteEl.focus(); }, 50);
+  }
+
+  function deselectImage() {
+    if (activeImg) { activeImg.classList.remove('editor-img-selected'); activeImg = null; }
+    refreshToolbar();
+  }
+
+  function addToBrief() {
+    if (!activeImg) return;
+    var noteEl = qs('#etb-img-note');
+    var note   = noteEl ? noteEl.value.trim() : '';
+    var src    = getImgSrc(activeImg);
+
+    /* Check if already in brief */
+    var existing = briefItems.filter(function (b) { return b.iid === activeImg.dataset.iid; });
+    if (existing.length) {
+      /* Update the note */
+      existing[0].note = note;
+    } else {
+      briefItems.push({
+        iid:           activeImg.dataset.iid,
+        type:          'image_replacement',
+        slideNumber:   parseInt(activeImg.dataset.iidSlide) || null,
+        sectionId:     activeImg.dataset.iidSection || '',
+        tabContext:    activeImg.dataset.iidTab || null,
+        currentFile:   'natgeo/' + src.replace(/^\//, ''),
+        imgSelector:   activeImg.dataset.iidSelector + ' img',
+        picSelector:   activeImg.dataset.iidSelector,
+        sources:       getImgSources(activeImg),
+        note:          note
+      });
+    }
+
+    refreshBriefBadge();
+    /* Flash confirmation */
+    var btn = qs('#etb-img-add');
+    if (btn) {
+      var orig = btn.textContent;
+      btn.textContent = '✓ Added';
+      btn.classList.add('etb-btn-active');
+      setTimeout(function () { btn.textContent = orig; btn.classList.remove('etb-btn-active'); }, 1200);
+    }
+  }
+
+  function removeFromBrief(iid) {
+    briefItems = briefItems.filter(function (b) { return b.iid !== iid; });
+    refreshBriefBadge();
+    refreshToolbar();
+  }
+
+  function isInBrief(pic) {
+    if (!pic) return false;
+    return briefItems.some(function (b) { return b.iid === pic.dataset.iid; });
+  }
+
+  function refreshBriefBadge() {
+    var badge = qs('#etb-brief-badge');
+    if (badge) {
+      badge.hidden = !briefItems.length;
+      badge.textContent = briefItems.length;
+    }
+    var exportBtn = qs('#etb-export-brief');
+    if (exportBtn) exportBtn.classList.toggle('etb-has-items', briefItems.length > 0);
+  }
+
+  /* ------------------------------------------------
+   * Export Brief — the JSON Claude reads
+   * ---------------------------------------------- */
+
+  function exportBrief() {
+    if (isTyping) exitTyping();
+
+    /* Collect text edits from store */
+    var textEdits = [];
+    Object.keys(store).forEach(function (eid) {
+      var el = qs('[data-eid="' + eid + '"]'); if (!el) return;
+      var d  = store[eid];
+      var section = el.closest('.section');
+      var orig = originals[eid] || '';
+      var hasTextChange = d.html != null && d.html !== orig;
+      var hasSize  = !!d.fontSize;
+      var hasNudge = (d.nudgeX || 0) !== 0 || (d.nudgeY || 0) !== 0;
+      if (!hasTextChange && !hasSize && !hasNudge) return;
+
+      var cls = (el.className || '')
+        .replace(/editor-selected|editor-in-selection|editor-typing/g, '').trim()
+        .split(/\s+/)[0];
+
+      textEdits.push({
+        type:         'text_edit',
+        eid:           eid,
+        sectionId:     section ? section.id : '',
+        slideNumber:   section ? (parseInt(section.dataset.slide) || null) : null,
+        elementTag:    el.tagName,
+        elementClass:  cls,
+        htmlSelector:  buildTextSelector(el),
+        originalHtml:  orig,
+        newHtml:       d.html || orig,
+        fontSize:      d.fontSize || null,
+        nudge:         { x: d.nudgeX || 0, y: d.nudgeY || 0 }
+      });
+    });
+
+    /* Collect pins */
+    var pinData = pins.map(function (p) {
+      return { type: 'pin', num: p.num, sectionId: p.sectionId,
+               slideNumber: p.slide, canvasX: p.cx, canvasY: p.cy };
+    });
+
+    var brief = {
+      meta: {
+        generated:  new Date().toISOString(),
+        deck:       'natgeo/index.html',
+        note:       'Hand this file to Claude. Claude will apply image replacements (download, convert to WebP, update HTML) and any text edits listed below.'
+      },
+      imageReplacements: briefItems,
+      textEdits:         textEdits,
+      pins:              pinData,
+      instructions: {
+        forImageReplacements: [
+          '1. For each imageReplacement entry: find or download the image described in "note".',
+          '2. Compress and save as both .jpg and .webp in the same folder as currentFile.',
+          '3. Name the new files to match currentFile (replace the old ones), or use a descriptive new name.',
+          '4. Update imgSelector src and picSelector source srcsets in natgeo/index.html.',
+          '5. Run: git add + git commit + git push.'
+        ],
+        forTextEdits: [
+          '1. For each textEdit entry: locate the element via htmlSelector or eid.',
+          '2. Apply newHtml, fontSize, and nudge values directly to natgeo/index.html.',
+          '3. Commit with a descriptive message.'
+        ]
+      }
+    };
+
+    var json = JSON.stringify(brief, null, 2);
+    var blob = new Blob([json], { type: 'application/json' });
+    var a    = doc.createElement('a');
+    a.href   = URL.createObjectURL(blob);
+    a.download = 'editor-brief.json';
+    doc.body.appendChild(a); a.click(); doc.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+  }
+
+  function buildTextSelector(el) {
+    var section = el.closest('.section');
+    var base    = section && section.id ? '#' + section.id + ' ' : '';
+    var cls     = (el.className || '')
+      .replace(/editor-selected|editor-in-selection|editor-typing/g, '').trim()
+      .split(/\s+/)[0];
+    return base + (cls ? '.' + cls : el.tagName.toLowerCase());
+  }
+
+  /* ------------------------------------------------
+   * Export HTML (existing, kept for completeness)
    * ---------------------------------------------- */
 
   function exportHTML() {
     if (isTyping) exitTyping();
     var clone = doc.documentElement.cloneNode(true);
-    clone.querySelectorAll('[data-editor-remove]').forEach(function (el) {
-      el.parentNode && el.parentNode.removeChild(el);
+    clone.querySelectorAll('[data-editor-remove]').forEach(function (el) { el.parentNode && el.parentNode.removeChild(el); });
+    clone.querySelectorAll('[contenteditable]').forEach(function (el) { el.removeAttribute('contenteditable'); });
+    clone.querySelectorAll('[data-eid],[data-iid],[data-iid-selector],[data-iid-section],[data-iid-slide],[data-iid-tab]').forEach(function (el) {
+      ['eid','iid','iidSelector','iidSection','iidSlide','iidTab'].forEach(function (k) { delete el.dataset[k]; });
     });
-    clone.querySelectorAll('[contenteditable]').forEach(function (el) {
-      el.removeAttribute('contenteditable');
+    clone.querySelectorAll('.editor-selected,.editor-in-selection,.editor-typing,.editor-img-selected').forEach(function (el) {
+      el.classList.remove('editor-selected','editor-in-selection','editor-typing','editor-img-selected');
     });
-    clone.querySelectorAll('[data-eid]').forEach(function (el) {
-      el.removeAttribute('data-eid');
-    });
-    clone.querySelectorAll('.editor-selected,.editor-in-selection,.editor-typing').forEach(function (el) {
-      el.classList.remove('editor-selected', 'editor-in-selection', 'editor-typing');
-    });
-    clone.querySelectorAll('.editor-pin').forEach(function (el) {
-      el.parentNode && el.parentNode.removeChild(el);
-    });
-    clone.querySelectorAll('#editor-toolbar,#editor-banner').forEach(function (el) {
-      el.parentNode && el.parentNode.removeChild(el);
-    });
-    clone.removeAttribute('data-editor');
-    clone.removeAttribute('data-editor-pin');
+    clone.querySelectorAll('.editor-pin,#editor-toolbar,#editor-banner').forEach(function (el) { el.parentNode && el.parentNode.removeChild(el); });
+    clone.removeAttribute('data-editor'); clone.removeAttribute('data-editor-pin');
     var html = '<!doctype html>\n' + clone.outerHTML;
     var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     var a = doc.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'natgeo-edited.html';
-    doc.body.appendChild(a);
-    a.click();
-    doc.body.removeChild(a);
+    a.href = URL.createObjectURL(blob); a.download = 'natgeo-edited.html';
+    doc.body.appendChild(a); a.click(); doc.body.removeChild(a);
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
   }
 
@@ -501,15 +652,15 @@
     t.innerHTML =
       '<span class="etb-label">✏ Editor</span>' +
 
-      /* Undo / redo */
+      /* Undo/redo */
       '<div class="etb-group">' +
         '<button id="etb-undo" data-ea="undo" title="Ctrl+Z" disabled>↩</button>' +
         '<button id="etb-redo" data-ea="redo" title="Ctrl+Shift+Z" disabled>↪</button>' +
       '</div>' +
 
-      /* Element controls */
-      '<div class="etb-group">' +
-        '<span class="etb-hint" id="etb-hint">click text to select</span>' +
+      /* Text element controls */
+      '<div class="etb-group" id="etb-text-group">' +
+        '<span class="etb-hint" id="etb-hint">click text or image</span>' +
         '<span class="etb-el-name" id="etb-el-name" hidden></span>' +
         '<button id="etb-edit-text" data-ea="edit-text" hidden>Edit Text</button>' +
         '<div class="etb-row" id="etb-size-row" hidden>' +
@@ -520,27 +671,39 @@
         '</div>' +
         '<div class="etb-row" id="etb-nudge-row" hidden>' +
           '<span class="etb-section-label">Nudge</span>' +
-          '<button data-ea="nudge-left"  title="Alt+←">←</button>' +
-          '<button data-ea="nudge-up"    title="Alt+↑">↑</button>' +
-          '<button data-ea="nudge-down"  title="Alt+↓">↓</button>' +
+          '<button data-ea="nudge-left" title="Alt+←">←</button>' +
+          '<button data-ea="nudge-up"   title="Alt+↑">↑</button>' +
+          '<button data-ea="nudge-down" title="Alt+↓">↓</button>' +
           '<button data-ea="nudge-right" title="Alt+→">→</button>' +
           '<span id="etb-nudge-val">0, 0</span>' +
         '</div>' +
         '<button class="etb-btn-danger" data-ea="reset" id="etb-reset" hidden>Reset</button>' +
       '</div>' +
 
-      /* Coordinate tools */
-      '<div class="etb-group etb-group--coords">' +
-        '<span class="etb-section-label">Canvas</span>' +
+      /* Image brief panel */
+      '<div class="etb-group etb-group--img" id="etb-img-group" hidden>' +
+        '<span class="etb-section-label">🖼</span>' +
+        '<span id="etb-img-filename" class="etb-img-filename"></span>' +
+        '<input id="etb-img-note" class="etb-img-note" type="text" ' +
+          'placeholder="describe the replacement…" autocomplete="off">' +
+        '<button id="etb-img-add"    data-ea="img-add">Add to Brief</button>' +
+        '<button id="etb-img-remove" data-ea="img-remove" hidden class="etb-btn-danger">Remove</button>' +
+      '</div>' +
+
+      /* Coordinate + pins */
+      '<div class="etb-group">' +
         '<span id="etb-coords" class="etb-coords">— —</span>' +
-        '<button id="etb-pin-toggle" data-ea="pin-toggle">📍 Drop pin</button>' +
-        '<button id="etb-pin-clear" data-ea="pin-clear" hidden>Clear pins (0)</button>' +
+        '<button id="etb-pin-toggle" data-ea="pin-toggle">📍 Pin</button>' +
+        '<button id="etb-pin-clear"  data-ea="pin-clear"  hidden>Clear pins</button>' +
       '</div>' +
 
       /* Global */
       '<div class="etb-group">' +
         '<button class="etb-btn-danger" data-ea="reset-all">Reset all</button>' +
-        '<button class="etb-btn-export" data-ea="export">Export ↓</button>' +
+        '<button data-ea="export-html">Export HTML</button>' +
+        '<button id="etb-export-brief" data-ea="export-brief" class="etb-btn-brief">' +
+          'Export Brief <span id="etb-brief-badge" class="etb-badge" hidden>0</span>' +
+        '</button>' +
       '</div>';
 
     t.addEventListener('mousedown', function (e) { e.preventDefault(); });
@@ -549,22 +712,31 @@
       if (!btn) return;
       var step = e.shiftKey ? 10 : 2;
       switch (btn.dataset.ea) {
-        case 'undo':        undo();  break;
-        case 'redo':        redo();  break;
-        case 'edit-text':   toggleTyping(); break;
-        case 'size-up':     if (activeEl) stepSize(activeEl,  1); break;
-        case 'size-down':   if (activeEl) stepSize(activeEl, -1); break;
-        case 'nudge-left':  nudgeAll(-step, 0); break;
-        case 'nudge-right': nudgeAll( step, 0); break;
-        case 'nudge-up':    nudgeAll(0, -step); break;
-        case 'nudge-down':  nudgeAll(0,  step); break;
-        case 'reset':       resetSelection(); break;
-        case 'reset-all':   resetAll(); break;
-        case 'export':      exportHTML(); break;
-        case 'pin-toggle':  setPinMode(!pinMode); break;
-        case 'pin-clear':   clearAllPins(); break;
+        case 'undo':         undo();  break;
+        case 'redo':         redo();  break;
+        case 'edit-text':    toggleTyping(); break;
+        case 'size-up':      if (activeEl) stepSize(activeEl,  1); break;
+        case 'size-down':    if (activeEl) stepSize(activeEl, -1); break;
+        case 'nudge-left':   nudgeAll(-step, 0); break;
+        case 'nudge-right':  nudgeAll( step, 0); break;
+        case 'nudge-up':     nudgeAll(0, -step); break;
+        case 'nudge-down':   nudgeAll(0,  step); break;
+        case 'reset':        resetSelection(); break;
+        case 'reset-all':    resetAll(); break;
+        case 'export-html':  exportHTML(); break;
+        case 'export-brief': exportBrief(); break;
+        case 'pin-toggle':   setPinMode(!pinMode); break;
+        case 'pin-clear':    clearAllPins(); break;
+        case 'img-add':      addToBrief(); break;
+        case 'img-remove':   if (activeImg) removeFromBrief(activeImg.dataset.iid); break;
       }
     });
+
+    /* Allow typing in the note input without triggering editor shortcuts */
+    var noteInput = t.querySelector('#etb-img-note');
+    if (noteInput) {
+      noteInput.addEventListener('keydown', function (e) { e.stopPropagation(); });
+    }
 
     doc.body.appendChild(t);
     return t;
@@ -572,6 +744,13 @@
 
   function refreshToolbar() {
     if (!toolbar) return;
+
+    var count  = selectedEls.length;
+    var hasEl  = count > 0;
+    var multi  = count > 1;
+    var hasImg = !!activeImg;
+
+    /* Text controls */
     var hint        = qs('#etb-hint');
     var elName      = qs('#etb-el-name');
     var editTextBtn = qs('#etb-edit-text');
@@ -581,29 +760,25 @@
     var sizeVal     = qs('#etb-size-val');
     var nudgeVal    = qs('#etb-nudge-val');
 
-    var count  = selectedEls.length;
-    var hasAny = count > 0;
-    var multi  = count > 1;
-
-    if (hint)        hint.hidden        = hasAny;
-    if (elName)      elName.hidden      = !hasAny;
-    if (editTextBtn) editTextBtn.hidden = !hasAny || multi;
-    if (sizeRow)     sizeRow.hidden     = !hasAny || multi || isTyping;
-    if (nudgeRow)    nudgeRow.hidden    = !hasAny || isTyping;
-    if (resetBtn)    resetBtn.hidden    = !hasAny;
+    var showHint = !hasEl && !hasImg;
+    if (hint)        hint.hidden        = !showHint;
+    if (elName)      elName.hidden      = !hasEl;
+    if (editTextBtn) editTextBtn.hidden = !hasEl || multi;
+    if (sizeRow)     sizeRow.hidden     = !hasEl || multi || isTyping;
+    if (nudgeRow)    nudgeRow.hidden    = !hasEl || isTyping;
+    if (resetBtn)    resetBtn.hidden    = !hasEl;
 
     if (editTextBtn && !multi) {
-      editTextBtn.textContent = isTyping ? '✓ Done Editing' : 'Edit Text';
+      editTextBtn.textContent = isTyping ? '✓ Done' : 'Edit Text';
       editTextBtn.classList.toggle('etb-btn-active', isTyping);
     }
 
-    if (hasAny && elName) {
+    if (hasEl && elName) {
       if (multi) {
         elName.textContent = count + ' selected';
       } else if (activeEl) {
         var cls = (activeEl.className || '')
-          .replace(/editor-selected|editor-in-selection|editor-typing/g, '')
-          .trim().split(/\s+/)[0];
+          .replace(/editor-selected|editor-in-selection|editor-typing/g, '').trim().split(/\s+/)[0];
         elName.textContent = cls || activeEl.tagName.toLowerCase();
       }
     }
@@ -614,7 +789,34 @@
       if (nudgeVal) nudgeVal.textContent = n.x + ', ' + n.y;
     }
 
+    /* Image brief panel */
+    var imgGroup    = qs('#etb-img-group');
+    var imgFilename = qs('#etb-img-filename');
+    var imgNote     = qs('#etb-img-note');
+    var imgAdd      = qs('#etb-img-add');
+    var imgRemove   = qs('#etb-img-remove');
+
+    if (imgGroup) imgGroup.hidden = !hasImg;
+    if (hasImg) {
+      var src = getImgSrc(activeImg);
+      var fname = src.split('/').pop();
+      if (imgFilename) imgFilename.textContent = fname;
+
+      var inBrief = isInBrief(activeImg);
+      if (imgAdd)    { imgAdd.textContent = inBrief ? 'Update Note' : 'Add to Brief'; }
+      if (imgRemove) { imgRemove.hidden = !inBrief; }
+
+      /* Pre-fill note if already in brief */
+      if (imgNote && inBrief) {
+        var existing = briefItems.find(function (b) { return b.iid === activeImg.dataset.iid; });
+        if (existing && !imgNote.value) imgNote.value = existing.note || '';
+      } else if (imgNote && !inBrief) {
+        imgNote.value = '';
+      }
+    }
+
     refreshUndoButtons();
+    refreshBriefBadge();
   }
 
   /* ------------------------------------------------
@@ -627,17 +829,17 @@
     b.hidden = true;
     b.innerHTML =
       '<span>✏ <strong>Edit mode</strong> — ' +
-      'click to select &nbsp;|&nbsp; <kbd>Shift+click</kbd> multi &nbsp;|&nbsp; ' +
+      'click text to select &nbsp;|&nbsp; click image to brief &nbsp;|&nbsp; ' +
+      '<kbd>Shift+click</kbd> multi &nbsp;|&nbsp; ' +
       '"Edit Text" to type &nbsp;|&nbsp; ' +
-      '<kbd>Alt+↑↓←→</kbd> nudge &nbsp;|&nbsp; <kbd>Shift</kbd> ×5 &nbsp;|&nbsp; ' +
-      '<kbd>P</kbd> pin mode &nbsp;|&nbsp; ' +
+      '<kbd>Alt+↑↓←→</kbd> nudge &nbsp;|&nbsp; <kbd>P</kbd> pin &nbsp;|&nbsp; ' +
       '<kbd>Ctrl+Z</kbd> undo &nbsp;|&nbsp; <kbd>Esc</kbd> deselect &nbsp;|&nbsp; ' +
       '<kbd>E</kbd> exit</span>';
     doc.body.appendChild(b);
   }
 
   /* ------------------------------------------------
-   * Coordinate tracking — mousemove on each section
+   * Coordinate tracking
    * ---------------------------------------------- */
 
   function initCoordTracking() {
@@ -648,17 +850,12 @@
         updateCoordDisplay(c.x, c.y);
       });
       section.addEventListener('mouseleave', function () {
-        if (!isOn) return;
-        updateCoordDisplay(null, null);
+        if (isOn) updateCoordDisplay(null, null);
       });
-
-      /* Click to drop pin */
       section.addEventListener('click', function (e) {
         if (!isOn || !pinMode) return;
-        /* Don't pin if click was on an editable element */
-        if (e.target.dataset.eid) return;
-        /* Don't pin on toolbar / banner / existing pin */
-        if (e.target.closest('#editor-toolbar, #editor-banner, .editor-pin')) return;
+        if (e.target.dataset.eid || e.target.dataset.iid) return;
+        if (e.target.closest('#editor-toolbar,#editor-banner,.editor-pin')) return;
         dropPin(section, e.clientX, e.clientY);
       });
     });
@@ -672,34 +869,30 @@
     var tag     = (e.target.tagName || '').toUpperCase();
     var inField = tag === 'INPUT' || tag === 'TEXTAREA';
 
-    /* Ctrl+Z / Ctrl+Y */
     if (e.ctrlKey && !e.altKey && isOn && !inField) {
       if (e.key === 'z') { e.preventDefault(); if (e.shiftKey) redo(); else undo(); return; }
       if (e.key === 'y' && !e.shiftKey) { e.preventDefault(); redo(); return; }
     }
 
-    /* E — toggle edit mode */
     if ((e.key === 'e' || e.key === 'E') && !e.metaKey && !e.ctrlKey && !e.altKey) {
       if (!inField && !isTyping) { setMode(!isOn); return; }
     }
 
     if (!isOn) return;
 
-    /* P — toggle pin mode */
     if ((e.key === 'p' || e.key === 'P') && !e.metaKey && !e.ctrlKey && !e.altKey) {
       if (!inField && !isTyping) { setPinMode(!pinMode); return; }
     }
 
-    /* Escape */
     if (e.key === 'Escape') {
       e.preventDefault();
-      if (pinMode)     { setPinMode(false); return; }
-      if (isTyping)    { exitTyping();      return; }
+      if (pinMode)  { setPinMode(false); return; }
+      if (isTyping) { exitTyping();      return; }
+      if (activeImg){ deselectImage();   return; }
       deactivateAll();
       return;
     }
 
-    /* Alt+Arrow nudge */
     if (!isTyping && selectedEls.length && e.altKey && !e.ctrlKey && !e.metaKey) {
       var step = e.shiftKey ? 10 : 2;
       switch (e.key) {
@@ -727,12 +920,26 @@
   }
 
   function onDocClick(e) {
-    if (!isOn || !selectedEls.length) return;
-    if (isTyping && activeEl && activeEl.contains(e.target)) return;
-    var inAny = selectedEls.some(function (el) { return el.contains(e.target); });
-    if (inAny) return;
+    if (!isOn) return;
     if (toolbar && toolbar.contains(e.target)) return;
-    deactivateAll();
+
+    /* Image click */
+    var pic = e.target.closest('picture[data-iid]');
+    if (pic && !e.target.dataset.eid) {
+      deactivateAll();
+      selectImage(pic);
+      return;
+    }
+
+    /* Deselect image if clicked outside */
+    if (activeImg && !activeImg.contains(e.target)) deselectImage();
+
+    /* Deselect text if clicked outside */
+    if (selectedEls.length) {
+      if (isTyping && activeEl && activeEl.contains(e.target)) return;
+      var inAny = selectedEls.some(function (el) { return el.contains(e.target); });
+      if (!inAny) deactivateAll();
+    }
   }
 
   /* ------------------------------------------------
@@ -747,6 +954,7 @@
   ready(function () {
     load();
     assignIds();
+    assignImgIds();
     applyAll();
 
     toolbar = buildToolbar();
@@ -761,8 +969,9 @@
     doc.addEventListener('click', onDocClick);
 
     window.__editor = {
-      undo: undo, redo: redo, resetAll: resetAll, export: exportHTML,
-      store: store, pins: pins, history: { undo: undoStack, redo: redoStack }
+      undo: undo, redo: redo, resetAll: resetAll,
+      exportHTML: exportHTML, exportBrief: exportBrief,
+      store: store, brief: briefItems, pins: pins
     };
   });
 
