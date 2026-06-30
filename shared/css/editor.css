@@ -41,6 +41,20 @@ body[data-editor="true"] [data-eid]:hover {
   cursor: default !important;
 }
 
+/* Typing mode — green outline shows element is actively editable */
+.editor-typing {
+  outline: 2px solid rgba(100, 200, 120, 0.9) !important;
+  outline-offset: 3px;
+  cursor: text !important;
+}
+
+/* Edit Text button — active/pressed state */
+.etb-btn-active {
+  background: rgba(100, 200, 120, 0.2) !important;
+  border-color: rgba(100, 200, 120, 0.6) !important;
+  color: rgba(140, 220, 150, 0.95) !important;
+}
+
 /* --------------------------------------------------
  * Top banner
  * -------------------------------------------------- */

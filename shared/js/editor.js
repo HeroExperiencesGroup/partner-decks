@@ -1,16 +1,15 @@
 /* editor.js — personal in-browser slide editor
  *
- * Toggle with E key. Provides inline content editing, font-size
- * control, position nudging, multi-select move, and full undo/redo.
+ * Toggle with E key.
  *
- * Keyboard:
- *   E                    — toggle edit mode
- *   Click text           — select element, enable text editing
- *   Shift + Click text   — add / remove element from selection
- *   Esc                  — deselect all
- *   Alt + ↑↓←→          — nudge 2px (Shift = 10px); moves ALL selected
- *   Ctrl + Z             — undo
- *   Ctrl + Shift + Z / Y — redo
+ * Selection model:
+ *   Click            — select element (no text editing yet)
+ *   Shift+click      — add / remove from multi-selection
+ *   Toolbar "Edit Text" button — enter typing mode on primary element
+ *   Esc (while typing)  — exit typing mode, keep selection
+ *   Esc (not typing)    — deselect all
+ *   Alt+↑↓←→            — nudge all selected (2px; Shift = 10px)
+ *   Ctrl+Z / Ctrl+Shift+Z — undo / redo
  *
  * TO DISABLE FOR CLIENT: remove the two lines tagged
  * data-editor-remove in natgeo/index.html.
@@ -27,64 +26,52 @@
   var toolbar    = null;
   var isOn       = false;
 
-  /* Selection state
-   * activeEl    — primary element (text-editable, size controls apply to this)
-   * selectedEls — full set including activeEl; nudge applies to all */
-  var activeEl    = null;
-  var selectedEls = [];
+  /* Selection */
+  var activeEl    = null;   /* primary selected element */
+  var selectedEls = [];     /* full set; nudge applies to all */
+  var isTyping    = false;  /* whether activeEl is contentEditable */
 
-  /* Undo / redo — each entry is an ARRAY of { eid, before, after }
-   * so a multi-element nudge is one undo step. */
+  /* Undo/redo — each entry is an ARRAY of { eid, before, after } */
   var undoStack = [];
   var redoStack = [];
   var MAX_HISTORY = 60;
 
-  /* Snapshot captured when activeEl is activated, for content-edit undo */
-  var activationSnap = null;
+  /* Snapshot captured when entering typing mode, for content undo */
+  var typingSnap = null;
 
   var EDITABLE = [
-    '.section-label',
-    '.headline',
-    '.subhead',
-    '.body p',
-    '.pull',
-    '.caption',
-    '.declaration',
-    '.close-line',
-    '.landscape-tab__caption',
-    '.cover-label',
-    '.overlay h2',
-    '.overlay p',
-    '.splash__title',
-    '.splash__subtitle'
+    '.section-label', '.headline', '.subhead',
+    '.body p', '.pull', '.caption', '.declaration',
+    '.close-line', '.landscape-tab__caption', '.cover-label',
+    '.overlay h2', '.overlay p',
+    '.splash__title', '.splash__subtitle'
   ].join(', ');
 
-  /* --------------------------------------------------
+  /* ------------------------------------------------
    * Helpers
-   * -------------------------------------------------- */
+   * ---------------------------------------------- */
 
   function qsa(sel, root) {
     return Array.prototype.slice.call((root || doc).querySelectorAll(sel));
   }
   function qs(sel, root) { return (root || doc).querySelector(sel); }
 
-  /* --------------------------------------------------
+  /* ------------------------------------------------
    * Storage
-   * -------------------------------------------------- */
+   * ---------------------------------------------- */
 
   function load() {
     try { store = JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); }
     catch (e) { store = {}; }
   }
-
   function save() {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); }
     catch (e) {}
   }
 
-  /* --------------------------------------------------
+  /* ------------------------------------------------
    * Element identification
-   * -------------------------------------------------- */
+   * ---------------------------------------------- */
 
   function assignIds() {
     qsa('.section').forEach(function (section) {
@@ -93,13 +80,17 @@
         var eid = sid + ':' + i;
         el.dataset.eid = eid;
         originals[eid] = el.innerHTML;
+        /* Prevent browser text-selection on click while in edit mode */
+        el.addEventListener('mousedown', function (e) {
+          if (isOn && !isTyping) e.preventDefault();
+        });
       });
     });
   }
 
-  /* --------------------------------------------------
+  /* ------------------------------------------------
    * State snapshot
-   * -------------------------------------------------- */
+   * ---------------------------------------------- */
 
   function snapState(el) {
     var d = store[el.dataset.eid] || {};
@@ -117,23 +108,19 @@
     el.innerHTML       = state.html;
     el.style.fontSize  = state.fontSize || '';
     applyTransform(el, state.nudgeX || 0, state.nudgeY || 0);
-    var d      = store[eid] || {};
-    d.html     = state.html;
-    d.fontSize = state.fontSize;
-    d.nudgeX   = state.nudgeX || 0;
-    d.nudgeY   = state.nudgeY || 0;
+    var d = store[eid] || {};
+    d.html = state.html; d.fontSize = state.fontSize;
+    d.nudgeX = state.nudgeX || 0; d.nudgeY = state.nudgeY || 0;
     store[eid] = d;
     save();
     refreshToolbar();
   }
 
-  /* --------------------------------------------------
+  /* ------------------------------------------------
    * Undo / redo
-   * Each entry in the stack is an ARRAY of { eid, before, after }.
-   * -------------------------------------------------- */
+   * ---------------------------------------------- */
 
   function pushHistory(entries) {
-    /* Drop entries where nothing changed */
     var changed = entries.filter(function (e) {
       return JSON.stringify(e.before) !== JSON.stringify(e.after);
     });
@@ -167,9 +154,9 @@
     if (r) r.disabled = !redoStack.length;
   }
 
-  /* --------------------------------------------------
+  /* ------------------------------------------------
    * Apply saved state on page load
-   * -------------------------------------------------- */
+   * ---------------------------------------------- */
 
   function applyAll() {
     Object.keys(store).forEach(function (eid) {
@@ -184,17 +171,16 @@
 
   function applyTransform(el, x, y) {
     if (x === 0 && y === 0) {
-      el.style.position  = '';
-      el.style.transform = '';
+      el.style.position = ''; el.style.transform = '';
     } else {
-      el.style.position  = 'relative';
+      el.style.position = 'relative';
       el.style.transform = 'translate(' + x + 'px,' + y + 'px)';
     }
   }
 
-  /* --------------------------------------------------
+  /* ------------------------------------------------
    * Edit mode on / off
-   * -------------------------------------------------- */
+   * ---------------------------------------------- */
 
   function setMode(on) {
     isOn = on;
@@ -205,87 +191,105 @@
     if (!on) deactivateAll();
   }
 
-  /* --------------------------------------------------
-   * Selection management
-   * -------------------------------------------------- */
+  /* ------------------------------------------------
+   * Selection
+   * ---------------------------------------------- */
 
-  function isSelected(el) {
-    return selectedEls.indexOf(el) !== -1;
-  }
+  function isSelected(el) { return selectedEls.indexOf(el) !== -1; }
 
-  /* Primary activate — makes element text-editable */
-  function activate(el) {
-    if (activeEl === el) return;
-
-    /* Commit any in-flight content edits on the previous primary */
-    if (activeEl) commitActive();
-
-    activeEl       = el;
-    activationSnap = snapState(el);
-
-    el.contentEditable = 'true';
-    el.classList.remove('editor-in-selection');
+  /* Set primary selection (single click) */
+  function selectPrimary(el) {
+    if (isTyping) exitTyping();
+    /* Clear all existing highlights */
+    selectedEls.forEach(function (s) {
+      s.classList.remove('editor-selected', 'editor-in-selection');
+    });
+    selectedEls = [el];
+    activeEl = el;
     el.classList.add('editor-selected');
-
-    el._edInput = function () {
-      var d = store[el.dataset.eid] || {};
-      d.html = el.innerHTML;
-      store[el.dataset.eid] = d;
-      save();
-    };
-    el.addEventListener('input', el._edInput);
-
-    /* Make sure it's in selectedEls */
-    if (!isSelected(el)) selectedEls.push(el);
-
     refreshToolbar();
   }
 
-  /* Add / remove a secondary element from the selection (Shift+click) */
+  /* Toggle secondary selection (shift+click) */
   function toggleSecondary(el) {
-    if (el === activeEl) return; /* primary handled by activate() */
-
+    if (el === activeEl) return;
     if (isSelected(el)) {
-      /* Remove from selection */
       selectedEls = selectedEls.filter(function (e) { return e !== el; });
       el.classList.remove('editor-in-selection');
     } else {
-      /* Add to selection */
       selectedEls.push(el);
       el.classList.add('editor-in-selection');
     }
     refreshToolbar();
   }
 
-  /* Commit content edits on the active element and push history */
-  function commitActive() {
-    if (!activeEl) return;
-    var after = snapState(activeEl);
-    pushHistory([{ eid: activeEl.dataset.eid, before: activationSnap, after: after }]);
-    activationSnap = null;
-
-    activeEl.contentEditable = 'false';
-    activeEl.classList.remove('editor-selected');
-    if (activeEl._edInput) {
-      activeEl.removeEventListener('input', activeEl._edInput);
-      delete activeEl._edInput;
-    }
-    activeEl = null;
-  }
-
-  /* Clear everything */
+  /* Deselect everything */
   function deactivateAll() {
-    commitActive();
+    if (isTyping) exitTyping();
     selectedEls.forEach(function (el) {
       el.classList.remove('editor-selected', 'editor-in-selection');
     });
     selectedEls = [];
+    activeEl = null;
     refreshToolbar();
   }
 
-  /* --------------------------------------------------
+  /* ------------------------------------------------
+   * Text editing (explicit opt-in from toolbar)
+   * ---------------------------------------------- */
+
+  function enterTyping() {
+    if (!activeEl || isTyping) return;
+    isTyping    = true;
+    typingSnap  = snapState(activeEl);
+    activeEl.contentEditable = 'true';
+    activeEl.classList.add('editor-typing');
+    activeEl.focus();
+
+    /* Restore normal cursor/text-selection while typing */
+    activeEl._edMouseDown = function (e) { e.stopPropagation(); };
+    activeEl.addEventListener('mousedown', activeEl._edMouseDown);
+
+    /* Auto-save on every keystroke */
+    activeEl._edInput = function () {
+      var d = store[activeEl.dataset.eid] || {};
+      d.html = activeEl.innerHTML;
+      store[activeEl.dataset.eid] = d;
+      save();
+    };
+    activeEl.addEventListener('input', activeEl._edInput);
+
+    refreshToolbar();
+  }
+
+  function exitTyping() {
+    if (!isTyping || !activeEl) return;
+    var after = snapState(activeEl);
+    pushHistory([{ eid: activeEl.dataset.eid, before: typingSnap, after: after }]);
+    typingSnap = null;
+
+    activeEl.contentEditable = 'false';
+    activeEl.classList.remove('editor-typing');
+
+    if (activeEl._edMouseDown) {
+      activeEl.removeEventListener('mousedown', activeEl._edMouseDown);
+      delete activeEl._edMouseDown;
+    }
+    if (activeEl._edInput) {
+      activeEl.removeEventListener('input', activeEl._edInput);
+      delete activeEl._edInput;
+    }
+    isTyping = false;
+    refreshToolbar();
+  }
+
+  function toggleTyping() {
+    if (isTyping) exitTyping(); else enterTyping();
+  }
+
+  /* ------------------------------------------------
    * Font size (primary element only)
-   * -------------------------------------------------- */
+   * ---------------------------------------------- */
 
   function getSize(el) {
     var inline = parseFloat(el.style.fontSize);
@@ -307,26 +311,23 @@
     refreshToolbar();
   }
 
-  /* --------------------------------------------------
-   * Nudge — applies to ALL selected elements
-   * -------------------------------------------------- */
+  /* ------------------------------------------------
+   * Nudge — all selected elements
+   * ---------------------------------------------- */
 
   function nudgeAll(dx, dy) {
     if (!selectedEls.length) return;
-
     var entries = selectedEls.map(function (el) {
       return { eid: el.dataset.eid, before: snapState(el), el: el };
     });
-
     selectedEls.forEach(function (el) {
-      var d    = store[el.dataset.eid] || {};
+      var d = store[el.dataset.eid] || {};
       d.nudgeX = (d.nudgeX || 0) + dx;
       d.nudgeY = (d.nudgeY || 0) + dy;
       store[el.dataset.eid] = d;
       applyTransform(el, d.nudgeX, d.nudgeY);
     });
     save();
-
     pushHistory(entries.map(function (e) {
       return { eid: e.eid, before: e.before, after: snapState(e.el) };
     }));
@@ -338,37 +339,20 @@
     return { x: d.nudgeX || 0, y: d.nudgeY || 0 };
   }
 
-  /* --------------------------------------------------
+  /* ------------------------------------------------
    * Reset
-   * -------------------------------------------------- */
-
-  function resetEl(el) {
-    var before = snapState(el);
-    var eid    = el.dataset.eid;
-    delete store[eid];
-    save();
-    el.innerHTML       = originals[eid] != null ? originals[eid] : el.innerHTML;
-    el.style.fontSize  = '';
-    el.style.position  = '';
-    el.style.transform = '';
-    pushHistory([{ eid: eid, before: before, after: snapState(el) }]);
-    refreshToolbar();
-  }
+   * ---------------------------------------------- */
 
   function resetSelection() {
     if (!selectedEls.length) return;
+    if (isTyping) exitTyping();
     var entries = selectedEls.map(function (el) {
       return { eid: el.dataset.eid, before: snapState(el), el: el };
     });
     selectedEls.forEach(function (el) {
       var eid = el.dataset.eid;
-      if (el === activeEl) {
-        el.innerHTML = originals[eid] != null ? originals[eid] : el.innerHTML;
-        activationSnap = snapState(el); /* update snap so commit doesn't override */
-      } else {
-        el.innerHTML = originals[eid] != null ? originals[eid] : el.innerHTML;
-      }
       delete store[eid];
+      el.innerHTML       = originals[eid] != null ? originals[eid] : el.innerHTML;
       el.style.fontSize  = '';
       el.style.position  = '';
       el.style.transform = '';
@@ -382,18 +366,15 @@
 
   function resetAll() {
     if (!confirm('Reset ALL edits and reload?')) return;
-    store = {};
-    save();
-    location.reload();
+    store = {}; save(); location.reload();
   }
 
-  /* --------------------------------------------------
+  /* ------------------------------------------------
    * Export
-   * -------------------------------------------------- */
+   * ---------------------------------------------- */
 
   function exportHTML() {
-    if (activeEl) commitActive();
-
+    if (isTyping) exitTyping();
     var clone = doc.documentElement.cloneNode(true);
     clone.querySelectorAll('[data-editor-remove]').forEach(function (el) {
       el.parentNode && el.parentNode.removeChild(el);
@@ -404,14 +385,13 @@
     clone.querySelectorAll('[data-eid]').forEach(function (el) {
       el.removeAttribute('data-eid');
     });
-    clone.querySelectorAll('.editor-selected,.editor-in-selection').forEach(function (el) {
-      el.classList.remove('editor-selected', 'editor-in-selection');
+    clone.querySelectorAll('.editor-selected,.editor-in-selection,.editor-typing').forEach(function (el) {
+      el.classList.remove('editor-selected', 'editor-in-selection', 'editor-typing');
     });
     clone.querySelectorAll('#editor-toolbar,#editor-banner').forEach(function (el) {
       el.parentNode && el.parentNode.removeChild(el);
     });
     clone.removeAttribute('data-editor');
-
     var html = '<!doctype html>\n' + clone.outerHTML;
     var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     var a    = doc.createElement('a');
@@ -423,9 +403,9 @@
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
   }
 
-  /* --------------------------------------------------
+  /* ------------------------------------------------
    * Toolbar
-   * -------------------------------------------------- */
+   * ---------------------------------------------- */
 
   function buildToolbar() {
     var t = doc.createElement('div');
@@ -435,13 +415,14 @@
       '<span class="etb-label">✏ Editor</span>' +
 
       '<div class="etb-group">' +
-        '<button id="etb-undo" data-ea="undo" title="Undo (Ctrl+Z)" disabled>↩ Undo</button>' +
-        '<button id="etb-redo" data-ea="redo" title="Redo (Ctrl+Shift+Z)" disabled>↪ Redo</button>' +
+        '<button id="etb-undo" data-ea="undo" title="Ctrl+Z" disabled>↩ Undo</button>' +
+        '<button id="etb-redo" data-ea="redo" title="Ctrl+Shift+Z" disabled>↪ Redo</button>' +
       '</div>' +
 
-      '<div class="etb-group" id="etb-el-group">' +
+      '<div class="etb-group">' +
         '<span class="etb-hint" id="etb-hint">click text to select</span>' +
         '<span class="etb-el-name" id="etb-el-name" hidden></span>' +
+        '<button id="etb-edit-text" data-ea="edit-text" hidden>Edit Text</button>' +
         '<div class="etb-row" id="etb-size-row" hidden>' +
           '<span class="etb-section-label">Size</span>' +
           '<button data-ea="size-down">−</button>' +
@@ -473,8 +454,9 @@
       switch (action) {
         case 'undo':        undo();  break;
         case 'redo':        redo();  break;
-        case 'size-up':     if (activeEl) stepSize(activeEl,  1);     break;
-        case 'size-down':   if (activeEl) stepSize(activeEl, -1);     break;
+        case 'edit-text':   toggleTyping(); break;
+        case 'size-up':     if (activeEl) stepSize(activeEl,  1); break;
+        case 'size-down':   if (activeEl) stepSize(activeEl, -1); break;
         case 'nudge-left':  nudgeAll(-step, 0); break;
         case 'nudge-right': nudgeAll( step, 0); break;
         case 'nudge-up':    nudgeAll(0, -step); break;
@@ -491,55 +473,57 @@
 
   function refreshToolbar() {
     if (!toolbar) return;
-    var hint     = qs('#etb-hint');
-    var elName   = qs('#etb-el-name');
-    var sizeRow  = qs('#etb-size-row');
-    var nudgeRow = qs('#etb-nudge-row');
-    var resetBtn = qs('#etb-reset');
-    var sizeVal  = qs('#etb-size-val');
-    var nudgeVal = qs('#etb-nudge-val');
+    var hint        = qs('#etb-hint');
+    var elName      = qs('#etb-el-name');
+    var editTextBtn = qs('#etb-edit-text');
+    var sizeRow     = qs('#etb-size-row');
+    var nudgeRow    = qs('#etb-nudge-row');
+    var resetBtn    = qs('#etb-reset');
+    var sizeVal     = qs('#etb-size-val');
+    var nudgeVal    = qs('#etb-nudge-val');
 
     var count  = selectedEls.length;
     var hasAny = count > 0;
     var multi  = count > 1;
 
-    if (hint)     hint.hidden     = hasAny;
-    if (elName)   elName.hidden   = !hasAny;
-    if (sizeRow)  sizeRow.hidden  = !hasAny || multi; /* size only for single */
-    if (nudgeRow) nudgeRow.hidden = !hasAny;
-    if (resetBtn) resetBtn.hidden = !hasAny;
+    if (hint)        hint.hidden        = hasAny;
+    if (elName)      elName.hidden      = !hasAny;
+    if (editTextBtn) editTextBtn.hidden = !hasAny || multi; /* single selection only */
+    if (sizeRow)     sizeRow.hidden     = !hasAny || multi || isTyping;
+    if (nudgeRow)    nudgeRow.hidden    = !hasAny || isTyping;
+    if (resetBtn)    resetBtn.hidden    = !hasAny;
+
+    /* Edit Text button label and state */
+    if (editTextBtn && !multi) {
+      editTextBtn.textContent = isTyping ? '✓ Done Editing' : 'Edit Text';
+      editTextBtn.classList.toggle('etb-btn-active', isTyping);
+    }
 
     if (!hasAny) { refreshUndoButtons(); return; }
 
     if (elName) {
       if (multi) {
-        elName.textContent = count + ' elements';
+        elName.textContent = count + ' elements selected';
       } else if (activeEl) {
         var cls = (activeEl.className || '')
-          .replace(/editor-selected|editor-in-selection/g, '').trim()
-          .split(/\s+/)[0];
+          .replace(/editor-selected|editor-in-selection|editor-typing/g, '')
+          .trim().split(/\s+/)[0];
         elName.textContent = cls || activeEl.tagName.toLowerCase();
       }
     }
 
-    if (!multi && activeEl) {
-      if (sizeVal)  sizeVal.textContent = Math.round(getSize(activeEl)) + 'px';
+    if (!multi && activeEl && !isTyping) {
+      if (sizeVal)  sizeVal.textContent  = Math.round(getSize(activeEl)) + 'px';
       var n = getNudge(activeEl);
       if (nudgeVal) nudgeVal.textContent = n.x + ', ' + n.y;
-    } else if (multi) {
-      /* Show nudge of primary element as reference */
-      if (nudgeVal && activeEl) {
-        var nm = getNudge(activeEl);
-        nudgeVal.textContent = nm.x + ', ' + nm.y;
-      }
     }
 
     refreshUndoButtons();
   }
 
-  /* --------------------------------------------------
+  /* ------------------------------------------------
    * Banner
-   * -------------------------------------------------- */
+   * ---------------------------------------------- */
 
   function buildBanner() {
     var b = doc.createElement('div');
@@ -547,47 +531,51 @@
     b.hidden = true;
     b.innerHTML =
       '<span>✏ <strong>Edit mode</strong> — ' +
-      'click text &nbsp;|&nbsp; <kbd>Shift+click</kbd> multi-select &nbsp;|&nbsp; ' +
-      '<kbd>Alt+↑↓←→</kbd> nudge all &nbsp;|&nbsp; <kbd>Shift</kbd> ×5 &nbsp;|&nbsp; ' +
+      'click to select &nbsp;|&nbsp; <kbd>Shift+click</kbd> multi-select &nbsp;|&nbsp; ' +
+      '"Edit Text" button to type &nbsp;|&nbsp; ' +
+      '<kbd>Alt+↑↓←→</kbd> nudge &nbsp;|&nbsp; <kbd>Shift</kbd> ×5 &nbsp;|&nbsp; ' +
       '<kbd>Ctrl+Z</kbd> undo &nbsp;|&nbsp; <kbd>Ctrl+⇧+Z</kbd> redo &nbsp;|&nbsp; ' +
       '<kbd>Esc</kbd> deselect &nbsp;|&nbsp; <kbd>E</kbd> exit</span>';
     doc.body.appendChild(b);
   }
 
-  /* --------------------------------------------------
+  /* ------------------------------------------------
    * Keyboard
-   * -------------------------------------------------- */
+   * ---------------------------------------------- */
 
   function onKey(e) {
     var tag     = (e.target.tagName || '').toUpperCase();
     var inField = tag === 'INPUT' || tag === 'TEXTAREA';
 
     /* Ctrl+Z undo / Ctrl+Shift+Z or Ctrl+Y redo */
-    if (e.ctrlKey && !e.altKey && isOn) {
-      if (e.key === 'z' && !inField) {
+    if (e.ctrlKey && !e.altKey && isOn && !inField) {
+      if (e.key === 'z') {
         e.preventDefault();
         if (e.shiftKey) redo(); else undo();
         return;
       }
-      if (e.key === 'y' && !e.shiftKey && !inField) {
+      if (e.key === 'y' && !e.shiftKey) {
         e.preventDefault(); redo(); return;
       }
     }
 
-    /* E — toggle edit mode */
+    /* E — toggle edit mode (only when not typing) */
     if ((e.key === 'e' || e.key === 'E') && !e.metaKey && !e.ctrlKey && !e.altKey) {
-      if (!inField && !e.target.isContentEditable) {
-        setMode(!isOn); return;
-      }
+      if (!inField && !isTyping) { setMode(!isOn); return; }
     }
 
     if (!isOn) return;
 
-    /* Escape — deselect all */
-    if (e.key === 'Escape') { e.preventDefault(); deactivateAll(); return; }
+    /* Escape */
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      if (isTyping) exitTyping();    /* first Esc exits typing */
+      else          deactivateAll(); /* second Esc deselects */
+      return;
+    }
 
-    /* Alt + Arrow — nudge all selected */
-    if (selectedEls.length && e.altKey && !e.ctrlKey && !e.metaKey) {
+    /* Alt+Arrow nudge — only when not typing */
+    if (!isTyping && selectedEls.length && e.altKey && !e.ctrlKey && !e.metaKey) {
       var step = e.shiftKey ? 10 : 2;
       switch (e.key) {
         case 'ArrowUp':    e.preventDefault(); nudgeAll(0, -step); return;
@@ -598,43 +586,37 @@
     }
   }
 
-  /* --------------------------------------------------
+  /* ------------------------------------------------
    * Click handling
-   * -------------------------------------------------- */
+   * ---------------------------------------------- */
 
   function onEditableClick(el, e) {
     if (!isOn) return;
-    e.stopPropagation();
-
+    /* mousedown already called e.preventDefault() when not typing,
+       so no text selection happens. We just handle the selection here. */
     if (e.shiftKey) {
-      /* Shift+click — toggle secondary selection */
-      if (el === activeEl) return; /* can't secondary-select the primary */
+      if (el === activeEl) return;
+      /* If there's no primary yet, make this the primary */
+      if (!activeEl) { selectPrimary(el); return; }
       toggleSecondary(el);
     } else {
-      /* Normal click — deselect others, activate this one */
-      /* Keep secondary selections but remove their class */
-      selectedEls.forEach(function (s) {
-        if (s !== el) {
-          s.classList.remove('editor-selected', 'editor-in-selection');
-        }
-      });
-      selectedEls = [];
-      activate(el);
+      selectPrimary(el);
     }
   }
 
   function onDocClick(e) {
     if (!isOn || !selectedEls.length) return;
-    /* Clicked outside all selected elements and outside toolbar */
+    /* If typing, clicks inside the element are handled by the browser */
+    if (isTyping && activeEl && activeEl.contains(e.target)) return;
     var inAny = selectedEls.some(function (el) { return el.contains(e.target); });
     if (inAny) return;
     if (toolbar && toolbar.contains(e.target)) return;
     deactivateAll();
   }
 
-  /* --------------------------------------------------
+  /* ------------------------------------------------
    * Init
-   * -------------------------------------------------- */
+   * ---------------------------------------------- */
 
   function ready(fn) {
     if (doc.readyState !== 'loading') fn();
@@ -657,11 +639,8 @@
     doc.addEventListener('click', onDocClick);
 
     window.__editor = {
-      undo: undo, redo: redo,
-      resetAll: resetAll,
-      export: exportHTML,
-      store: store,
-      history: { undo: undoStack, redo: redoStack }
+      undo: undo, redo: redo, resetAll: resetAll, export: exportHTML,
+      store: store, history: { undo: undoStack, redo: redoStack }
     };
   });
 
