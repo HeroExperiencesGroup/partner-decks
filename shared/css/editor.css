@@ -1,0 +1,190 @@
+/* editor.css — styles for the personal in-browser editor
+ * Loaded only when editor.js is active.
+ * Remove both <link> and <script> tags (data-editor) from
+ * natgeo/index.html before client delivery.
+ */
+
+/* --------------------------------------------------
+ * Edit mode body indicator
+ * -------------------------------------------------- */
+
+body[data-editor="true"] {
+  outline: 2px solid rgba(210, 140, 60, 0.5);
+  outline-offset: -2px;
+}
+
+/* --------------------------------------------------
+ * Editable element — hover hint in edit mode
+ * -------------------------------------------------- */
+
+body[data-editor="true"] [data-eid]:hover {
+  outline: 1px dashed rgba(210, 140, 60, 0.55);
+  outline-offset: 3px;
+  cursor: text !important;
+}
+
+/* --------------------------------------------------
+ * Selected / active element
+ * -------------------------------------------------- */
+
+.editor-selected {
+  outline: 2px solid rgba(210, 140, 60, 0.9) !important;
+  outline-offset: 3px;
+  cursor: text !important;
+}
+
+/* --------------------------------------------------
+ * Top banner
+ * -------------------------------------------------- */
+
+#editor-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 1rem;
+  background: rgba(28, 28, 26, 0.92);
+  color: rgba(244, 239, 230, 0.9);
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Code', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+  gap: 0.5rem;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+#editor-banner kbd {
+  display: inline-block;
+  padding: 0 0.35em;
+  background: rgba(244, 239, 230, 0.15);
+  border: 1px solid rgba(244, 239, 230, 0.25);
+  border-radius: 3px;
+  font-size: 0.65rem;
+}
+
+/* --------------------------------------------------
+ * Toolbar
+ * -------------------------------------------------- */
+
+#editor-toolbar {
+  position: fixed;
+  top: 2rem; /* sits just below the banner */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.45rem 0.85rem;
+  background: rgba(28, 28, 26, 0.94);
+  color: rgba(244, 239, 230, 0.85);
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Code', monospace;
+  font-size: 0.7rem;
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.etb-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.5;
+  padding-right: 0.5rem;
+  border-right: 1px solid rgba(244, 239, 230, 0.15);
+}
+
+.etb-group {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding-right: 0.75rem;
+  border-right: 1px solid rgba(244, 239, 230, 0.15);
+}
+
+.etb-group:last-child {
+  border-right: none;
+  padding-right: 0;
+}
+
+.etb-row {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.etb-hint {
+  opacity: 0.4;
+  font-style: italic;
+}
+
+.etb-el-name {
+  opacity: 0.7;
+  padding-right: 0.5rem;
+}
+
+.etb-section-label {
+  opacity: 0.45;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-right: 0.1rem;
+}
+
+#editor-toolbar button {
+  appearance: none;
+  background: rgba(244, 239, 230, 0.1);
+  border: 1px solid rgba(244, 239, 230, 0.2);
+  color: rgba(244, 239, 230, 0.85);
+  font-family: inherit;
+  font-size: 0.7rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 3px;
+  cursor: pointer;
+  line-height: 1.4;
+  transition: background 120ms ease;
+}
+
+#editor-toolbar button:hover {
+  background: rgba(244, 239, 230, 0.2);
+}
+
+#etb-size-val,
+#etb-nudge-val {
+  min-width: 2.5rem;
+  text-align: center;
+  opacity: 0.8;
+  font-variant-numeric: tabular-nums;
+}
+
+.etb-btn-danger {
+  border-color: rgba(180, 80, 60, 0.5) !important;
+  color: rgba(220, 120, 100, 0.9) !important;
+}
+
+.etb-btn-danger:hover {
+  background: rgba(180, 80, 60, 0.2) !important;
+}
+
+.etb-btn-export {
+  border-color: rgba(100, 160, 100, 0.5) !important;
+  color: rgba(130, 200, 130, 0.9) !important;
+}
+
+.etb-btn-export:hover {
+  background: rgba(100, 160, 100, 0.15) !important;
+}
+
+#editor-toolbar button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
