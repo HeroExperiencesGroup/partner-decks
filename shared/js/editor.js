@@ -1,20 +1,25 @@
 /* editor.js — personal in-browser slide editor
  *
- * Requires save-server.py running at localhost:8080.
- * Toggle with E key.
+ * Served by tools/save-server.py. Toggle with E.
  *
- * Text edits  — edit natgeo/index.html directly in your editor.
- *               Nudge/size controls here are for visual tweaking only;
- *               they don't appear in the brief (you apply them manually).
+ * Floating panel — drag by its header, snaps to the nearest corner,
+ * position + collapsed state remembered. Sections reveal contextually.
  *
- * Image brief — click an image → describe the replacement → Add to Brief.
- *               "Export Brief" downloads editor-brief.json for Claude.
- *               Claude reads the brief, finds/converts/places images,
- *               updates index.html, commits, and pushes.
+ * Selection:
+ *   Click text          — select element
+ *   Shift+click         — multi-select
+ *   "Edit Text"         — enter typing mode
+ *   Click image         — select image → brief panel
+ *   Esc                 — step back (typing → image → selection)
+ *   Alt+↑↓←→            — nudge selected (2px; Shift = 10px)
+ *   Ctrl+Z / Ctrl+⇧+Z   — undo / redo
+ *   P                   — pin mode; click slide to drop coord marker
  *
- * Save & Commit — sends the current DOM (editor artifacts stripped) to
- *                 save-server.py which overwrites natgeo/index.html,
- *                 commits, and pushes. Use after visual nudge/size tweaks.
+ * Git (branches): pick a branch to switch (page reloads), or "+" to create.
+ *   Switching is blocked if there are uncommitted edits — Save first.
+ *
+ * Save & Commit — writes DOM to natgeo/index.html, commits, pushes.
+ * Export Brief  — image replacements + pins + notes → editor-brief.json.
  *
  * TO DISABLE FOR CLIENT: remove the two lines tagged
  * data-editor-remove in natgeo/index.html.
@@ -23,16 +28,22 @@
 (function () {
   'use strict';
 
-  var SAVE_URL  = 'http://localhost:8080/save';
-  var BRIEF_URL = 'http://localhost:8080/brief';
+  /* Same-origin relative endpoints — work on whatever port save-server uses */
+  var SAVE_URL     = '/save';
+  var BRIEF_URL    = '/brief';
+  var BRANCHES_URL = '/git/branches';
+  var SWITCH_URL   = '/git/switch';
+  var NEWBR_URL    = '/git/branch';
 
   var STORE_KEY = 'partner-decks:editor-v1';
-  var doc       = document;
-  var body      = doc.body;
-  var store     = {};
+  var PANEL_KEY = 'partner-decks:editor-panel';
+
+  var doc   = document;
+  var body  = doc.body;
+  var store = {};
   var originals = {};
-  var toolbar   = null;
-  var isOn      = false;
+  var panel = null;
+  var isOn  = false;
 
   /* Text selection */
   var activeEl    = null;
@@ -42,16 +53,16 @@
 
   /* Image brief */
   var activeImg  = null;
-  var briefItems = [];     /* image replacement requests */
+  var briefItems = [];
 
   /* Pins */
   var pinMode  = false;
   var pins     = [];
   var pinCount = 0;
 
-  /* Undo/redo */
-  var undoStack   = [];
-  var redoStack   = [];
+  /* Undo / redo */
+  var undoStack = [];
+  var redoStack = [];
   var MAX_HISTORY = 60;
 
   var EDITABLE = [
@@ -62,31 +73,29 @@
     '.splash__title', '.splash__subtitle'
   ].join(', ');
 
-  /* ------------------------------------------------
+  /* ================================================
    * Helpers
-   * ---------------------------------------------- */
+   * ================================================ */
 
   function qsa(sel, root) {
     return Array.prototype.slice.call((root || doc).querySelectorAll(sel));
   }
   function qs(sel, root) { return (root || doc).querySelector(sel); }
 
-  /* ------------------------------------------------
-   * Storage
-   * ---------------------------------------------- */
-
-  function load() {
-    try { store = JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); }
-    catch (e) { store = {}; }
+  function loadLS(key, fallback) {
+    try { return JSON.parse(localStorage.getItem(key)) || fallback; }
+    catch (e) { return fallback; }
   }
-  function save() {
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); }
-    catch (e) {}
+  function saveLS(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
   }
 
-  /* ------------------------------------------------
-   * Element IDs — text
-   * ---------------------------------------------- */
+  function load() { store = loadLS(STORE_KEY, {}); }
+  function save() { saveLS(STORE_KEY, store); }
+
+  /* ================================================
+   * Element IDs
+   * ================================================ */
 
   function assignIds() {
     qsa('.section').forEach(function (section) {
@@ -100,10 +109,6 @@
       });
     });
   }
-
-  /* ------------------------------------------------
-   * Element IDs — images
-   * ---------------------------------------------- */
 
   function assignImgIds() {
     qsa('.section').forEach(function (section) {
@@ -125,8 +130,7 @@
     var base     = section && section.id ? '#' + section.id : '';
     if (tabPanel) base += ' [data-tab="' + tabPanel.getAttribute('data-tab') + '"]';
     var ctx  = tabPanel || section || doc;
-    var pics = qsa('picture', ctx);
-    var idx  = pics.indexOf(pic);
+    var idx  = qsa('picture', ctx).indexOf(pic);
     base += ' picture' + (idx > 0 ? ':nth-of-type(' + (idx + 1) + ')' : '');
     return base;
   }
@@ -135,16 +139,15 @@
     var img = pic.querySelector('img');
     return img ? (img.getAttribute('src') || '') : '';
   }
-
   function getImgSources(pic) {
     return qsa('source', pic).map(function (s) {
       return { type: s.getAttribute('type'), srcset: s.getAttribute('srcset') };
     });
   }
 
-  /* ------------------------------------------------
+  /* ================================================
    * Coordinates
-   * ---------------------------------------------- */
+   * ================================================ */
 
   function screenToCanvas(section, sx, sy) {
     var r = section.getBoundingClientRect();
@@ -153,15 +156,14 @@
       y: Math.round(Math.max(0, Math.min(1080, (sy - r.top)  * 1080 / r.height)))
     };
   }
-
   function updateCoordDisplay(x, y) {
     var el = qs('#etb-coords');
     if (el) el.textContent = x !== null ? 'x ' + x + '  y ' + y : '— —';
   }
 
-  /* ------------------------------------------------
+  /* ================================================
    * Pins
-   * ---------------------------------------------- */
+   * ================================================ */
 
   function setPinMode(on) {
     pinMode = on;
@@ -182,15 +184,13 @@
     el.style.top  = c.y + 'px';
     el.innerHTML  =
       '<div class="editor-pin__cross"></div>' +
-      '<div class="editor-pin__label">' +
-        '<span class="editor-pin__num">' + n + '</span> ' + c.x + ', ' + c.y +
-      '</div>';
+      '<div class="editor-pin__label"><span class="editor-pin__num">' +
+      n + '</span> ' + c.x + ', ' + c.y + '</div>';
     el.title = 'Pin ' + n + ' — ' + c.x + ', ' + c.y + ' (click to remove)';
     el.addEventListener('click', function (e) { e.stopPropagation(); removePin(el); });
     section.appendChild(el);
-    pins.push({ el: el, section: section, num: n,
-                sectionId: section.id, slide: parseInt(section.dataset.slide) || 0,
-                cx: c.x, cy: c.y });
+    pins.push({ el: el, num: n, sectionId: section.id,
+                slide: parseInt(section.dataset.slide) || 0, cx: c.x, cy: c.y });
     updatePinBtn();
   }
 
@@ -213,9 +213,9 @@
     if (btn) { btn.hidden = !pins.length; btn.textContent = 'Clear (' + pins.length + ')'; }
   }
 
-  /* ------------------------------------------------
-   * State snapshot
-   * ---------------------------------------------- */
+  /* ================================================
+   * State snapshot + undo/redo
+   * ================================================ */
 
   function snapState(el) {
     var d = store[el.dataset.eid] || {};
@@ -223,25 +223,21 @@
              nudgeX: d.nudgeX || 0, nudgeY: d.nudgeY || 0 };
   }
 
-  function applyState(eid, state) {
+  function applyState(eid, s) {
     var el = qs('[data-eid="' + eid + '"]'); if (!el) return;
-    el.innerHTML = state.html;
-    el.style.fontSize = state.fontSize || '';
-    applyTransform(el, state.nudgeX || 0, state.nudgeY || 0);
+    el.innerHTML = s.html;
+    el.style.fontSize = s.fontSize || '';
+    applyTransform(el, s.nudgeX || 0, s.nudgeY || 0);
     var d = store[eid] || {};
-    d.html = state.html; d.fontSize = state.fontSize;
-    d.nudgeX = state.nudgeX || 0; d.nudgeY = state.nudgeY || 0;
-    store[eid] = d; save(); refreshToolbar();
+    d.html = s.html; d.fontSize = s.fontSize;
+    d.nudgeX = s.nudgeX || 0; d.nudgeY = s.nudgeY || 0;
+    store[eid] = d; save(); refreshPanel();
   }
 
   function applyTransform(el, x, y) {
     if (x === 0 && y === 0) { el.style.position = ''; el.style.transform = ''; }
     else { el.style.position = 'relative'; el.style.transform = 'translate(' + x + 'px,' + y + 'px)'; }
   }
-
-  /* ------------------------------------------------
-   * Undo / redo
-   * ---------------------------------------------- */
 
   function pushHistory(entries) {
     var changed = entries.filter(function (e) {
@@ -253,28 +249,21 @@
     redoStack = [];
     refreshUndoButtons();
   }
-
   function undo() {
     var e = undoStack.pop(); if (!e) return;
     e.forEach(function (i) { applyState(i.eid, i.before); });
     redoStack.push(e); refreshUndoButtons();
   }
-
   function redo() {
     var e = redoStack.pop(); if (!e) return;
     e.forEach(function (i) { applyState(i.eid, i.after); });
     undoStack.push(e); refreshUndoButtons();
   }
-
   function refreshUndoButtons() {
     var u = qs('#etb-undo'); var r = qs('#etb-redo');
     if (u) u.disabled = !undoStack.length;
     if (r) r.disabled = !redoStack.length;
   }
-
-  /* ------------------------------------------------
-   * Apply saved state on load
-   * ---------------------------------------------- */
 
   function applyAll() {
     Object.keys(store).forEach(function (eid) {
@@ -286,22 +275,23 @@
     });
   }
 
-  /* ------------------------------------------------
+  /* ================================================
    * Edit mode
-   * ---------------------------------------------- */
+   * ================================================ */
 
   function setMode(on) {
     isOn = on;
     body.setAttribute('data-editor', on ? 'true' : 'false');
     var banner = qs('#editor-banner');
     if (banner) banner.hidden = !on;
-    if (toolbar) toolbar.hidden = !on;
+    if (panel) panel.hidden = !on;
+    if (on && !panel._branchesLoaded) loadBranches();
     if (!on) { deactivateAll(); deselectImage(); setPinMode(false); }
   }
 
-  /* ------------------------------------------------
+  /* ================================================
    * Text selection
-   * ---------------------------------------------- */
+   * ================================================ */
 
   function isSelected(el) { return selectedEls.indexOf(el) !== -1; }
 
@@ -313,7 +303,7 @@
     });
     selectedEls = [el]; activeEl = el;
     el.classList.add('editor-selected');
-    refreshToolbar();
+    refreshPanel();
   }
 
   function toggleSecondary(el) {
@@ -324,7 +314,7 @@
     } else {
       selectedEls.push(el); el.classList.add('editor-in-selection');
     }
-    refreshToolbar();
+    refreshPanel();
   }
 
   function deactivateAll() {
@@ -333,12 +323,12 @@
       el.classList.remove('editor-selected', 'editor-in-selection');
     });
     selectedEls = []; activeEl = null;
-    refreshToolbar();
+    refreshPanel();
   }
 
-  /* ------------------------------------------------
+  /* ================================================
    * Typing mode
-   * ---------------------------------------------- */
+   * ================================================ */
 
   function enterTyping() {
     if (!activeEl || isTyping) return;
@@ -353,7 +343,7 @@
       d.html = activeEl.innerHTML; store[activeEl.dataset.eid] = d; save();
     };
     activeEl.addEventListener('input', activeEl._edIn);
-    refreshToolbar();
+    refreshPanel();
   }
 
   function exitTyping() {
@@ -364,14 +354,14 @@
     activeEl.classList.remove('editor-typing');
     if (activeEl._edMD) { activeEl.removeEventListener('mousedown', activeEl._edMD); delete activeEl._edMD; }
     if (activeEl._edIn) { activeEl.removeEventListener('input', activeEl._edIn); delete activeEl._edIn; }
-    isTyping = false; refreshToolbar();
+    isTyping = false; refreshPanel();
   }
 
   function toggleTyping() { if (isTyping) exitTyping(); else enterTyping(); }
 
-  /* ------------------------------------------------
-   * Font size
-   * ---------------------------------------------- */
+  /* ================================================
+   * Font size + nudge + reset
+   * ================================================ */
 
   function getSize(el) {
     var v = parseFloat(el.style.fontSize);
@@ -386,12 +376,8 @@
     var d = store[el.dataset.eid] || {};
     d.fontSize = el.style.fontSize; store[el.dataset.eid] = d; save();
     pushHistory([{ eid: el.dataset.eid, before: before, after: snapState(el) }]);
-    refreshToolbar();
+    refreshPanel();
   }
-
-  /* ------------------------------------------------
-   * Nudge
-   * ---------------------------------------------- */
 
   function nudgeAll(dx, dy) {
     if (!selectedEls.length) return;
@@ -407,17 +393,13 @@
     pushHistory(entries.map(function (e) {
       return { eid: e.eid, before: e.before, after: snapState(e.el) };
     }));
-    refreshToolbar();
+    refreshPanel();
   }
 
   function getNudge(el) {
     var d = store[el.dataset.eid] || {};
     return { x: d.nudgeX || 0, y: d.nudgeY || 0 };
   }
-
-  /* ------------------------------------------------
-   * Reset
-   * ---------------------------------------------- */
 
   function resetSelection() {
     if (!selectedEls.length) return;
@@ -434,7 +416,7 @@
     pushHistory(entries.map(function (e) {
       return { eid: e.eid, before: e.before, after: snapState(e.el) };
     }));
-    refreshToolbar();
+    refreshPanel();
   }
 
   function resetAll() {
@@ -442,22 +424,22 @@
     store = {}; save(); location.reload();
   }
 
-  /* ------------------------------------------------
-   * Image selection + brief
-   * ---------------------------------------------- */
+  /* ================================================
+   * Image brief
+   * ================================================ */
 
   function selectImage(pic) {
     deactivateAll();
     if (activeImg) activeImg.classList.remove('editor-img-selected');
     activeImg = pic;
     pic.classList.add('editor-img-selected');
-    refreshToolbar();
+    refreshPanel();
     setTimeout(function () { var n = qs('#etb-img-note'); if (n) n.focus(); }, 50);
   }
 
   function deselectImage() {
     if (activeImg) { activeImg.classList.remove('editor-img-selected'); activeImg = null; }
-    refreshToolbar();
+    refreshPanel();
   }
 
   function addToBrief() {
@@ -483,22 +465,19 @@
     refreshBriefBadge();
     var btn = qs('#etb-img-add');
     if (btn) {
-      var orig = btn.textContent;
+      var o = btn.textContent;
       btn.textContent = '✓ Added'; btn.classList.add('etb-btn-active');
-      setTimeout(function () { btn.textContent = orig; btn.classList.remove('etb-btn-active'); }, 1400);
+      setTimeout(function () { btn.textContent = o; btn.classList.remove('etb-btn-active'); }, 1400);
     }
   }
 
   function removeFromBrief(iid) {
     briefItems = briefItems.filter(function (b) { return b.iid !== iid; });
-    refreshBriefBadge(); refreshToolbar();
+    refreshBriefBadge(); refreshPanel();
   }
-
   function isInBrief(pic) {
-    if (!pic) return false;
-    return briefItems.some(function (b) { return b.iid === pic.dataset.iid; });
+    return pic && briefItems.some(function (b) { return b.iid === pic.dataset.iid; });
   }
-
   function refreshBriefBadge() {
     var badge = qs('#etb-brief-badge');
     if (badge) { badge.hidden = !briefItems.length; badge.textContent = briefItems.length; }
@@ -506,111 +485,76 @@
     if (btn) btn.classList.toggle('etb-has-items', briefItems.length > 0);
   }
 
-  /* ------------------------------------------------
-   * Export Brief JSON (for Claude to action)
-   * Contains: image replacements + pins + freeform notes.
-   * Text edits are NOT included — edit index.html directly.
-   * ---------------------------------------------- */
-
   function exportBrief() {
     var notes = (qs('#etb-brief-notes') || {}).value || '';
     var brief = {
-      meta: {
-        generated: new Date().toISOString(),
-        deck:      'natgeo/index.html',
+      meta: { generated: new Date().toISOString(), deck: 'natgeo/index.html',
         guide: [
-          'For each imageReplacement: find/download the image described in "note",',
-          'compress to .jpg + .webp, place in the same folder as currentFile (or a',
-          'descriptive new name), update imgSelector src and picSelector source srcsets',
-          'in natgeo/index.html, then commit + push.',
-          'Use pin canvasX/canvasY as position references when mentioned in notes.'
-        ]
-      },
+          'For each imageReplacement: find/download the image in "note",',
+          'compress to .jpg + .webp, place beside currentFile, update',
+          'imgSelector src and picSelector source srcsets in index.html,',
+          'then commit + push. Use pin canvasX/canvasY as position refs.'
+        ] },
       imageReplacements: briefItems,
       pins: pins.map(function (p) {
-        return { num: p.num, sectionId: p.sectionId, slideNumber: p.slide,
-                 canvasX: p.cx, canvasY: p.cy };
+        return { num: p.num, sectionId: p.sectionId, slideNumber: p.slide, canvasX: p.cx, canvasY: p.cy };
       }),
       notes: notes.trim() || null
     };
-
     var json = JSON.stringify(brief, null, 2);
-
-    /* Try posting to save-server first; fall back to download */
-    fetch(BRIEF_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: json
-    }).then(function (res) { return res.json(); })
-      .then(function (r) {
-        if (r.ok) setStatus('Brief saved to editor-brief.json', 'ok');
-        else      downloadJSON(json, 'editor-brief.json');
-      })
-      .catch(function () { downloadJSON(json, 'editor-brief.json'); });
+    fetch(BRIEF_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: json })
+      .then(function (r) { return r.json(); })
+      .then(function (r) { if (r.ok) setStatus('Brief saved to editor-brief.json', 'ok');
+                           else downloadJSON(json); })
+      .catch(function () { downloadJSON(json); });
   }
 
-  function downloadJSON(text, filename) {
+  function downloadJSON(text) {
     var blob = new Blob([text], { type: 'application/json' });
     var a = doc.createElement('a');
-    a.href = URL.createObjectURL(blob); a.download = filename;
+    a.href = URL.createObjectURL(blob); a.download = 'editor-brief.json';
     doc.body.appendChild(a); a.click(); doc.body.removeChild(a);
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
     setStatus('Brief downloaded ↓', 'ok');
   }
 
-  /* ------------------------------------------------
-   * Save & Commit — sends DOM to save-server.py
-   * ---------------------------------------------- */
+  /* ================================================
+   * Save & Commit
+   * ================================================ */
 
   function saveAndCommit() {
     if (isTyping) exitTyping();
-
     var msgInput = qs('#etb-commit-msg');
     var message  = msgInput ? msgInput.value.trim() : '';
     if (!message) {
       var ts = new Date().toISOString().slice(0, 16).replace('T', ' ');
       message = 'Editor: visual save ' + ts;
     }
-
     var html = buildCleanHTML();
-
     setStatus('Saving…', 'pending');
-
     fetch(SAVE_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ html: html, message: message })
     })
-    .then(function (res) { return res.json(); })
+    .then(function (r) { return r.json(); })
     .then(function (r) {
-      if (r.ok) {
-        setStatus('✓ Saved & committed', 'ok');
-        if (msgInput) msgInput.value = '';
-      } else {
-        setStatus('✗ ' + (r.error || r.step || 'Error'), 'error');
-      }
+      if (r.ok) { setStatus('✓ ' + (r.message || 'Saved & committed'), 'ok'); if (msgInput) msgInput.value = ''; }
+      else      { setStatus('✗ ' + (r.error || r.step || 'Error'), 'error'); }
     })
-    .catch(function (err) {
-      setStatus('✗ Server unreachable — run save-server.py', 'error');
-    });
+    .catch(function () { setStatus('✗ Server unreachable — run save-server.py', 'error'); });
   }
 
   function buildCleanHTML() {
     var clone = doc.documentElement.cloneNode(true);
-    /* NOTE: we deliberately KEEP the [data-editor-remove] script + link
-     * tags so the working file stays editable after save. They are only
-     * removed manually for final client delivery. */
-    /* Strip editor-specific runtime attributes */
-    var editorAttrs = ['eid','iid','iidSelector','iidSection','iidSlide','iidTab'];
+    /* Keep [data-editor-remove] tags so the working file stays editable. */
+    var attrs = ['eid','iid','iidSelector','iidSection','iidSlide','iidTab'];
     clone.querySelectorAll('[data-eid],[data-iid]').forEach(function (el) {
-      editorAttrs.forEach(function (k) { delete el.dataset[k]; });
+      attrs.forEach(function (k) { delete el.dataset[k]; });
     });
-    /* Strip editor classes */
     clone.querySelectorAll('.editor-selected,.editor-in-selection,.editor-typing,.editor-img-selected').forEach(function (el) {
       el.classList.remove('editor-selected','editor-in-selection','editor-typing','editor-img-selected');
     });
-    /* Remove injected UI */
-    clone.querySelectorAll('.editor-pin,#editor-toolbar,#editor-banner').forEach(function (el) {
+    clone.querySelectorAll('.editor-pin,#editor-panel,#editor-banner').forEach(function (el) {
       el.parentNode && el.parentNode.removeChild(el);
     });
     clone.removeAttribute('data-editor');
@@ -618,194 +562,395 @@
     return '<!doctype html>\n' + clone.outerHTML;
   }
 
-  /* ------------------------------------------------
-   * Status display
-   * ---------------------------------------------- */
+  /* ================================================
+   * Git branches
+   * ================================================ */
+
+  function loadBranches() {
+    var sel = qs('#ep-branch');
+    if (!sel) return;
+    fetch(BRANCHES_URL)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        panel._branchesLoaded = true;
+        if (!data.ok) { setBranchUnavailable(); return; }
+        sel.innerHTML = '';
+        data.branches.forEach(function (b) {
+          var o = doc.createElement('option');
+          o.value = b; o.textContent = b;
+          if (b === data.current) o.selected = true;
+          sel.appendChild(o);
+        });
+        sel.disabled = false;
+        sel.dataset.current = data.current;
+        var dot = qs('#ep-branch-clean');
+        if (dot) {
+          dot.textContent = data.clean ? '●' : '○';
+          dot.title = data.clean ? 'Working tree clean' : 'Uncommitted changes';
+          dot.classList.toggle('is-dirty', !data.clean);
+        }
+      })
+      .catch(function () { setBranchUnavailable(); });
+  }
+
+  function setBranchUnavailable() {
+    var sel = qs('#ep-branch');
+    if (sel) {
+      sel.innerHTML = '<option>— save-server not running —</option>';
+      sel.disabled = true;
+    }
+    var newBtn = qs('#ep-branch-new-btn');
+    if (newBtn) newBtn.disabled = true;
+  }
+
+  function onBranchPick() {
+    var sel = qs('#ep-branch');
+    if (!sel) return;
+    var target = sel.value;
+    var current = sel.dataset.current;
+    if (target === current) return;
+    if (!confirm('Switch to branch "' + target + '"?\n\nThe page will reload to show that branch\'s content.')) {
+      sel.value = current;   /* revert dropdown */
+      return;
+    }
+    setStatus('Switching to ' + target + '…', 'pending');
+    fetch(SWITCH_URL, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ branch: target })
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (r) {
+      if (r.ok) { setStatus('✓ Switched — reloading…', 'ok'); setTimeout(function () { location.reload(); }, 500); }
+      else { setStatus('✗ ' + (r.error || 'Switch failed'), 'error'); sel.value = current; }
+    })
+    .catch(function () { setStatus('✗ Server unreachable', 'error'); sel.value = current; });
+  }
+
+  function createBranch() {
+    var input = qs('#ep-newbranch-name');
+    var name  = input ? input.value.trim() : '';
+    if (!name) { setStatus('Enter a branch name', 'error'); return; }
+    setStatus('Creating ' + name + '…', 'pending');
+    fetch(NEWBR_URL, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name })
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (r) {
+      if (r.ok) { setStatus('✓ Created — reloading…', 'ok'); setTimeout(function () { location.reload(); }, 500); }
+      else { setStatus('✗ ' + (r.error || 'Create failed'), 'error'); }
+    })
+    .catch(function () { setStatus('✗ Server unreachable', 'error'); });
+  }
+
+  function toggleNewBranchRow(show) {
+    var row = qs('#ep-newbranch-row');
+    if (!row) return;
+    row.hidden = show === undefined ? !row.hidden : !show;
+    if (!row.hidden) { var i = qs('#ep-newbranch-name'); if (i) i.focus(); }
+  }
+
+  /* ================================================
+   * Status readout
+   * ================================================ */
 
   var statusTimer = null;
-
   function setStatus(msg, state) {
     var el = qs('#etb-status');
     if (!el) return;
     el.textContent = msg;
-    el.className   = 'etb-status etb-status--' + (state || 'ok');
-    el.hidden      = false;
+    el.className = 'etb-status etb-status--' + (state || 'ok');
+    el.hidden = false;
     clearTimeout(statusTimer);
-    if (state !== 'pending') {
-      statusTimer = setTimeout(function () { el.hidden = true; }, 4000);
-    }
+    if (state !== 'pending') statusTimer = setTimeout(function () { el.hidden = true; }, 4500);
   }
 
-  /* ------------------------------------------------
-   * Toolbar
-   * ---------------------------------------------- */
+  /* ================================================
+   * Panel — floating, draggable, collapsible
+   * ================================================ */
 
-  function buildToolbar() {
-    var t = doc.createElement('div');
-    t.id = 'editor-toolbar';
-    t.hidden = true;
-    t.innerHTML =
-      '<span class="etb-label">✏ Editor</span>' +
+  function buildPanel() {
+    var p = doc.createElement('div');
+    p.id = 'editor-panel';
+    p.className = 'editor-panel';
+    p.hidden = true;
 
-      /* Undo/redo */
-      '<div class="etb-group">' +
-        '<button id="etb-undo" data-ea="undo" title="Ctrl+Z" disabled>↩</button>' +
-        '<button id="etb-redo" data-ea="redo" title="Ctrl+Shift+Z" disabled>↪</button>' +
-      '</div>' +
-
-      /* Text element controls */
-      '<div class="etb-group">' +
-        '<span class="etb-hint" id="etb-hint">click text or image</span>' +
-        '<span class="etb-el-name" id="etb-el-name" hidden></span>' +
-        '<button id="etb-edit-text" data-ea="edit-text" hidden>Edit Text</button>' +
-        '<div class="etb-row" id="etb-size-row" hidden>' +
-          '<span class="etb-section-label">Size</span>' +
-          '<button data-ea="size-down">−</button>' +
-          '<span id="etb-size-val">—</span>' +
-          '<button data-ea="size-up">+</button>' +
+    p.innerHTML =
+      '<div class="ep-header" id="ep-header">' +
+        '<span class="ep-title">✏ Editor</span>' +
+        '<div class="ep-header-btns">' +
+          '<button id="etb-undo" data-ea="undo" title="Ctrl+Z" disabled>↩</button>' +
+          '<button id="etb-redo" data-ea="redo" title="Ctrl+Shift+Z" disabled>↪</button>' +
+          '<button id="ep-collapse" data-ea="collapse" title="Collapse">▾</button>' +
         '</div>' +
-        '<div class="etb-row" id="etb-nudge-row" hidden>' +
-          '<span class="etb-section-label">Nudge</span>' +
-          '<button data-ea="nudge-left"  title="Alt+←">←</button>' +
-          '<button data-ea="nudge-up"    title="Alt+↑">↑</button>' +
-          '<button data-ea="nudge-down"  title="Alt+↓">↓</button>' +
-          '<button data-ea="nudge-right" title="Alt+→">→</button>' +
-          '<span id="etb-nudge-val">0, 0</span>' +
+      '</div>' +
+
+      '<div class="ep-body" id="ep-body">' +
+
+        /* Branch row */
+        '<div class="ep-row ep-branch-row">' +
+          '<span class="ep-icon" title="Branch">⎇</span>' +
+          '<select id="ep-branch" title="Switch branch" disabled><option>loading…</option></select>' +
+          '<span id="ep-branch-clean" class="ep-branch-clean" title="">●</span>' +
+          '<button id="ep-branch-new-btn" data-ea="branch-new" title="New branch">+</button>' +
         '</div>' +
-        '<button class="etb-btn-danger" data-ea="reset" id="etb-reset" hidden>Reset</button>' +
-      '</div>' +
+        '<div class="ep-row" id="ep-newbranch-row" hidden>' +
+          '<input id="ep-newbranch-name" type="text" placeholder="new-branch-name" autocomplete="off">' +
+          '<button data-ea="branch-create" class="etb-btn-save">Create</button>' +
+          '<button data-ea="branch-cancel">✕</button>' +
+        '</div>' +
 
-      /* Image brief */
-      '<div class="etb-group etb-group--img" id="etb-img-group" hidden>' +
-        '<span class="etb-section-label">🖼</span>' +
-        '<span id="etb-img-filename" class="etb-img-filename"></span>' +
-        '<input id="etb-img-note" class="etb-img-note" type="text" ' +
-          'placeholder="describe the replacement…" autocomplete="off">' +
-        '<button id="etb-img-add"    data-ea="img-add">Add to Brief</button>' +
-        '<button id="etb-img-remove" data-ea="img-remove" hidden class="etb-btn-danger">Remove</button>' +
-      '</div>' +
+        /* Save row */
+        '<div class="ep-row">' +
+          '<input id="etb-commit-msg" type="text" placeholder="commit message (optional)" autocomplete="off">' +
+        '</div>' +
+        '<div class="ep-row">' +
+          '<button id="etb-save" data-ea="save" class="etb-btn-save ep-wide">💾 Save &amp; Commit</button>' +
+        '</div>' +
+        '<div id="etb-status" class="etb-status" hidden></div>' +
 
-      /* Coords + pins */
-      '<div class="etb-group">' +
-        '<span id="etb-coords" class="etb-coords">— —</span>' +
-        '<button id="etb-pin-toggle" data-ea="pin-toggle">📍 Pin</button>' +
-        '<button id="etb-pin-clear"  data-ea="pin-clear" hidden>Clear</button>' +
-      '</div>' +
+        /* Contextual hint */
+        '<div class="ep-hint" id="etb-hint">Click text or an image to begin.</div>' +
 
-      /* Save & Commit */
-      '<div class="etb-group etb-group--save">' +
-        '<input id="etb-commit-msg" class="etb-commit-msg" type="text" ' +
-          'placeholder="commit message (optional)" autocomplete="off">' +
-        '<button id="etb-save" data-ea="save" class="etb-btn-save">Save &amp; Commit</button>' +
-        '<span id="etb-status" class="etb-status" hidden></span>' +
-      '</div>' +
+        /* Selection section */
+        '<div class="ep-section" id="ep-sec-selection" hidden>' +
+          '<div class="ep-section-title">Selection · <span id="etb-el-name">—</span></div>' +
+          '<div class="ep-section-body">' +
+            '<button id="etb-edit-text" data-ea="edit-text">Edit Text</button>' +
+            '<div class="etb-row" id="etb-size-row" hidden>' +
+              '<span class="etb-section-label">Size</span>' +
+              '<button data-ea="size-down">−</button>' +
+              '<span id="etb-size-val">—</span>' +
+              '<button data-ea="size-up">+</button>' +
+            '</div>' +
+            '<div class="etb-row" id="etb-nudge-row" hidden>' +
+              '<span class="etb-section-label">Nudge</span>' +
+              '<button data-ea="nudge-left"  title="Alt+←">←</button>' +
+              '<button data-ea="nudge-up"    title="Alt+↑">↑</button>' +
+              '<button data-ea="nudge-down"  title="Alt+↓">↓</button>' +
+              '<button data-ea="nudge-right" title="Alt+→">→</button>' +
+              '<span id="etb-nudge-val">0, 0</span>' +
+            '</div>' +
+            '<button class="etb-btn-danger" data-ea="reset" id="etb-reset">Reset element</button>' +
+          '</div>' +
+        '</div>' +
 
-      /* Brief + reset */
-      '<div class="etb-group">' +
-        '<button class="etb-btn-danger" data-ea="reset-all">Reset all</button>' +
-        '<button id="etb-export-brief" data-ea="export-brief" class="etb-btn-brief">' +
-          'Export Brief <span id="etb-brief-badge" class="etb-badge" hidden>0</span>' +
-        '</button>' +
+        /* Image section */
+        '<div class="ep-section" id="ep-sec-image" hidden>' +
+          '<div class="ep-section-title">🖼 <span id="etb-img-filename">image</span></div>' +
+          '<div class="ep-section-body">' +
+            '<input id="etb-img-note" type="text" placeholder="describe the replacement…" autocomplete="off">' +
+            '<div class="etb-row">' +
+              '<button id="etb-img-add" data-ea="img-add" class="ep-wide">Add to Brief</button>' +
+              '<button id="etb-img-remove" data-ea="img-remove" class="etb-btn-danger" hidden>Remove</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+
+        /* Pins + coords */
+        '<div class="ep-section" id="ep-sec-pins">' +
+          '<div class="ep-section-title">Pins · <span id="etb-coords" class="etb-coords">— —</span></div>' +
+          '<div class="ep-section-body">' +
+            '<div class="etb-row">' +
+              '<button id="etb-pin-toggle" data-ea="pin-toggle">📍 Pin</button>' +
+              '<button id="etb-pin-clear" data-ea="pin-clear" hidden>Clear</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+
+        /* Footer */
+        '<div class="ep-footer">' +
+          '<button id="etb-export-brief" data-ea="export-brief" class="etb-btn-brief">' +
+            'Export Brief <span id="etb-brief-badge" class="etb-badge" hidden>0</span></button>' +
+          '<button class="etb-btn-danger" data-ea="reset-all">Reset all</button>' +
+        '</div>' +
       '</div>';
 
-    t.addEventListener('mousedown', function (e) {
-      /* Allow typing in text inputs without stealing focus */
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    /* Don't steal focus from inputs; block default on buttons */
+    p.addEventListener('mousedown', function (e) {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.target.closest('#ep-header')) return; /* drag handles its own */
       e.preventDefault();
     });
 
-    t.addEventListener('click', function (e) {
+    p.addEventListener('click', function (e) {
       var btn = e.target.closest('[data-ea]');
       if (!btn) return;
       var step = e.shiftKey ? 10 : 2;
       switch (btn.dataset.ea) {
-        case 'undo':         undo();  break;
-        case 'redo':         redo();  break;
-        case 'edit-text':    toggleTyping(); break;
-        case 'size-up':      if (activeEl) stepSize(activeEl,  1); break;
-        case 'size-down':    if (activeEl) stepSize(activeEl, -1); break;
-        case 'nudge-left':   nudgeAll(-step, 0); break;
-        case 'nudge-right':  nudgeAll( step, 0); break;
-        case 'nudge-up':     nudgeAll(0, -step); break;
-        case 'nudge-down':   nudgeAll(0,  step); break;
-        case 'reset':        resetSelection(); break;
-        case 'reset-all':    resetAll(); break;
-        case 'save':         saveAndCommit(); break;
-        case 'export-brief': exportBrief(); break;
-        case 'pin-toggle':   setPinMode(!pinMode); break;
-        case 'pin-clear':    clearAllPins(); break;
-        case 'img-add':      addToBrief(); break;
-        case 'img-remove':   if (activeImg) removeFromBrief(activeImg.dataset.iid); break;
+        case 'undo':          undo(); break;
+        case 'redo':          redo(); break;
+        case 'collapse':      toggleCollapse(); break;
+        case 'edit-text':     toggleTyping(); break;
+        case 'size-up':       if (activeEl) stepSize(activeEl,  1); break;
+        case 'size-down':     if (activeEl) stepSize(activeEl, -1); break;
+        case 'nudge-left':    nudgeAll(-step, 0); break;
+        case 'nudge-right':   nudgeAll( step, 0); break;
+        case 'nudge-up':      nudgeAll(0, -step); break;
+        case 'nudge-down':    nudgeAll(0,  step); break;
+        case 'reset':         resetSelection(); break;
+        case 'reset-all':     resetAll(); break;
+        case 'save':          saveAndCommit(); break;
+        case 'export-brief':  exportBrief(); break;
+        case 'pin-toggle':    setPinMode(!pinMode); break;
+        case 'pin-clear':     clearAllPins(); break;
+        case 'img-add':       addToBrief(); break;
+        case 'img-remove':    if (activeImg) removeFromBrief(activeImg.dataset.iid); break;
+        case 'branch-new':    toggleNewBranchRow(); break;
+        case 'branch-create': createBranch(); break;
+        case 'branch-cancel': toggleNewBranchRow(false); break;
       }
     });
 
-    /* Prevent editor shortcuts while typing in inputs */
-    t.querySelectorAll('input').forEach(function (inp) {
-      inp.addEventListener('keydown', function (e) { e.stopPropagation(); });
+    /* Inputs: stop editor shortcuts; branch select change */
+    p.querySelectorAll('input').forEach(function (inp) {
+      inp.addEventListener('keydown', function (e) {
+        e.stopPropagation();
+        if (e.key === 'Enter') {
+          if (inp.id === 'ep-newbranch-name') createBranch();
+          if (inp.id === 'etb-commit-msg')    saveAndCommit();
+        }
+      });
     });
+    var branchSel = p.querySelector('#ep-branch');
+    if (branchSel) branchSel.addEventListener('change', onBranchPick);
 
-    doc.body.appendChild(t);
-    return t;
+    doc.body.appendChild(p);
+    initDrag(p);
+    restorePanelPos(p);
+    return p;
   }
 
-  function refreshToolbar() {
-    if (!toolbar) return;
+  /* ---- Collapse ---- */
+  function toggleCollapse() {
+    var collapsed = panel.classList.toggle('editor-panel--collapsed');
+    var btn = qs('#ep-collapse');
+    if (btn) { btn.textContent = collapsed ? '▸' : '▾'; btn.title = collapsed ? 'Expand' : 'Collapse'; }
+    var pos = loadLS(PANEL_KEY, {});
+    pos.collapsed = collapsed; saveLS(PANEL_KEY, pos);
+  }
+
+  /* ---- Drag + snap to corner ---- */
+  function initDrag(p) {
+    var header = qs('#ep-header', p);
+    if (!header) return;
+    var dragging = false, offX = 0, offY = 0;
+
+    header.addEventListener('mousedown', function (e) {
+      if (e.target.closest('button')) return; /* header buttons still work */
+      dragging = true;
+      var r = p.getBoundingClientRect();
+      offX = e.clientX - r.left;
+      offY = e.clientY - r.top;
+      p.classList.add('editor-panel--dragging');
+      p.style.left = r.left + 'px';
+      p.style.top  = r.top + 'px';
+      p.style.right = 'auto';
+      p.style.bottom = 'auto';
+      e.preventDefault();
+    });
+
+    window.addEventListener('mousemove', function (e) {
+      if (!dragging) return;
+      p.style.left = (e.clientX - offX) + 'px';
+      p.style.top  = (e.clientY - offY) + 'px';
+    });
+
+    window.addEventListener('mouseup', function () {
+      if (!dragging) return;
+      dragging = false;
+      p.classList.remove('editor-panel--dragging');
+      snapToCorner(p);
+    });
+  }
+
+  function snapToCorner(p) {
+    var r  = p.getBoundingClientRect();
+    var cx = r.left + r.width / 2;
+    var cy = r.top + r.height / 2;
+    var corner = (cy < window.innerHeight / 2 ? 't' : 'b') +
+                 (cx < window.innerWidth  / 2 ? 'l' : 'r');
+    applyCorner(p, corner);
+    var pos = loadLS(PANEL_KEY, {});
+    pos.corner = corner; saveLS(PANEL_KEY, pos);
+  }
+
+  function applyCorner(p, corner) {
+    p.style.left = ''; p.style.top = ''; p.style.right = ''; p.style.bottom = '';
+    p.classList.remove('editor-panel--tl','editor-panel--tr','editor-panel--bl','editor-panel--br');
+    p.classList.add('editor-panel--' + corner);
+  }
+
+  function restorePanelPos(p) {
+    var pos = loadLS(PANEL_KEY, { corner: 'br', collapsed: false });
+    applyCorner(p, pos.corner || 'br');
+    if (pos.collapsed) {
+      p.classList.add('editor-panel--collapsed');
+      var btn = qs('#ep-collapse', p);
+      if (btn) { btn.textContent = '▸'; btn.title = 'Expand'; }
+    }
+  }
+
+  /* ================================================
+   * Refresh panel (contextual visibility)
+   * ================================================ */
+
+  function refreshPanel() {
+    if (!panel) return;
 
     var count  = selectedEls.length;
     var hasEl  = count > 0;
     var multi  = count > 1;
     var hasImg = !!activeImg;
 
-    var hint        = qs('#etb-hint');
-    var elName      = qs('#etb-el-name');
-    var editTextBtn = qs('#etb-edit-text');
-    var sizeRow     = qs('#etb-size-row');
-    var nudgeRow    = qs('#etb-nudge-row');
-    var resetBtn    = qs('#etb-reset');
-    var sizeVal     = qs('#etb-size-val');
-    var nudgeVal    = qs('#etb-nudge-val');
+    var hint    = qs('#etb-hint');
+    var selSec  = qs('#ep-sec-selection');
+    var imgSec  = qs('#ep-sec-image');
 
-    if (hint)        hint.hidden        = hasEl || hasImg;
-    if (elName)      elName.hidden      = !hasEl;
-    if (editTextBtn) editTextBtn.hidden = !hasEl || multi;
-    if (sizeRow)     sizeRow.hidden     = !hasEl || multi || isTyping;
-    if (nudgeRow)    nudgeRow.hidden    = !hasEl || isTyping;
-    if (resetBtn)    resetBtn.hidden    = !hasEl;
+    if (hint)   hint.hidden   = hasEl || hasImg;
+    if (selSec) selSec.hidden = !hasEl;
+    if (imgSec) imgSec.hidden = !hasImg;
 
-    if (editTextBtn && !multi) {
-      editTextBtn.textContent = isTyping ? '✓ Done' : 'Edit Text';
-      editTextBtn.classList.toggle('etb-btn-active', isTyping);
-    }
+    /* Selection controls */
+    if (hasEl) {
+      var elName      = qs('#etb-el-name');
+      var editTextBtn = qs('#etb-edit-text');
+      var sizeRow     = qs('#etb-size-row');
+      var nudgeRow    = qs('#etb-nudge-row');
+      var sizeVal     = qs('#etb-size-val');
+      var nudgeVal    = qs('#etb-nudge-val');
 
-    if (hasEl && elName) {
-      if (multi) {
-        elName.textContent = count + ' selected';
-      } else if (activeEl) {
-        var cls = (activeEl.className || '')
-          .replace(/editor-selected|editor-in-selection|editor-typing/g, '').trim().split(/\s+/)[0];
-        elName.textContent = cls || activeEl.tagName.toLowerCase();
+      if (elName) {
+        if (multi) elName.textContent = count + ' selected';
+        else if (activeEl) {
+          var cls = (activeEl.className || '')
+            .replace(/editor-selected|editor-in-selection|editor-typing/g, '').trim().split(/\s+/)[0];
+          elName.textContent = cls || activeEl.tagName.toLowerCase();
+        }
+      }
+      if (editTextBtn) {
+        editTextBtn.hidden = multi;
+        editTextBtn.textContent = isTyping ? '✓ Done Editing' : 'Edit Text';
+        editTextBtn.classList.toggle('etb-btn-active', isTyping);
+      }
+      if (sizeRow)  sizeRow.hidden  = multi || isTyping;
+      if (nudgeRow) nudgeRow.hidden = isTyping;
+      if (!multi && activeEl && !isTyping) {
+        if (sizeVal) sizeVal.textContent = Math.round(getSize(activeEl)) + 'px';
+        var n = getNudge(activeEl);
+        if (nudgeVal) nudgeVal.textContent = n.x + ', ' + n.y;
       }
     }
 
-    if (!multi && activeEl && !isTyping) {
-      if (sizeVal) sizeVal.textContent = Math.round(getSize(activeEl)) + 'px';
-      var n = getNudge(activeEl);
-      if (nudgeVal) nudgeVal.textContent = n.x + ', ' + n.y;
-    }
-
-    /* Image brief panel */
-    var imgGroup    = qs('#etb-img-group');
-    var imgFilename = qs('#etb-img-filename');
-    var imgNote     = qs('#etb-img-note');
-    var imgAdd      = qs('#etb-img-add');
-    var imgRemove   = qs('#etb-img-remove');
-
-    if (imgGroup) imgGroup.hidden = !hasImg;
+    /* Image controls */
     if (hasImg) {
-      var fname = getImgSrc(activeImg).split('/').pop();
-      if (imgFilename) imgFilename.textContent = fname;
+      var imgFilename = qs('#etb-img-filename');
+      var imgNote     = qs('#etb-img-note');
+      var imgAdd      = qs('#etb-img-add');
+      var imgRemove   = qs('#etb-img-remove');
+      if (imgFilename) imgFilename.textContent = getImgSrc(activeImg).split('/').pop();
       var inBrief = isInBrief(activeImg);
-      if (imgAdd)    imgAdd.textContent = inBrief ? 'Update' : 'Add to Brief';
+      if (imgAdd)    imgAdd.textContent = inBrief ? 'Update Note' : 'Add to Brief';
       if (imgRemove) imgRemove.hidden   = !inBrief;
       if (imgNote && inBrief && !imgNote.value) {
         var ex = briefItems.filter(function (b) { return b.iid === activeImg.dataset.iid; })[0];
@@ -819,9 +964,9 @@
     refreshBriefBadge();
   }
 
-  /* ------------------------------------------------
+  /* ================================================
    * Banner
-   * ---------------------------------------------- */
+   * ================================================ */
 
   function buildBanner() {
     var b = doc.createElement('div');
@@ -829,18 +974,16 @@
     b.hidden = true;
     b.innerHTML =
       '<span>✏ <strong>Edit mode</strong> — ' +
-      'click text to select &nbsp;|&nbsp; click image to brief &nbsp;|&nbsp; ' +
-      '<kbd>Shift+click</kbd> multi &nbsp;|&nbsp; ' +
-      '"Edit Text" to type &nbsp;|&nbsp; ' +
+      'click text / image &nbsp;|&nbsp; <kbd>Shift+click</kbd> multi &nbsp;|&nbsp; ' +
       '<kbd>Alt+↑↓←→</kbd> nudge &nbsp;|&nbsp; <kbd>P</kbd> pin &nbsp;|&nbsp; ' +
-      '<kbd>Ctrl+Z</kbd> undo &nbsp;|&nbsp; <kbd>Esc</kbd> deselect &nbsp;|&nbsp; ' +
-      '<kbd>E</kbd> exit</span>';
+      '<kbd>Ctrl+Z</kbd> undo &nbsp;|&nbsp; <kbd>Esc</kbd> back &nbsp;|&nbsp; ' +
+      '<kbd>E</kbd> exit &nbsp;·&nbsp; drag panel header to move</span>';
     doc.body.appendChild(b);
   }
 
-  /* ------------------------------------------------
+  /* ================================================
    * Coordinate tracking + pin drops
-   * ---------------------------------------------- */
+   * ================================================ */
 
   function initCoordTracking() {
     qsa('.section').forEach(function (section) {
@@ -855,19 +998,19 @@
       section.addEventListener('click', function (e) {
         if (!isOn || !pinMode) return;
         if (e.target.dataset.eid || e.target.dataset.iid) return;
-        if (e.target.closest('#editor-toolbar,#editor-banner,.editor-pin')) return;
+        if (e.target.closest('#editor-panel,#editor-banner,.editor-pin')) return;
         dropPin(section, e.clientX, e.clientY);
       });
     });
   }
 
-  /* ------------------------------------------------
+  /* ================================================
    * Keyboard
-   * ---------------------------------------------- */
+   * ================================================ */
 
   function onKey(e) {
     var tag     = (e.target.tagName || '').toUpperCase();
-    var inField = tag === 'INPUT' || tag === 'TEXTAREA';
+    var inField = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
 
     if (e.ctrlKey && !e.altKey && isOn && !inField) {
       if (e.key === 'z') { e.preventDefault(); if (e.shiftKey) redo(); else undo(); return; }
@@ -886,9 +1029,9 @@
 
     if (e.key === 'Escape') {
       e.preventDefault();
-      if (pinMode)  { setPinMode(false);  return; }
-      if (isTyping) { exitTyping();       return; }
-      if (activeImg){ deselectImage();    return; }
+      if (pinMode)   { setPinMode(false);  return; }
+      if (isTyping)  { exitTyping();       return; }
+      if (activeImg) { deselectImage();    return; }
       deactivateAll(); return;
     }
 
@@ -903,9 +1046,9 @@
     }
   }
 
-  /* ------------------------------------------------
+  /* ================================================
    * Click handling
-   * ---------------------------------------------- */
+   * ================================================ */
 
   function onEditableClick(el, e) {
     if (!isOn || pinMode) return;
@@ -920,12 +1063,10 @@
 
   function onDocClick(e) {
     if (!isOn) return;
-    if (toolbar && toolbar.contains(e.target)) return;
+    if (panel && panel.contains(e.target)) return;
 
     var pic = e.target.closest('picture[data-iid]');
-    if (pic && !e.target.dataset.eid) {
-      deactivateAll(); selectImage(pic); return;
-    }
+    if (pic && !e.target.dataset.eid) { deactivateAll(); selectImage(pic); return; }
 
     if (activeImg && !activeImg.contains(e.target)) deselectImage();
 
@@ -935,9 +1076,9 @@
     }
   }
 
-  /* ------------------------------------------------
+  /* ================================================
    * Init
-   * ---------------------------------------------- */
+   * ================================================ */
 
   function ready(fn) {
     if (doc.readyState !== 'loading') fn();
@@ -950,7 +1091,7 @@
     assignImgIds();
     applyAll();
 
-    toolbar = buildToolbar();
+    panel = buildPanel();
     buildBanner();
     initCoordTracking();
 
@@ -964,7 +1105,7 @@
     window.__editor = {
       undo: undo, redo: redo, resetAll: resetAll,
       saveAndCommit: saveAndCommit, exportBrief: exportBrief,
-      store: store, brief: briefItems, pins: pins
+      loadBranches: loadBranches, store: store, brief: briefItems, pins: pins
     };
   });
 

@@ -75,6 +75,68 @@ def git(args, cwd=ROOT):
     return result.returncode, result.stdout.strip(), result.stderr.strip()
 
 
+# ---- Branch helpers ----
+
+def git_current_branch() -> str:
+    code, out, _ = git(['rev-parse', '--abbrev-ref', 'HEAD'])
+    return out if code == 0 else ''
+
+
+def git_branches() -> list:
+    code, out, _ = git(['branch', '--format=%(refname:short)'])
+    if code != 0:
+        return []
+    return [b.strip() for b in out.splitlines() if b.strip()]
+
+
+def git_is_clean() -> bool:
+    code, out, _ = git(['status', '--porcelain'])
+    return code == 0 and out.strip() == ''
+
+
+def branches_info() -> dict:
+    return {'ok': True,
+            'current': git_current_branch(),
+            'branches': git_branches(),
+            'clean': git_is_clean()}
+
+
+def switch_branch(branch: str) -> dict:
+    if not branch:
+        return {'ok': False, 'error': 'No branch specified.'}
+    if branch == git_current_branch():
+        return {'ok': True, 'message': 'Already on ' + branch, 'current': branch}
+    if not git_is_clean():
+        return {'ok': False, 'dirty': True,
+                'error': 'Uncommitted changes present. Save & Commit before '
+                         'switching branches (or discard them) to avoid losing work.'}
+    code, out, err = git(['checkout', branch])
+    if code != 0:
+        return {'ok': False, 'error': err or out}
+    print(f'  Switched to branch: {branch}')
+    return {'ok': True, 'current': branch, 'message': 'Switched to ' + branch}
+
+
+def create_branch(name: str) -> dict:
+    if not name:
+        return {'ok': False, 'error': 'No branch name specified.'}
+    # Basic sanity on branch name
+    bad = set(' ~^:?*[\\')
+    if any(c in bad for c in name) or name.startswith('-'):
+        return {'ok': False, 'error': 'Invalid branch name.'}
+    if name in git_branches():
+        return {'ok': False, 'error': 'Branch already exists: ' + name}
+    if not git_is_clean():
+        return {'ok': False, 'dirty': True,
+                'error': 'Uncommitted changes present. Save & Commit before '
+                         'creating a branch to avoid carrying stray edits.'}
+    code, out, err = git(['checkout', '-b', name])
+    if code != 0:
+        return {'ok': False, 'error': err or out}
+    print(f'  Created and switched to branch: {name}')
+    return {'ok': True, 'current': name, 'message': 'Created ' + name}
+
+
 def save_and_commit(html: str, message: str) -> dict:
     # Guard against truncated / wrong payloads overwriting the deck
     if not looks_like_deck(html):
@@ -128,7 +190,19 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self._cors()
         self.end_headers()
 
-    # ---- POST /save  /brief ----
+    # ---- GET /git/branches  (else static) ----
+    def do_GET(self):
+        path = self.path.split('?')[0]
+        if path == '/git/branches':
+            try:
+                self._json_response(branches_info())
+            except Exception as e:
+                self._json_response({'ok': False, 'error': str(e)}, 500)
+            return
+        # Fall through to static file serving
+        super().do_GET()
+
+    # ---- POST /save  /brief  /git/switch  /git/branch ----
     def do_POST(self):
         path = self.path.split('?')[0]
 
@@ -136,6 +210,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._handle_save()
         elif path == '/brief':
             self._handle_brief()
+        elif path == '/git/switch':
+            self._handle_git('switch')
+        elif path == '/git/branch':
+            self._handle_git('branch')
         else:
             self.send_error(404, 'Not found')
 
@@ -183,9 +261,21 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         except Exception as e:
             self._json_response({'ok': False, 'error': str(e)}, 500)
 
+    def _handle_git(self, action):
+        try:
+            data = self._read_json()
+            if action == 'switch':
+                print(f'\n/git/switch  ->  "{data.get("branch", "")}"')
+                self._json_response(switch_branch(data.get('branch', '').strip()))
+            elif action == 'branch':
+                print(f'\n/git/branch  ->  "{data.get("name", "")}"')
+                self._json_response(create_branch(data.get('name', '').strip()))
+        except Exception as e:
+            self._json_response({'ok': False, 'error': str(e)}, 500)
+
     # Silence request logs for cleaner output (remove to debug)
     def log_message(self, fmt, *args):
-        if self.path in ('/save', '/brief') or self.command == 'OPTIONS':
+        if self.command == 'OPTIONS' or self.path.startswith(('/save', '/brief', '/git')):
             super().log_message(fmt, *args)
 
 

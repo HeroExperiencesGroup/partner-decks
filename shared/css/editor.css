@@ -1,21 +1,16 @@
 /* editor.css — styles for the personal in-browser editor
- * Loaded only when editor.js is active.
- * Remove both <link> and <script> tags (data-editor) from
- * natgeo/index.html before client delivery.
+ * Loaded only when editor.js is active (via data-editor-remove tag).
+ * Remove both the <link> and <script> before client delivery.
  */
 
-/* --------------------------------------------------
- * Edit mode body indicator
- * -------------------------------------------------- */
+/* ==================================================
+ * Edit-mode indicators on the deck
+ * ================================================== */
 
 body[data-editor="true"] {
   outline: 2px solid rgba(210, 140, 60, 0.5);
   outline-offset: -2px;
 }
-
-/* --------------------------------------------------
- * Editable element — hover hint in edit mode
- * -------------------------------------------------- */
 
 body[data-editor="true"] [data-eid]:hover {
   outline: 1px dashed rgba(210, 140, 60, 0.55);
@@ -23,167 +18,188 @@ body[data-editor="true"] [data-eid]:hover {
   cursor: text !important;
 }
 
-/* --------------------------------------------------
- * Selected / active element
- * -------------------------------------------------- */
-
-/* Primary — text-editable, warm amber */
+/* Selected primary (amber) / secondary multi (teal) / typing (green) */
 .editor-selected {
   outline: 2px solid rgba(210, 140, 60, 0.9) !important;
   outline-offset: 3px;
   cursor: text !important;
 }
-
-/* Secondary — in multi-select, teal — move only, no text editing */
 .editor-in-selection {
   outline: 2px solid rgba(80, 180, 160, 0.8) !important;
   outline-offset: 3px;
   cursor: default !important;
 }
-
-/* Typing mode — green outline shows element is actively editable */
 .editor-typing {
   outline: 2px solid rgba(100, 200, 120, 0.9) !important;
   outline-offset: 3px;
   cursor: text !important;
 }
 
-/* Edit Text button — active/pressed state */
-.etb-btn-active {
-  background: rgba(100, 200, 120, 0.2) !important;
-  border-color: rgba(100, 200, 120, 0.6) !important;
-  color: rgba(140, 220, 150, 0.95) !important;
+/* Image selection */
+body[data-editor="true"] picture[data-iid] { cursor: pointer; }
+body[data-editor="true"] picture[data-iid]:hover {
+  box-shadow: inset 0 0 0 2px rgba(210, 140, 60, 0.45);
+}
+picture.editor-img-selected {
+  box-shadow: inset 0 0 0 2px rgba(210, 140, 60, 0.95) !important;
 }
 
-/* --------------------------------------------------
- * Top banner
- * -------------------------------------------------- */
+/* Pin-mode crosshair */
+body[data-editor-pin="true"] .section,
+body[data-editor-pin="true"] [data-eid] { cursor: crosshair !important; }
+
+/* ==================================================
+ * Top banner (keyboard hints)
+ * ================================================== */
+
+#editor-banner[hidden],
+#editor-panel[hidden] { display: none !important; }
 
 #editor-banner {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 0; left: 0; right: 0;
   z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.4rem 1rem;
-  background: rgba(28, 28, 26, 0.92);
+  padding: 0.35rem 1rem;
+  background: rgba(28, 28, 26, 0.9);
   color: rgba(244, 239, 230, 0.9);
   font-family: ui-monospace, 'SF Mono', 'Cascadia Code', monospace;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   letter-spacing: 0.03em;
-  gap: 0.5rem;
   pointer-events: none;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
-
 #editor-banner kbd {
   display: inline-block;
   padding: 0 0.35em;
   background: rgba(244, 239, 230, 0.15);
   border: 1px solid rgba(244, 239, 230, 0.25);
   border-radius: 3px;
-  font-size: 0.65rem;
+  font-size: 0.62rem;
 }
 
-/* --------------------------------------------------
- * Toolbar
- * -------------------------------------------------- */
+/* ==================================================
+ * Floating panel
+ * ================================================== */
 
-#editor-toolbar[hidden],
-#editor-banner[hidden] {
-  display: none !important;
-}
-
-#editor-toolbar {
+.editor-panel {
   position: fixed;
-  top: 2rem; /* sits just below the banner */
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.45rem 0.85rem;
-  background: rgba(28, 28, 26, 0.94);
-  color: rgba(244, 239, 230, 0.85);
+  z-index: 10001;
+  width: 20rem;
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100vh - 4rem);
+  overflow: auto;
+  background: rgba(24, 24, 22, 0.95);
+  color: rgba(244, 239, 230, 0.88);
   font-family: ui-monospace, 'SF Mono', 'Cascadia Code', monospace;
-  font-size: 0.7rem;
-  border-radius: 6px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  white-space: nowrap;
+  font-size: 0.72rem;
+  border: 1px solid rgba(244, 239, 230, 0.12);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   user-select: none;
 }
 
-.etb-label {
-  font-size: 0.65rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  opacity: 0.5;
-  padding-right: 0.5rem;
-  border-right: 1px solid rgba(244, 239, 230, 0.15);
+/* Corner docking (JS toggles these classes) */
+.editor-panel--tl { top: 3rem;    left: 1rem;  }
+.editor-panel--tr { top: 3rem;    right: 1rem; }
+.editor-panel--bl { bottom: 1rem; left: 1rem;  }
+.editor-panel--br { bottom: 1rem; right: 1rem; }
+
+.editor-panel--dragging {
+  transition: none;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  opacity: 0.97;
 }
 
-.etb-group {
+.editor-panel--collapsed .ep-body { display: none; }
+
+/* Header (drag handle) */
+.ep-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.7rem;
+  cursor: grab;
+  border-bottom: 1px solid rgba(244, 239, 230, 0.1);
+}
+.ep-header:active { cursor: grabbing; }
+
+.ep-title {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.ep-header-btns { display: flex; gap: 0.3rem; }
+
+/* Body */
+.ep-body {
+  padding: 0.6rem 0.7rem 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ep-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ep-icon { opacity: 0.6; font-size: 0.85rem; }
+
+.ep-hint {
+  opacity: 0.4;
+  font-style: italic;
+  padding: 0.3rem 0;
+}
+
+/* Sections */
+.ep-section {
+  border-top: 1px solid rgba(244, 239, 230, 0.1);
+  padding-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
   gap: 0.4rem;
-  padding-right: 0.75rem;
-  border-right: 1px solid rgba(244, 239, 230, 0.15);
+}
+.ep-section-title {
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+.ep-section-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
 }
 
-.etb-group:last-child {
-  border-right: none;
-  padding-right: 0;
+.ep-footer {
+  border-top: 1px solid rgba(244, 239, 230, 0.1);
+  padding-top: 0.5rem;
+  display: flex;
+  gap: 0.35rem;
+  justify-content: space-between;
 }
 
+/* Inline rows (size / nudge) */
 .etb-row {
   display: flex;
   align-items: center;
   gap: 0.3rem;
+  flex-wrap: wrap;
 }
-
-.etb-hint {
-  opacity: 0.4;
-  font-style: italic;
-}
-
-.etb-el-name {
-  opacity: 0.7;
-  padding-right: 0.5rem;
-}
-
 .etb-section-label {
   opacity: 0.45;
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  margin-right: 0.1rem;
 }
-
-#editor-toolbar button {
-  appearance: none;
-  background: rgba(244, 239, 230, 0.1);
-  border: 1px solid rgba(244, 239, 230, 0.2);
-  color: rgba(244, 239, 230, 0.85);
-  font-family: inherit;
-  font-size: 0.7rem;
-  padding: 0.15rem 0.45rem;
-  border-radius: 3px;
-  cursor: pointer;
-  line-height: 1.4;
-  transition: background 120ms ease;
-}
-
-#editor-toolbar button:hover {
-  background: rgba(244, 239, 230, 0.2);
-}
-
 #etb-size-val,
 #etb-nudge-val {
   min-width: 2.5rem;
@@ -191,198 +207,54 @@ body[data-editor="true"] [data-eid]:hover {
   opacity: 0.8;
   font-variant-numeric: tabular-nums;
 }
+.etb-el-name { opacity: 0.8; }
 
-.etb-btn-danger {
-  border-color: rgba(180, 80, 60, 0.5) !important;
-  color: rgba(220, 120, 100, 0.9) !important;
+/* ==================================================
+ * Buttons
+ * ================================================== */
+
+.editor-panel button {
+  appearance: none;
+  background: rgba(244, 239, 230, 0.1);
+  border: 1px solid rgba(244, 239, 230, 0.2);
+  color: rgba(244, 239, 230, 0.85);
+  font-family: inherit;
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  line-height: 1.4;
+  transition: background 120ms ease;
 }
-
-.etb-btn-danger:hover {
-  background: rgba(180, 80, 60, 0.2) !important;
-}
-
-.etb-btn-export {
-  border-color: rgba(100, 160, 100, 0.5) !important;
-  color: rgba(130, 200, 130, 0.9) !important;
-}
-
-.etb-btn-export:hover {
-  background: rgba(100, 160, 100, 0.15) !important;
-}
-
-#editor-toolbar button:disabled {
+.editor-panel button:hover { background: rgba(244, 239, 230, 0.2); }
+.editor-panel button:disabled {
   opacity: 0.3;
   cursor: not-allowed;
   pointer-events: none;
 }
 
-/* --------------------------------------------------
- * Coordinate display
- * -------------------------------------------------- */
+.ep-wide { flex: 1; }
 
-.etb-group--coords {
-  gap: 0.5rem;
+.etb-btn-active {
+  background: rgba(100, 200, 120, 0.2) !important;
+  border-color: rgba(100, 200, 120, 0.6) !important;
+  color: rgba(140, 220, 150, 0.95) !important;
 }
-
-.etb-coords {
-  font-variant-numeric: tabular-nums;
-  min-width: 7rem;
-  opacity: 0.9;
-  letter-spacing: 0.04em;
+.etb-btn-danger {
+  border-color: rgba(180, 80, 60, 0.5) !important;
+  color: rgba(220, 120, 100, 0.9) !important;
 }
-
-/* --------------------------------------------------
- * Pin mode cursor
- * -------------------------------------------------- */
-
-body[data-editor-pin="true"] .section {
-  cursor: crosshair !important;
-}
-
-body[data-editor-pin="true"] [data-eid] {
-  cursor: crosshair !important;
-}
-
-/* --------------------------------------------------
- * Pin markers
- * Positioned in the 1920×1080 section coordinate space;
- * scale with the letterbox transform automatically.
- * -------------------------------------------------- */
-
-.editor-pin {
-  position: absolute;
-  z-index: 9000;
-  transform: translate(-50%, -50%);
-  pointer-events: auto;
-  cursor: pointer;
-}
-
-.editor-pin__cross {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 20px;
-  height: 20px;
-  transform: translate(-50%, -50%);
-}
-
-.editor-pin__cross::before,
-.editor-pin__cross::after {
-  content: '';
-  position: absolute;
-  background: rgba(255, 80, 80, 0.9);
-}
-
-.editor-pin__cross::before {
-  width: 2px;
-  height: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.editor-pin__cross::after {
-  height: 2px;
-  width: 100%;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.editor-pin__label {
-  position: absolute;
-  top: 14px;
-  left: 10px;
-  background: rgba(28, 28, 26, 0.88);
-  color: rgba(255, 180, 160, 0.95);
-  font-family: ui-monospace, 'SF Mono', monospace;
-  font-size: 11px;
-  padding: 2px 6px;
-  border-radius: 3px;
-  white-space: nowrap;
-  pointer-events: none;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-}
-
-.editor-pin__num {
-  color: rgba(255, 120, 100, 1);
+.etb-btn-danger:hover { background: rgba(180, 80, 60, 0.2) !important; }
+.etb-btn-save {
+  border-color: rgba(130, 200, 130, 0.6) !important;
+  color: rgba(150, 220, 160, 0.95) !important;
   font-weight: bold;
 }
-
-.editor-pin:hover .editor-pin__cross::before,
-.editor-pin:hover .editor-pin__cross::after {
-  background: rgba(255, 50, 50, 1);
-}
-
-.editor-pin:hover .editor-pin__label::after {
-  content: ' ✕';
-  opacity: 0.6;
-}
-
-/* --------------------------------------------------
- * Image selection
- * -------------------------------------------------- */
-
-body[data-editor="true"] picture[data-iid] {
-  cursor: pointer;
-}
-
-body[data-editor="true"] picture[data-iid]:hover {
-  box-shadow: inset 0 0 0 2px rgba(210, 140, 60, 0.45);
-}
-
-picture.editor-img-selected {
-  box-shadow: inset 0 0 0 2px rgba(210, 140, 60, 0.95) !important;
-}
-
-/* --------------------------------------------------
- * Image brief panel in toolbar
- * -------------------------------------------------- */
-
-.etb-group--img {
-  gap: 0.4rem;
-  flex-shrink: 0;
-}
-
-.etb-img-filename {
-  font-size: 0.65rem;
-  opacity: 0.6;
-  max-width: 10rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.etb-img-note {
-  background: rgba(244, 239, 230, 0.08);
-  border: 1px solid rgba(244, 239, 230, 0.2);
-  border-radius: 3px;
-  color: rgba(244, 239, 230, 0.9);
-  font-family: ui-monospace, 'SF Mono', monospace;
-  font-size: 0.68rem;
-  padding: 0.2rem 0.5rem;
-  width: 16rem;
-  outline: none;
-}
-
-.etb-img-note:focus {
-  border-color: rgba(210, 140, 60, 0.7);
-  background: rgba(244, 239, 230, 0.12);
-}
-
-.etb-img-note::placeholder {
-  opacity: 0.35;
-}
-
-/* --------------------------------------------------
- * Brief export button + badge
- * -------------------------------------------------- */
-
+.etb-btn-save:hover { background: rgba(130, 200, 130, 0.18) !important; }
 .etb-btn-brief {
   border-color: rgba(120, 160, 220, 0.5) !important;
   color: rgba(150, 190, 240, 0.9) !important;
-  position: relative;
 }
-
 .etb-btn-brief:hover,
 .etb-btn-brief.etb-has-items {
   background: rgba(120, 160, 220, 0.15) !important;
@@ -402,73 +274,108 @@ picture.editor-img-selected {
   height: 1.1em;
   padding: 0 0.2em;
   margin-left: 0.3em;
-  vertical-align: middle;
 }
 
-/* --------------------------------------------------
- * Save & Commit group
- * -------------------------------------------------- */
+/* ==================================================
+ * Inputs
+ * ================================================== */
 
-.etb-group--save {
-  gap: 0.4rem;
-}
-
-.etb-commit-msg {
+.editor-panel input[type="text"],
+.editor-panel select {
   background: rgba(244, 239, 230, 0.08);
   border: 1px solid rgba(244, 239, 230, 0.2);
-  border-radius: 3px;
+  border-radius: 4px;
   color: rgba(244, 239, 230, 0.9);
-  font-family: ui-monospace, 'SF Mono', monospace;
+  font-family: inherit;
   font-size: 0.68rem;
-  padding: 0.2rem 0.5rem;
-  width: 14rem;
+  padding: 0.25rem 0.45rem;
   outline: none;
+  flex: 1;
+  min-width: 0;
 }
-
-.etb-commit-msg:focus {
-  border-color: rgba(130, 200, 130, 0.7);
+.editor-panel input[type="text"]:focus {
+  border-color: rgba(210, 140, 60, 0.7);
   background: rgba(244, 239, 230, 0.12);
 }
+.editor-panel input::placeholder { opacity: 0.35; }
+.editor-panel select { cursor: pointer; }
+.editor-panel select:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.etb-commit-msg::placeholder {
-  opacity: 0.35;
+/* ==================================================
+ * Branch row
+ * ================================================== */
+
+.ep-branch-clean {
+  font-size: 0.7rem;
+  opacity: 0.7;
+  color: rgba(130, 200, 130, 0.9);
 }
+.ep-branch-clean.is-dirty { color: rgba(230, 200, 120, 0.95); }
 
-.etb-btn-save {
-  border-color: rgba(130, 200, 130, 0.6) !important;
-  color: rgba(150, 220, 160, 0.95) !important;
-  font-weight: bold;
+#ep-branch-new-btn { flex: 0 0 auto; padding: 0.2rem 0.5rem; }
+
+/* ==================================================
+ * Coords + status
+ * ================================================== */
+
+.etb-coords {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+  letter-spacing: 0.04em;
+  text-transform: none;
 }
-
-.etb-btn-save:hover {
-  background: rgba(130, 200, 130, 0.18) !important;
-}
-
-/* --------------------------------------------------
- * Status readout
- * -------------------------------------------------- */
 
 .etb-status {
   font-size: 0.65rem;
-  padding: 0.15rem 0.5rem;
-  border-radius: 3px;
-  white-space: nowrap;
-  max-width: 18rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.etb-status--pending { color: rgba(230, 200, 120, 0.95); background: rgba(230, 200, 120, 0.12); }
+.etb-status--ok      { color: rgba(150, 220, 160, 0.95); background: rgba(130, 200, 130, 0.15); }
+.etb-status--error   { color: rgba(230, 130, 110, 0.95); background: rgba(200, 90, 70, 0.18); }
 
-.etb-status--pending {
-  color: rgba(230, 200, 120, 0.95);
-  background: rgba(230, 200, 120, 0.12);
-}
+/* ==================================================
+ * Pin markers (in 1920×1080 section space)
+ * ================================================== */
 
-.etb-status--ok {
-  color: rgba(150, 220, 160, 0.95);
-  background: rgba(130, 200, 130, 0.15);
+.editor-pin {
+  position: absolute;
+  z-index: 9000;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  cursor: pointer;
 }
-
-.etb-status--error {
-  color: rgba(230, 130, 110, 0.95);
-  background: rgba(200, 90, 70, 0.18);
+.editor-pin__cross {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 20px; height: 20px;
+  transform: translate(-50%, -50%);
 }
+.editor-pin__cross::before,
+.editor-pin__cross::after {
+  content: '';
+  position: absolute;
+  background: rgba(255, 80, 80, 0.9);
+}
+.editor-pin__cross::before { width: 2px; height: 100%; left: 50%; transform: translateX(-50%); }
+.editor-pin__cross::after  { height: 2px; width: 100%; top: 50%; transform: translateY(-50%); }
+.editor-pin__label {
+  position: absolute;
+  top: 14px; left: 10px;
+  background: rgba(28, 28, 26, 0.88);
+  color: rgba(255, 180, 160, 0.95);
+  font-family: ui-monospace, 'SF Mono', monospace;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.editor-pin__num { color: rgba(255, 120, 100, 1); font-weight: bold; }
+.editor-pin:hover .editor-pin__cross::before,
+.editor-pin:hover .editor-pin__cross::after { background: rgba(255, 50, 50, 1); }
+.editor-pin:hover .editor-pin__label::after { content: ' ✕'; opacity: 0.6; }
