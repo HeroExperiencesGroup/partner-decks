@@ -1,6 +1,5 @@
 <!doctype html>
-<html lang="en-GB" data-deck-layout="locked">
-<head>
+<html lang="en-GB" data-deck-layout="locked"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
@@ -9,18 +8,18 @@
 <meta name="description" content="The spirit of exploration in Arabia — a story about discovery, landscape, and the case for an expedition built together.">
 <meta name="theme-color" content="#1c1c1a">
 
-<link rel="preload" href="../shared/fonts/playfair-display-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="../shared/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="../shared/fonts/newsreader-400-italic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../shared/fonts/playfair-display-400.woff2" as="font" type="font/woff2" crossorigin="">
+<link rel="preload" href="../shared/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin="">
+<link rel="preload" href="../shared/fonts/newsreader-400-italic.woff2" as="font" type="font/woff2" crossorigin="">
 
 <link rel="stylesheet" href="../shared/css/tokens.css">
 <link rel="stylesheet" href="../shared/css/base.css">
 <link rel="stylesheet" href="../shared/css/components.css">
 <link rel="stylesheet" href="../shared/css/print.css" media="print">
-<link rel="stylesheet" href="../shared/css/editor.css" data-editor-remove>
+<link rel="stylesheet" href="../shared/css/editor.css" data-editor-remove="">
 </head>
 
-<body>
+<body data-editor="true">
 
 <a href="#sec-cover" class="skip-link">Skip to deck</a>
 
@@ -32,44 +31,29 @@
 <div class="rotate-hint" role="dialog" aria-modal="true" aria-labelledby="rotate-hint-title">
   <div class="rotate-hint__view" data-rotate-view="portrait">
     <svg class="rotate-hint__icon rotate-hint__icon--rotate" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <rect x="22" y="6" width="20" height="52" rx="3"/>
-      <line x1="28" y1="52" x2="36" y2="52"/>
+      <rect x="22" y="6" width="20" height="52" rx="3"></rect>
+      <line x1="28" y1="52" x2="36" y2="52"></line>
     </svg>
     <h2 id="rotate-hint-title" class="rotate-hint__title">Rotate for the cinematic view</h2>
     <p class="rotate-hint__body">This deck reads best in landscape. Rotate your device for full-bleed imagery and side-by-side layouts.</p>
-    <button class="rotate-hint__dismiss" type="button" data-rotate-hint-dismiss>Continue in portrait</button>
+    <button class="rotate-hint__dismiss" type="button" data-rotate-hint-dismiss="">Continue in portrait</button>
   </div>
 
   <div class="rotate-hint__view" data-rotate-view="landscape">
     <svg class="rotate-hint__icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <polyline points="10,22 10,10 22,10"/>
-      <polyline points="42,10 54,10 54,22"/>
-      <polyline points="54,42 54,54 42,54"/>
-      <polyline points="22,54 10,54 10,42"/>
+      <polyline points="10,22 10,10 22,10"></polyline>
+      <polyline points="42,10 54,10 54,22"></polyline>
+      <polyline points="54,42 54,54 42,54"></polyline>
+      <polyline points="22,54 10,54 10,42"></polyline>
     </svg>
     <h2 class="rotate-hint__title">Go fullscreen</h2>
     <p class="rotate-hint__body">Tap below for the deepest immersion.</p>
-    <button class="rotate-hint__action" type="button" data-rotate-hint-fullscreen>Enter fullscreen</button>
-    <button class="rotate-hint__skip" type="button" data-rotate-hint-dismiss>Skip</button>
+    <button class="rotate-hint__action" type="button" data-rotate-hint-fullscreen="">Enter fullscreen</button>
+    <button class="rotate-hint__skip" type="button" data-rotate-hint-dismiss="">Skip</button>
   </div>
 </div>
 
-<div id="splash" class="splash" role="dialog" aria-modal="true" aria-labelledby="splashTitle">
-  <div class="splash__inner">
-    <p class="splash__eyebrow">National Geographic × Hero Experiences</p>
-    <h1 class="splash__title" id="splashTitle">The Spirit of Exploration in Arabia</h1>
-    <p class="splash__subtitle">A story</p>
-    <div class="splash__divider" aria-hidden="true"></div>
-    <p class="splash__hint-text">This presentation is interactive. Navigate with arrow keys, scroll, or swipe.</p>
-    <div class="splash__loader" aria-label="Loading images" id="splashLoader">
-      <div class="splash__loader-bar" id="splashLoaderBar"></div>
-    </div>
-    <p class="splash__loading-label" id="splashLoadingLabel">Loading…</p>
-    <button class="splash__btn" id="splashBtn" type="button" disabled aria-disabled="true">
-      Begin
-    </button>
-  </div>
-</div>
+
 
 <main class="deck" id="deck" aria-label="National Geographic × Hero Experiences — The Spirit of Exploration in Arabia">
 
@@ -78,7 +62,7 @@
        Manager copy: NATIONAL GEOGRAPHIC × HERO EXPERIENCES /
        The Spirit of Exploration in Arabia
        ===================================================== -->
-  <section class="section" id="sec-cover" data-slide="1" data-mode="immersive" data-image="full-bleed" aria-labelledby="cover-label">
+  <div class="slide-viewport"><section class="section" id="sec-cover" data-slide="1" data-mode="immersive" data-image="full-bleed" aria-labelledby="cover-label" style="transform: translate(0px, 0px) scale(1);">
     <div class="full-bleed full-bleed--soft-dim" aria-hidden="true">
       <picture class="responsive-image">
         <source type="image/webp" srcset="assets/images/01-cover-desktop.webp 1306w" sizes="100vw">
@@ -124,17 +108,17 @@
         </picture>
       </div>
     </div>
-  </section>
+  </section></div>
 
   <!-- =====================================================
        Slide 2 — 1. The Joy of Discovery (Immersive)
        ===================================================== -->
-  <section class="section" id="sec-discovery" data-slide="2" data-mode="immersive" data-image="full-bleed" aria-labelledby="discovery-headline">
+  <div class="slide-viewport"><section class="section" id="sec-discovery" data-slide="2" data-mode="immersive" data-image="full-bleed" aria-labelledby="discovery-headline" style="transform: translate(0px, 0px) scale(1);">
     <div class="full-bleed full-bleed--lower-band" aria-hidden="true">
       <picture class="responsive-image">
         <source type="image/webp" srcset="assets/images/Falcons-Platinum-100-mobile.webp 960w, assets/images/Falcons-Platinum-100-desktop.webp 1559w" sizes="100vw">
         <source type="image/jpeg" srcset="assets/images/Falcons-Platinum-100-mobile.jpg 960w, assets/images/Falcons-Platinum-100-desktop.jpg 1559w" sizes="100vw">
-        <img src="assets/images/Falcons-Platinum-100-desktop.jpg" alt="" loading="lazy" decoding="async" width="1559" height="1009">
+        <img src="assets/images/Falcons-Platinum-100-desktop.jpg" alt="" loading="lazy" decoding="async" width="1559" height="1009" class="is-loaded">
       </picture>
     </div>
 
@@ -160,18 +144,18 @@
         <p class="meta meta--on-dark">The Joy of Discovery</p>
         <h2 id="discovery-headline" class="headline headline--lg headline--bone">The best journeys begin with curiosity.</h2>
         <div class="body">
-          <p>A distant dune illuminated by the first light of day. A falcon gliding across an endless horizon. Tracks in the sand that reveal a story unseen. A conversation that changes how we understand a place.</p>
-          <p>These are the moments that stay with us long after a journey ends. After years spent guiding guests through the deserts, mountains, and cultural landscapes of Arabia, we have seen how even the simplest moments of discovery can transform a person's connection to a place.</p>
+          <p class="">A distant dune illuminated by the first light of day. A falcon gliding across an endless horizon. Tracks in the sand that reveal a story unseen. A conversation that changes how we understand a place.</p>
+          <p class="">These are the moments that stay with us long after a journey ends. After years spent guiding guests through the deserts, mountains, and cultural landscapes of Arabia, we have seen how even the simplest moments of discovery can transform a person's connection to a place.</p>
         </div>
         <p class="caption">The world is still full of wonder.</p>
       </div>
     </div>
-  </section>
+  </section></div>
 
   <!-- =====================================================
        Slide 3 — 2. Looking Closer (Restrained — split)
        ===================================================== -->
-  <section class="section section--bleed-right" id="sec-looking-closer" data-slide="3" data-mode="restrained" aria-labelledby="closer-headline">
+  <div class="slide-viewport"><section class="section section--bleed-right" id="sec-looking-closer" data-slide="3" data-mode="restrained" aria-labelledby="closer-headline" style="transform: translate(0px, 0px) scale(1);">
 
     <div class="section__meta meta">
       <span>03</span>
@@ -194,29 +178,29 @@
       <p class="section-label">Looking Closer</p>
       <h2 id="closer-headline" class="headline">At first glance, the landscapes of Arabia can seem vast and uncomplicated.</h2>
       <div class="body">
-        <p>Yet the more time one spends here, the more the region reveals itself. Ancient wadis cut through mountains. Wildlife thrives in unexpected places. Seasonal migrations continue across landscapes that have shaped life for thousands of years.</p>
-        <p>Every journey uncovers something new.</p>
+        <p style="position: relative; transform: translate(0px, 16px);" class="">Yet the more time one spends here, the more the region reveals itself. Ancient wadis cut through mountains. Wildlife thrives in unexpected places. Seasonal migrations continue across landscapes that have shaped life for thousands of years.</p>
+        <p style="position: relative; transform: translate(0px, 16px);">Every journey uncovers something new.</p>
       </div>
-      <p class="pull pull--with-rule">It is a lesson we continue to learn ourselves: the closer you look, the more there is to discover.</p>
+      <p class="pull pull--with-rule" style="position: relative; transform: translate(0px, 16px);">It is a lesson we continue to learn ourselves: the closer you look, the more there is to discover.</p>
     </div>
     <div class="section__image" aria-hidden="true">
       <picture class="responsive-image">
-        <source type="image/webp" srcset="assets/images/08-5-conservation-desktop.webp 900w" sizes="50vw">
-        <source type="image/jpeg" srcset="assets/images/08-5-conservation-desktop.jpg 900w" sizes="50vw">
-        <img src="assets/images/08-5-conservation-desktop.jpg" alt="" loading="lazy" decoding="async" width="900" height="1125">
+        
+        
+        <source type="image/webp" srcset="assets/images/arabian-oryx-ph-16.webp"><source type="image/jpeg" srcset="assets/images/arabian-oryx-ph-16.jpg"><img src="assets/images/arabian-oryx-ph-16.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1278" class="is-loaded">
       </picture>
     </div>
-  </section>
+  </section></div>
 
   <!-- =====================================================
        Slide 4 — 3. Arabia (Immersive)
        ===================================================== -->
-  <section class="section" id="sec-arabia" data-slide="4" data-mode="immersive" data-image="full-bleed" aria-labelledby="arabia-headline">
+  <div class="slide-viewport"><section class="section" id="sec-arabia" data-slide="4" data-mode="immersive" data-image="full-bleed" aria-labelledby="arabia-headline" style="transform: translate(0px, 0px) scale(1);">
     <div class="full-bleed full-bleed--lower-band" aria-hidden="true">
       <picture class="responsive-image">
         <source type="image/webp" srcset="assets/images/03-5-arabia-mobile.webp 960w, assets/images/03-5-arabia-desktop.webp 1672w" sizes="100vw">
         <source type="image/jpeg" srcset="assets/images/03-5-arabia-mobile.jpg 960w, assets/images/03-5-arabia-desktop.jpg 1672w" sizes="100vw">
-        <img src="assets/images/03-5-arabia-desktop.jpg" alt="" loading="lazy" decoding="async" width="1672" height="941">
+        <img src="assets/images/03-5-arabia-desktop.jpg" alt="" loading="lazy" decoding="async" width="1672" height="941" class="is-loaded">
       </picture>
     </div>
 
@@ -238,17 +222,17 @@
         <p class="meta meta--on-dark">Arabia</p>
         <h2 id="arabia-headline" class="headline headline--lg headline--bone">Arabia is one of the world's great landscapes.</h2>
         <div class="body">
-          <p>A region where deserts, mountains, coastlines, islands, and ancient trade routes come together to form an extraordinary tapestry of natural and cultural heritage. For thousands of years, people have crossed these lands, adapting to their environment and building cultures deeply connected to place.</p>
-          <p>Today, Arabia remains one of the world's most fascinating regions because so much of what makes it remarkable still endures.</p>
+          <p style="position: relative; transform: translate(0px, 2px);" class="">A region where deserts, mountains, coastlines, islands, and ancient trade routes come together to form an extraordinary tapestry of natural and cultural heritage. For thousands of years, people have crossed these lands, adapting to their environment and building cultures deeply connected to place.</p>
+          <p style="position: relative; transform: translate(0px, 2px);">Today, Arabia remains one of the world's most fascinating regions because so much of what makes it remarkable still endures.</p>
         </div>
       </div>
     </div>
-  </section>
+  </section></div>
 
   <!-- =====================================================
        Slide 5 — 4. A Region of Stories (Restrained — split)
        ===================================================== -->
-  <section class="section section--bleed-right" id="sec-stories" data-slide="5" data-mode="restrained" aria-labelledby="stories-headline">
+  <div class="slide-viewport"><section class="section section--bleed-right" id="sec-stories" data-slide="5" data-mode="restrained" aria-labelledby="stories-headline" style="transform: translate(0px, 0px) scale(1);">
 
     <div class="section__meta meta">
       <span>05</span>
@@ -271,29 +255,29 @@
       <p class="section-label">A Region of Stories</p>
       <h2 id="stories-headline" class="headline">Every landscape tells a story.</h2>
       <div class="body">
-        <p>Across Arabia, those stories are written into the land itself. They can be found in ancient migration routes, conservation successes, resilient communities, and traditions that continue to shape daily life today.</p>
-        <p>Throughout our experiences across the region, we have watched travelers become increasingly curious about these stories and eager to engage with them more deeply.</p>
+        <p style="position: relative; transform: translate(0px, 18px);">Across Arabia, those stories are written into the land itself. They can be found in ancient migration routes, conservation successes, resilient communities, and traditions that continue to shape daily life today.</p>
+        <p style="position: relative; transform: translate(0px, 18px);">Throughout our experiences across the region, we have watched travelers become increasingly curious about these stories and eager to engage with them more deeply.</p>
       </div>
-      <p class="pull pull--with-rule">Exploration often begins with a landscape, but it is the stories behind it that create lasting meaning.</p>
+      <p class="pull pull--with-rule" style="position: relative; transform: translate(0px, 18px);">Exploration often begins with a landscape, but it is the stories behind it that create lasting meaning.</p>
     </div>
     <div class="section__image" aria-hidden="true">
       <picture class="responsive-image">
         <source type="image/webp" srcset="assets/images/08-5-culture-mobile.webp 960w, assets/images/08-5-culture-desktop.webp 1920w" sizes="50vw">
         <source type="image/jpeg" srcset="assets/images/08-5-culture-mobile.jpg 960w, assets/images/08-5-culture-desktop.jpg 1920w" sizes="50vw">
-        <img src="assets/images/08-5-culture-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1280">
+        <img src="assets/images/08-5-culture-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1280" class="is-loaded">
       </picture>
     </div>
-  </section>
+  </section></div>
 
   <!-- =====================================================
        Slide 6 — 5. What Makes a Place Memorable (Immersive)
        ===================================================== -->
-  <section class="section" id="sec-memorable" data-slide="6" data-mode="immersive" data-image="full-bleed" aria-labelledby="memorable-headline">
+  <div class="slide-viewport"><section class="section" id="sec-memorable" data-slide="6" data-mode="immersive" data-image="full-bleed" aria-labelledby="memorable-headline" style="transform: translate(0px, 0px) scale(1);">
     <div class="full-bleed full-bleed--soft-dim" aria-hidden="true">
       <picture class="responsive-image">
         <source type="image/webp" srcset="assets/images/Campfire-Platinum-27-mobile.webp 960w, assets/images/Campfire-Platinum-27-desktop.webp 1920w" sizes="100vw">
         <source type="image/jpeg" srcset="assets/images/Campfire-Platinum-27-mobile.jpg 960w, assets/images/Campfire-Platinum-27-desktop.jpg 1920w" sizes="100vw">
-        <img src="assets/images/Campfire-Platinum-27-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1512" style="object-position: center 55%;">
+        <img src="assets/images/Campfire-Platinum-27-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1512" style="object-position: center 55%;" class="is-loaded">
       </picture>
     </div>
 
@@ -321,12 +305,12 @@
         <p class="caption">Instead, we remember the moments that changed how we saw a place: a landscape at first light, an unexpected wildlife encounter, or a conversation that revealed a different way of life. The most meaningful journeys do more than show us something new. They deepen our understanding of nature, culture, history, and ultimately ourselves.</p>
       </div>
     </div>
-  </section>
+  </section></div>
 
   <!-- =====================================================
        Slide 7 — 6. The National Geographic Spirit (Restrained — text only)
        ===================================================== -->
-  <section class="section" id="sec-natgeo-spirit" data-slide="7" data-mode="restrained" aria-labelledby="spirit-headline">
+  <div class="slide-viewport"><section class="section" id="sec-natgeo-spirit" data-slide="7" data-mode="restrained" aria-labelledby="spirit-headline" style="transform: translate(0px, 0px) scale(1);">
 
     <div class="section__meta meta">
       <span>07</span>
@@ -353,28 +337,28 @@
           <div class="body" style="margin-top: var(--space-5);">
             <p>Its legacy is rooted in discovery, science, conservation, and storytelling. Through its work, generations have been encouraged not only to see new places, but to understand them more deeply.</p>
           </div>
-          <p class="pull pull--with-rule">That spirit of exploration continues to resonate today, and it is one of the reasons Arabia presents such a compelling opportunity. Beneath its dramatic landscapes lies a wealth of natural, cultural, and human stories waiting to be explored.</p>
+          <p class="pull pull--with-rule" style="position: relative; transform: translate(0px, -24px);">That spirit of exploration continues to resonate today, and it is one of the reasons Arabia presents such a compelling opportunity. Beneath its dramatic landscapes lies a wealth of natural, cultural, and human stories waiting to be explored.</p>
         </div>
         <div class="split__image" aria-hidden="true" style="max-height: 680px;">
           <picture class="responsive-image">
             <source type="image/webp" srcset="assets/images/08-5-education-desktop.webp 900w" sizes="(max-width: 48em) 100vw, 50vw">
             <source type="image/jpeg" srcset="assets/images/08-5-education-desktop.jpg 900w" sizes="(max-width: 48em) 100vw, 50vw">
-            <img src="assets/images/08-5-education-desktop.jpg" alt="" loading="lazy" decoding="async" width="900" height="1125">
+            <img src="assets/images/08-5-education-desktop.jpg" alt="" loading="lazy" decoding="async" width="900" height="1125" class="is-loaded">
           </picture>
         </div>
       </div>
     </div>
-  </section>
+  </section></div>
 
   <!-- =====================================================
        Slide 8 — 7. Why This Feels Natural (Immersive)
        ===================================================== -->
-  <section class="section" id="sec-natural" data-slide="8" data-mode="immersive" data-image="full-bleed" aria-labelledby="natural-headline">
+  <div class="slide-viewport"><section class="section" id="sec-natural" data-slide="8" data-mode="immersive" data-image="full-bleed" aria-labelledby="natural-headline" style="transform: translate(0px, 0px) scale(1);">
     <div class="full-bleed full-bleed--soft-dim" aria-hidden="true">
       <picture class="responsive-image">
         <source type="image/webp" srcset="assets/images/07-solution-mobile.webp 960w, assets/images/07-solution-desktop.webp 1920w" sizes="100vw">
         <source type="image/jpeg" srcset="assets/images/07-solution-mobile.jpg 960w, assets/images/07-solution-desktop.jpg 1920w" sizes="100vw">
-        <img src="assets/images/07-solution-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1281">
+        <img src="assets/images/07-solution-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1281" class="is-loaded">
       </picture>
     </div>
 
@@ -398,13 +382,13 @@
         <p class="caption">Arabia offers exactly that. Its landscapes have been shaped by movement, adaptation, and connection for thousands of years. Here, conservation stories sit alongside living traditions, and ancient routes continue to influence modern exploration. It is a region that rewards curiosity and invites deeper discovery.</p>
       </div>
     </div>
-  </section>
+  </section></div>
 
   <!-- =====================================================
        Slide 9 — 8. Why We Believe This Matters (Restrained — split)
        Credentials woven into narrative (per manager) — field photo, not logos.
        ===================================================== -->
-  <section class="section section--bleed-right" id="sec-why-matters" data-slide="9" data-mode="restrained" aria-labelledby="matters-headline">
+  <div class="slide-viewport"><section class="section section--bleed-right" id="sec-why-matters" data-slide="9" data-mode="restrained" aria-labelledby="matters-headline" style="transform: translate(0px, 0px) scale(1);">
 
     <div class="section__meta meta">
       <span>09</span>
@@ -427,29 +411,29 @@
       <p class="section-label">Why We Believe This Matters</p>
       <h2 id="matters-headline" class="headline">For more than a decade, Hero Experiences has introduced guests to some of Arabia's most remarkable landscapes.</h2>
       <div class="body">
-        <p>Through Platinum Heritage, Hero Balloon Flights, The Dubai Balloon, and Absolute Adventure, we have welcomed hundreds of thousands of guests to the region. Across deserts, mountains, heritage sites, and wilderness areas, we have seen the same pattern emerge again and again. People often arrive expecting an activity and leave with something far more meaningful: a connection to the landscape, the culture, and the stories that define a place.</p>
-        <p>Through years of operating immersive experiences across Arabia, we have built the local expertise, partnerships, and operational capability needed to transform exploration into meaningful guest experiences.</p>
+        <p style="position: relative; transform: translate(0px, 16px);">Through Platinum Heritage, Hero Balloon Flights, The Dubai Balloon, and Absolute Adventure, we have welcomed hundreds of thousands of guests to the region. Across deserts, mountains, heritage sites, and wilderness areas, we have seen the same pattern emerge again and again. People often arrive expecting an activity and leave with something far more meaningful: a connection to the landscape, the culture, and the stories that define a place.</p>
+        <p style="position: relative; transform: translate(0px, 16px);">Through years of operating immersive experiences across Arabia, we have built the local expertise, partnerships, and operational capability needed to transform exploration into meaningful guest experiences.</p>
       </div>
-      <p class="pull pull--with-rule">We believe National Geographic is uniquely positioned to deepen that connection.</p>
+      <p class="pull pull--with-rule" style="position: relative; transform: translate(0px, 16px);">We believe National Geographic is uniquely positioned to deepen that connection.</p>
     </div>
     <div class="section__image" aria-hidden="true">
       <picture class="responsive-image">
         <source type="image/webp" srcset="assets/images/05a-hero-mobile.webp 960w, assets/images/05a-hero-desktop.webp 1400w" sizes="50vw">
         <source type="image/jpeg" srcset="assets/images/05a-hero-mobile.jpg 960w, assets/images/05a-hero-desktop.jpg 1400w" sizes="50vw">
-        <img src="assets/images/05a-hero-desktop.jpg" alt="" loading="lazy" decoding="async" width="1400" height="2100">
+        <img src="assets/images/05a-hero-desktop.jpg" alt="" loading="lazy" decoding="async" width="1400" height="2100" class="is-loaded">
       </picture>
     </div>
-  </section>
+  </section></div>
 
   <!-- =====================================================
        Slide 10 — 9. The Opportunity (Immersive)
        ===================================================== -->
-  <section class="section" id="sec-opportunity" data-slide="10" data-mode="immersive" data-image="full-bleed" aria-labelledby="opportunity-headline">
+  <div class="slide-viewport"><section class="section" id="sec-opportunity" data-slide="10" data-mode="immersive" data-image="full-bleed" aria-labelledby="opportunity-headline" style="transform: translate(0px, 0px) scale(1);">
     <div class="full-bleed full-bleed--soft-dim" aria-hidden="true">
       <picture class="responsive-image">
         <source type="image/webp" srcset="assets/images/03-vision-mobile.webp 960w, assets/images/03-vision-desktop.webp 1920w" sizes="100vw">
         <source type="image/jpeg" srcset="assets/images/03-vision-mobile.jpg 960w, assets/images/03-vision-desktop.jpg 1920w" sizes="100vw">
-        <img src="assets/images/03-vision-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="2881">
+        <img src="assets/images/03-vision-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="2881" class="is-loaded">
       </picture>
     </div>
 
@@ -473,12 +457,12 @@
         <p class="caption">Not simply a tour or an attraction, but a thoughtfully designed journey that helps travelers better understand one of the world's most remarkable regions. By combining National Geographic's legacy of storytelling and exploration with Hero's experience operating immersive adventures across Arabia, we have an opportunity to create something genuinely distinctive.</p>
       </div>
     </div>
-  </section>
+  </section></div>
 
   <!-- =====================================================
        Slide 11 — 10. Beginning in Abu Dhabi (Immersive — list)
        ===================================================== -->
-  <section class="section section--bleed-right" id="sec-abu-dhabi" data-slide="11" data-mode="restrained" aria-labelledby="abudhabi-headline">
+  <div class="slide-viewport"><section class="section section--bleed-right" id="sec-abu-dhabi" data-slide="11" data-mode="restrained" aria-labelledby="abudhabi-headline" style="transform: translate(0px, 0px) scale(1);">
 
     <div class="section__meta meta">
       <span>11</span>
@@ -502,7 +486,7 @@
       <h2 id="abudhabi-headline" class="headline">Every great expedition needs a place to begin.</h2>
       <p class="body" style="margin-top: var(--space-4);">In Abu Dhabi, different worlds come into close proximity. Vast desert horizons meet coastal ecosystems. Protected wildlife landscapes sit alongside living cultural traditions that remain closely tied to place.</p>
 
-      <div class="tabs-editorial" role="tablist" data-tabs-editorial style="margin-top: var(--space-6);">
+      <div class="tabs-editorial" role="tablist" data-tabs-editorial="" style="margin-top: var(--space-6);">
         <button class="tab-btn-editorial is-active" type="button" role="tab" data-tab="desert" aria-selected="true">Desert</button>
         <button class="tab-btn-editorial" type="button" role="tab" data-tab="coastal" aria-selected="false">Coastal</button>
         <button class="tab-btn-editorial" type="button" role="tab" data-tab="mountain" aria-selected="false">Mountain</button>
@@ -530,7 +514,7 @@
         <picture class="responsive-image">
           <source type="image/webp" srcset="assets/images/Place_Right_DDCR-mobile.webp 960w, assets/images/Place_Right_DDCR-desktop.webp 1920w" sizes="50vw">
           <source type="image/jpeg" srcset="assets/images/Place_Right_DDCR-mobile.jpg 960w, assets/images/Place_Right_DDCR-desktop.jpg 1920w" sizes="50vw">
-          <img src="assets/images/Place_Right_DDCR-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1080" style="object-position: center 80%;">
+          <img src="assets/images/Place_Right_DDCR-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1080" style="object-position: center 80%;" class="is-loaded">
         </picture>
       </div>
 
@@ -538,7 +522,7 @@
         <picture class="responsive-image">
           <source type="image/webp" srcset="assets/images/11-coastal-mangroves.webp" sizes="50vw">
           <source type="image/jpeg" srcset="assets/images/11-coastal-mangroves.jpg" sizes="50vw">
-          <img src="assets/images/11-coastal-mangroves.jpg" alt="Mangrove forest, Abu Dhabi, UAE" loading="lazy" decoding="async" width="1920" height="1280">
+          <img src="assets/images/11-coastal-mangroves.jpg" alt="Mangrove forest, Abu Dhabi, UAE" loading="lazy" decoding="async" width="1920" height="1280" class="is-loaded">
         </picture>
         <a class="photo-credit" href="https://commons.wikimedia.org/wiki/File:Abu_Dhabi%27s_Serene_Mangroves.jpg" target="_blank" rel="noopener">Photo: Majd Nasra · CC BY-SA 4.0</a>
       </div>
@@ -547,18 +531,18 @@
         <picture class="responsive-image">
           <source type="image/webp" srcset="assets/images/11-mountain-jebel-jais.webp" sizes="50vw">
           <source type="image/jpeg" srcset="assets/images/11-mountain-jebel-jais.jpg" sizes="50vw">
-          <img src="assets/images/11-mountain-jebel-jais.jpg" alt="Jebel Jais at sunset, Ras Al Khaimah, UAE" loading="lazy" decoding="async" width="1920" height="1280">
+          <img src="assets/images/11-mountain-jebel-jais.jpg" alt="Jebel Jais at sunset, Ras Al Khaimah, UAE" loading="lazy" decoding="async" width="1920" height="1280" class="is-loaded">
         </picture>
         <a class="photo-credit" href="https://commons.wikimedia.org/wiki/File:Mountain_view_during_sunset,_Jebel_Jais,_Ras_al_Khaimah,_UAE.jpg" target="_blank" rel="noopener">Photo: Tashmetova808 · CC BY-SA 4.0</a>
       </div>
 
     </div>
-  </section>
+  </section></div>
 
   <!-- =====================================================
        Slide 12 — 11. The Expedition Experience (Restrained — list + image)
        ===================================================== -->
-  <section class="section" id="sec-expedition" data-slide="12" data-mode="restrained" aria-labelledby="expedition-headline">
+  <div class="slide-viewport"><section class="section" id="sec-expedition" data-slide="12" data-mode="restrained" aria-labelledby="expedition-headline" style="transform: translate(0px, 0px) scale(1);">
 
     <div class="section__meta meta">
       <span>12</span>
@@ -578,44 +562,44 @@
     </div>
 
     <div class="section__inner">
-      <div class="split" data-swap-gallery>
+      <div class="split" data-swap-gallery="">
         <div class="split__copy" style="gap: var(--space-3); padding-block: var(--space-3);">
           <p class="section-label">The Expedition Experience</p>
           <h2 id="expedition-headline" class="headline">Each journey would be built around curiosity, exploration, and understanding.</h2>
           <ul class="list list--ruled list--swap" role="list" style="margin-top: var(--space-4);">
-            <li data-swap="wildlife" class="is-active">Wildlife observation and tracking</li>
-            <li data-swap="conservation">Conservation programs and field experiences</li>
-            <li data-swap="ecology">Desert ecology and geology</li>
-            <li data-swap="astronomy">Astronomy and navigation</li>
-            <li data-swap="photography">Photography and storytelling</li>
-            <li data-swap="culture">Cultural encounters and heritage interpretation</li>
-            <li data-swap="coastal">Exploration of coastal and island ecosystems</li>
+            <li data-swap="wildlife" class="">Wildlife observation and tracking</li>
+            <li data-swap="conservation" class="">Conservation programs and field experiences</li>
+            <li data-swap="ecology" class="">Desert ecology and geology</li>
+            <li data-swap="astronomy" class="">Astronomy and navigation</li>
+            <li data-swap="photography" class="">Photography and storytelling</li>
+            <li data-swap="culture" class="">Cultural encounters and heritage interpretation</li>
+            <li data-swap="coastal" class="is-active">Exploration of coastal and island ecosystems</li>
           </ul>
-          <p class="pull pull--with-rule">Together, these experiences create a deeper and more complete understanding of Arabia and its people, landscapes, and wildlife.</p>
+          <p class="pull pull--with-rule" contenteditable="false">Together, these experiences create a deeper and more complete understanding of Arabia and its people, landscapes, and wildlife.</p>
         </div>
         <div class="split__image" aria-hidden="true" style="max-height: 680px;">
 
-          <div class="swap-panel is-active" data-swap-panel="wildlife">
+          <div class="swap-panel" data-swap-panel="wildlife">
             <picture class="responsive-image">
-              <source type="image/webp" srcset="assets/images/Falcons-Platinum-100-mobile.webp 960w, assets/images/Falcons-Platinum-100-desktop.webp 1559w" sizes="50vw">
-              <source type="image/jpeg" srcset="assets/images/Falcons-Platinum-100-mobile.jpg 960w, assets/images/Falcons-Platinum-100-desktop.jpg 1559w" sizes="50vw">
-              <img src="assets/images/Falcons-Platinum-100-desktop.jpg" alt="" loading="lazy" decoding="async" width="1559" height="1009">
+              
+              
+              <source type="image/webp" srcset="assets/images/arabian-oryx-ph-63-2.webp"><source type="image/jpeg" srcset="assets/images/arabian-oryx-ph-63-2.jpg"><img src="assets/images/arabian-oryx-ph-63-2.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1080" class="is-loaded">
             </picture>
           </div>
 
           <div class="swap-panel" data-swap-panel="conservation">
             <picture class="responsive-image">
-              <source type="image/webp" srcset="assets/images/08-5-conservation-desktop.webp 900w" sizes="50vw">
-              <source type="image/jpeg" srcset="assets/images/08-5-conservation-desktop.jpg 900w" sizes="50vw">
-              <img src="assets/images/08-5-conservation-desktop.jpg" alt="" loading="lazy" decoding="async" width="900" height="1125">
+              
+              
+              <source type="image/webp" srcset="assets/images/20250218-131243-2.webp"><source type="image/jpeg" srcset="assets/images/20250218-131243-2.jpg"><img src="assets/images/20250218-131243-2.jpg" alt="" loading="lazy" decoding="async" width="1920" height="2560" class="is-loaded">
             </picture>
           </div>
 
           <div class="swap-panel" data-swap-panel="ecology">
             <picture class="responsive-image">
-              <source type="image/webp" srcset="assets/images/03-5-arabia-mobile.webp 960w, assets/images/03-5-arabia-desktop.webp 1672w" sizes="50vw">
-              <source type="image/jpeg" srcset="assets/images/03-5-arabia-mobile.jpg 960w, assets/images/03-5-arabia-desktop.jpg 1672w" sizes="50vw">
-              <img src="assets/images/03-5-arabia-desktop.jpg" alt="" loading="lazy" decoding="async" width="1672" height="941">
+              
+              
+              <source type="image/webp" srcset="assets/images/arabian-gazelle-ph-1.webp"><source type="image/jpeg" srcset="assets/images/arabian-gazelle-ph-1.jpg"><img src="assets/images/arabian-gazelle-ph-1.jpg" alt="" loading="lazy" decoding="async" width="1500" height="1000" class="is-loaded">
             </picture>
           </div>
 
@@ -623,15 +607,15 @@
             <picture class="responsive-image">
               <source type="image/webp" srcset="assets/images/08-5-education-desktop.webp 900w" sizes="50vw">
               <source type="image/jpeg" srcset="assets/images/08-5-education-desktop.jpg 900w" sizes="50vw">
-              <img src="assets/images/08-5-education-desktop.jpg" alt="" loading="lazy" decoding="async" width="900" height="1125">
+              <img src="assets/images/08-5-education-desktop.jpg" alt="" loading="lazy" decoding="async" width="900" height="1125" class="is-loaded">
             </picture>
           </div>
 
           <div class="swap-panel" data-swap-panel="photography">
             <picture class="responsive-image">
-              <source type="image/webp" srcset="assets/images/Camels-Platinum-27-mobile.webp 960w, assets/images/Camels-Platinum-27-desktop.webp 1800w" sizes="50vw">
-              <source type="image/jpeg" srcset="assets/images/Camels-Platinum-27-mobile.jpg 960w, assets/images/Camels-Platinum-27-desktop.jpg 1800w" sizes="50vw">
-              <img src="assets/images/Camels-Platinum-27-desktop.jpg" alt="" loading="lazy" decoding="async" width="1800" height="1200">
+              
+              
+              <source type="image/webp" srcset="assets/images/campfire-platinum-heritage-7-2.webp"><source type="image/jpeg" srcset="assets/images/campfire-platinum-heritage-7-2.jpg"><img src="assets/images/campfire-platinum-heritage-7-2.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1280" class="is-loaded">
             </picture>
           </div>
 
@@ -639,33 +623,26 @@
             <picture class="responsive-image">
               <source type="image/webp" srcset="assets/images/08-5-culture-mobile.webp 960w, assets/images/08-5-culture-desktop.webp 1920w" sizes="50vw">
               <source type="image/jpeg" srcset="assets/images/08-5-culture-mobile.jpg 960w, assets/images/08-5-culture-desktop.jpg 1920w" sizes="50vw">
-              <img src="assets/images/08-5-culture-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1280">
+              <img src="assets/images/08-5-culture-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1280" class="is-loaded">
             </picture>
           </div>
 
-          <div class="swap-panel" data-swap-panel="coastal">
-            <div style="width:100%;height:100%;background:linear-gradient(135deg,#2d5a6b,#1c3a45);display:flex;align-items:center;justify-content:center;">
-              <aside class="image-placeholder-note" style="position:relative;inset:auto;background:transparent;">
-                <span class="image-placeholder-note__title">Image · to be commissioned · Coastal ecosystem</span>
-                <p class="image-placeholder-note__body">Mangrove channel, island habitat, or dhow in coastal waters. Golden hour, documentary register.</p>
-              </aside>
-            </div>
-          </div>
+          <div class="swap-panel is-active" data-swap-panel="coastal"><picture class="responsive-image"><source type="image/webp" srcset="assets/images/dji-0086.webp"><source type="image/jpeg" srcset="assets/images/dji-0086.jpg"><img src="assets/images/dji-0086.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1080"></picture></div>
 
         </div>
       </div>
     </div>
-  </section>
+  </section></div>
 
   <!-- =====================================================
        Slide 13 — 12. Conservation in Action (Immersive)
        ===================================================== -->
-  <section class="section" id="sec-conservation" data-slide="13" data-mode="immersive" data-image="full-bleed" aria-labelledby="conservation-headline">
+  <div class="slide-viewport"><section class="section" id="sec-conservation" data-slide="13" data-mode="immersive" data-image="full-bleed" aria-labelledby="conservation-headline" style="transform: translate(0px, 0px) scale(1);">
     <div class="full-bleed full-bleed--soft-dim" aria-hidden="true">
       <picture class="responsive-image">
-        <source type="image/webp" srcset="assets/images/08-5-conservation-desktop.webp 900w" sizes="100vw">
-        <source type="image/jpeg" srcset="assets/images/08-5-conservation-desktop.jpg 900w" sizes="100vw">
-        <img src="assets/images/08-5-conservation-desktop.jpg" alt="" loading="lazy" decoding="async" width="900" height="1125" style="object-position: center 40%;">
+        
+        
+        <source type="image/webp" srcset="assets/images/gazelle-in-conservation-3.webp"><source type="image/jpeg" srcset="assets/images/gazelle-in-conservation-3.jpg"><img src="assets/images/gazelle-in-conservation-3.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1080" style="object-position: center 40%;" class="is-loaded">
       </picture>
     </div>
 
@@ -696,12 +673,12 @@
         <p class="caption">Guests would have the opportunity not only to learn about these initiatives, but to witness them firsthand, transforming conservation from an abstract concept into a tangible and memorable experience.</p>
       </div>
     </div>
-  </section>
+  </section></div>
 
   <!-- =====================================================
        Slide 14 — 13. Stories That Travel (Restrained — split)
        ===================================================== -->
-  <section class="section section--bleed-right" id="sec-stories-travel" data-slide="14" data-mode="restrained" aria-labelledby="travel-headline">
+  <div class="slide-viewport"><section class="section section--bleed-right" id="sec-stories-travel" data-slide="14" data-mode="restrained" aria-labelledby="travel-headline" style="transform: translate(0px, 0px) scale(1);">
 
     <div class="section__meta meta">
       <span>14</span>
@@ -724,29 +701,29 @@
       <p class="section-label">Stories That Travel</p>
       <h2 id="travel-headline" class="headline">The most meaningful expeditions do not end when guests return home.</h2>
       <div class="body">
-        <p>They continue through the photographs that spark conversation, the wildlife encounters that reshape perspective, and the stories people share long after the journey is over.</p>
-        <p>For National Geographic, storytelling has always been a way of connecting people to places they may never visit themselves. An expedition in Arabia creates opportunities for those stories to reach new audiences through imagery, education, conservation, and personal experience.</p>
+        <p class="" style="position: relative; transform: translate(0px, 10px);">They continue through the photographs that spark conversation, the wildlife encounters that reshape perspective, and the stories people share long after the journey is over.</p>
+        <p class="" style="position: relative; transform: translate(0px, 10px);">For National Geographic, storytelling has always been a way of connecting people to places they may never visit themselves. An expedition in Arabia creates opportunities for those stories to reach new audiences through imagery, education, conservation, and personal experience.</p>
       </div>
-      <p class="pull pull--with-rule">The result is a legacy that extends well beyond the expedition itself.</p>
+      <p class="pull pull--with-rule" style="position: relative; transform: translate(0px, 10px);">The result is a legacy that extends well beyond the expedition itself.</p>
     </div>
     <div class="section__image" aria-hidden="true">
       <picture class="responsive-image">
         <source type="image/webp" srcset="assets/images/Camels-Platinum-27-mobile.webp 960w, assets/images/Camels-Platinum-27-desktop.webp 1800w" sizes="50vw">
         <source type="image/jpeg" srcset="assets/images/Camels-Platinum-27-mobile.jpg 960w, assets/images/Camels-Platinum-27-desktop.jpg 1800w" sizes="50vw">
-        <img src="assets/images/Camels-Platinum-27-desktop.jpg" alt="" loading="lazy" decoding="async" width="1800" height="1200">
+        <img src="assets/images/Camels-Platinum-27-desktop.jpg" alt="" loading="lazy" decoding="async" width="1800" height="1200" class="is-loaded">
       </picture>
     </div>
-  </section>
+  </section></div>
 
   <!-- =====================================================
        Slide 15 — 14. Looking Beyond the Horizon (Immersive — list)
        ===================================================== -->
-  <section class="section" id="sec-horizon" data-slide="15" data-mode="immersive" data-image="full-bleed" aria-labelledby="horizon-headline">
+  <div class="slide-viewport"><section class="section" id="sec-horizon" data-slide="15" data-mode="immersive" data-image="full-bleed" aria-labelledby="horizon-headline" style="transform: translate(0px, 0px) scale(1);">
     <div class="full-bleed full-bleed--soft-dim" aria-hidden="true">
       <picture class="responsive-image">
         <source type="image/webp" srcset="assets/images/11-horizon-mobile.webp 960w, assets/images/11-horizon-desktop.webp 1920w" sizes="100vw">
         <source type="image/jpeg" srcset="assets/images/11-horizon-mobile.jpg 960w, assets/images/11-horizon-desktop.jpg 1920w" sizes="100vw">
-        <img src="assets/images/11-horizon-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1080">
+        <img src="assets/images/11-horizon-desktop.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1080" class="is-loaded">
       </picture>
     </div>
 
@@ -773,12 +750,12 @@
         <p class="caption">Each destination reveals a different perspective on the region's natural and cultural heritage. Together, they form the foundation for a long-term platform of expedition experiences across Arabia.</p>
       </div>
     </div>
-  </section>
+  </section></div>
 
   <!-- =====================================================
        Slide 16 — 15. A Shared Approach to Exploration (Restrained — text)
        ===================================================== -->
-  <section class="section" id="sec-shared" data-slide="16" data-mode="restrained" aria-labelledby="shared-headline">
+  <div class="slide-viewport"><section class="section" id="sec-shared" data-slide="16" data-mode="restrained" aria-labelledby="shared-headline" style="transform: translate(0px, 0px) scale(1);">
 
     <div class="section__meta meta">
       <span>16</span>
@@ -801,12 +778,12 @@
       </div>
       <p class="pull pull--with-rule">This is why the partnership feels so natural. The connection lies not only in what we do, but in why we do it.</p>
     </div>
-  </section>
+  </section></div>
 
   <!-- =====================================================
        Slide 17 — 16. An Invitation (Restrained — declaration)
        ===================================================== -->
-  <section class="section" id="sec-invitation" data-slide="17" data-mode="restrained" aria-labelledby="invitation-headline">
+  <div class="slide-viewport"><section class="section" id="sec-invitation" data-slide="17" data-mode="restrained" aria-labelledby="invitation-headline" style="transform: translate(0px, 0px) scale(1);">
 
     <div class="section__meta meta">
       <span>17</span>
@@ -829,18 +806,18 @@
       </blockquote>
       <p class="close-line" style="margin-inline: auto; margin-top: var(--space-5); padding-top: var(--space-4); border-top: var(--rule-hairline) solid var(--rule-fine); max-width: 34ch;">We would welcome the opportunity to begin that conversation.</p>
     </div>
-  </section>
+  </section></div>
 
   <!-- =====================================================
        Slide 18 — Closing bookend (Immersive)
        Manager copy: NATIONAL GEOGRAPHIC × HERO EXPERIENCES / Exploring Arabia
        ===================================================== -->
-  <section class="section" id="sec-closing" data-slide="18" data-mode="immersive" data-image="full-bleed" aria-labelledby="closing-headline">
+  <div class="slide-viewport"><section class="section" id="sec-closing" data-slide="18" data-mode="immersive" data-image="full-bleed" aria-labelledby="closing-headline" style="transform: translate(0px, 0px) scale(1);">
     <div class="full-bleed full-bleed--soft-dim" aria-hidden="true">
       <picture class="responsive-image">
         <source type="image/webp" srcset="assets/images/13-closing-mobile.webp 960w, assets/images/13-closing-desktop.webp 1749w" sizes="100vw">
         <source type="image/jpeg" srcset="assets/images/13-closing-mobile.jpg 960w, assets/images/13-closing-desktop.jpg 1749w" sizes="100vw">
-        <img src="assets/images/13-closing-desktop.jpg" alt="" loading="lazy" decoding="async" width="1749" height="2624" style="object-position: center 65%;">
+        <img src="assets/images/13-closing-desktop.jpg" alt="" loading="lazy" decoding="async" width="1749" height="2624" style="object-position: center 65%;" class="is-loaded">
       </picture>
     </div>
 
@@ -876,24 +853,25 @@
         </picture>
       </div>
     </div>
-  </section>
+  </section></div>
 
 </main>
 
 <nav class="top-nav" id="topNav" aria-label="Slide navigation" data-theme="light">
   <div class="top-nav__static">
-    <span data-top-nav-counter-static>01 / 18</span>
+    <span data-top-nav-counter-static="">12 / 18</span>
   </div>
   <div class="top-nav__full">
-    <button class="top-nav__arrow" type="button" data-top-nav-prev aria-label="Previous slide">&larr;</button>
-    <div class="top-nav__dots" role="tablist" aria-label="Slide progress"></div>
-    <button class="top-nav__arrow" type="button" data-top-nav-next aria-label="Next slide">&rarr;</button>
-    <span class="top-nav__counter">01 / 18</span>
+    <button class="top-nav__arrow" type="button" data-top-nav-prev="" aria-label="Previous slide">←</button>
+    <div class="top-nav__dots" role="tablist" aria-label="Slide progress"><button class="top-nav__dot" type="button" aria-label="National Geographic × Hero Experiences" data-slide-number="1"></button><button class="top-nav__dot" type="button" aria-label="The best journeys begin with curiosity." data-slide-number="2"></button><button class="top-nav__dot" type="button" aria-label="At first glance, the landscapes of Arabia can seem vast and " data-slide-number="3"></button><button class="top-nav__dot" type="button" aria-label="Arabia is one of the world's great landscapes." data-slide-number="4"></button><button class="top-nav__dot" type="button" aria-label="Every landscape tells a story." data-slide-number="5"></button><button class="top-nav__dot" type="button" aria-label="Long after a journey ends, it is rarely the itinerary we rem" data-slide-number="6"></button><button class="top-nav__dot" type="button" aria-label="For more than a century, National Geographic has inspired pe" data-slide-number="7"></button><button class="top-nav__dot" type="button" aria-label="National Geographic has always been drawn to places where na" data-slide-number="8"></button><button class="top-nav__dot" type="button" aria-label="For more than a decade, Hero Experiences has introduced gues" data-slide-number="9"></button><button class="top-nav__dot" type="button" aria-label="Together, National Geographic and Hero Experiences can creat" data-slide-number="10"></button><button class="top-nav__dot" type="button" aria-label="Every great expedition needs a place to begin." data-slide-number="11"></button><button class="top-nav__dot is-active" type="button" aria-label="Each journey would be built around curiosity, exploration, a" data-slide-number="12" aria-current="true"></button><button class="top-nav__dot" type="button" aria-label="Some of the most inspiring stories in Arabia are conservatio" data-slide-number="13"></button><button class="top-nav__dot" type="button" aria-label="The most meaningful expeditions do not end when guests retur" data-slide-number="14"></button><button class="top-nav__dot" type="button" aria-label="While Abu Dhabi provides a compelling starting point, it is " data-slide-number="15"></button><button class="top-nav__dot" type="button" aria-label="At its core, this opportunity is built on a simple idea: hel" data-slide-number="16"></button><button class="top-nav__dot" type="button" aria-label="Arabia remains one of the world's most fascinating regions, " data-slide-number="17"></button><button class="top-nav__dot" type="button" aria-label="National Geographic × Hero Experiences" data-slide-number="18"></button></div>
+    <button class="top-nav__arrow" type="button" data-top-nav-next="" aria-label="Next slide">→</button>
+    <span class="top-nav__counter">12 / 18</span>
   </div>
 </nav>
 
-<script src="../shared/js/deck.js" defer></script>
-<script src="../shared/js/editor.js" defer data-editor-remove></script>
+<script src="../shared/js/deck.js" defer=""></script>
+<script src="../shared/js/editor.js" defer="" data-editor-remove=""></script>
 
-</body>
-</html>
+
+
+</body></html>
