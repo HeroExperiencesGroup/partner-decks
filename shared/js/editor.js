@@ -111,37 +111,64 @@
     });
   }
 
+  /* Placeholder image slots — coloured/gradient blocks awaiting a photo.
+   * Matched: any *--placeholder element, or a .swap-panel with no <picture>. */
+  var PLACEHOLDER_SEL = '[class*="--placeholder"], .swap-panel';
+
   function assignImgIds() {
     qsa('.section').forEach(function (section) {
       var sid = section.id || 'global';
+
+      /* Real images */
       qsa('picture', section).forEach(function (pic, i) {
-        pic.dataset.iid         = sid + ':pic:' + i;
-        pic.dataset.iidSelector = buildPicSelector(pic);
-        pic.dataset.iidSection  = sid;
-        pic.dataset.iidSlide    = section.dataset.slide || '';
-        var tp = pic.closest('[data-tab]');
-        pic.dataset.iidTab = tp ? tp.getAttribute('data-tab') : '';
+        tagSlot(pic, sid + ':pic:' + i, section);
+      });
+
+      /* Empty placeholder slots (no <picture> inside) */
+      qsa(PLACEHOLDER_SEL, section).forEach(function (el, i) {
+        if (el.querySelector('picture')) return;      /* already has an image */
+        if (el.closest('picture')) return;            /* part of a picture */
+        el.dataset.iidPlaceholder = 'true';
+        tagSlot(el, sid + ':ph:' + i, section);
       });
     });
   }
 
-  function buildPicSelector(pic) {
-    var section  = pic.closest('.section');
-    var tabPanel = pic.closest('[data-tab]');
-    var base     = section && section.id ? '#' + section.id : '';
-    if (tabPanel) base += ' [data-tab="' + tabPanel.getAttribute('data-tab') + '"]';
-    var ctx  = tabPanel || section || doc;
-    var idx  = qsa('picture', ctx).indexOf(pic);
-    base += ' picture' + (idx > 0 ? ':nth-of-type(' + (idx + 1) + ')' : '');
-    return base;
+  function tagSlot(el, iid, section) {
+    el.dataset.iid         = iid;
+    el.dataset.iidSelector = buildSlotSelector(el);
+    el.dataset.iidSection  = section.id || 'global';
+    el.dataset.iidSlide    = section.dataset.slide || '';
+    var tp = el.closest('[data-tab]');
+    el.dataset.iidTab = tp ? tp.getAttribute('data-tab') : '';
   }
 
-  function getImgSrc(pic) {
-    var img = pic.querySelector('img');
+  function buildSlotSelector(el) {
+    var section  = el.closest('.section');
+    var tabPanel = el.closest('[data-tab]');
+    var base     = section && section.id ? '#' + section.id : '';
+    if (tabPanel) base += ' [data-tab="' + tabPanel.getAttribute('data-tab') + '"]';
+    var swap = el.getAttribute && el.getAttribute('data-swap-panel');
+    if (swap) return base + ' [data-swap-panel="' + swap + '"]';
+    if (el.tagName === 'PICTURE') {
+      var ctx = tabPanel || section || doc;
+      var idx = qsa('picture', ctx).indexOf(el);
+      return base + ' picture' + (idx > 0 ? ':nth-of-type(' + (idx + 1) + ')' : '');
+    }
+    var cls = (el.className || '').trim().split(/\s+/)[0];
+    return base + (cls ? ' .' + cls : '');
+  }
+
+  function isPlaceholderSlot(el) {
+    return !!(el && el.dataset && el.dataset.iidPlaceholder);
+  }
+
+  function getImgSrc(slot) {
+    var img = slot.querySelector ? slot.querySelector('img') : null;
     return img ? (img.getAttribute('src') || '') : '';
   }
-  function getImgSources(pic) {
-    return qsa('source', pic).map(function (s) {
+  function getImgSources(slot) {
+    return qsa('source', slot).map(function (s) {
       return { type: s.getAttribute('type'), srcset: s.getAttribute('srcset') };
     });
   }
@@ -571,8 +598,10 @@
     if (!/^image\//.test(file.type)) { setStatus('Not an image file', 'error'); return; }
 
     var targetPic = activeImg;                 /* lock the target now */
-    var currentFile = 'natgeo/' + getImgSrc(targetPic).replace(/^\//, '');
-    var targetDir   = currentFile.substring(0, currentFile.lastIndexOf('/'));
+    var src         = getImgSrc(targetPic);
+    var currentFile = src ? 'natgeo/' + src.replace(/^\//, '') : '';
+    var targetDir   = currentFile ? currentFile.substring(0, currentFile.lastIndexOf('/'))
+                                  : 'natgeo/assets/images';
 
     setStatus('Converting ' + file.name + '…', 'pending');
     var dz = qs('#ep-dropzone'); if (dz) dz.classList.add('is-busy');
@@ -599,32 +628,69 @@
     reader.readAsDataURL(file);
   }
 
-  function updatePictureSources(pic, webpRel, jpgRel, w, h) {
-    /* Replace ALL sources with a clean webp + jpeg pair; update img. */
-    qsa('source', pic).forEach(function (s) { s.parentNode.removeChild(s); });
-    var img = pic.querySelector('img');
-
+  function makeSources(webpRel, jpgRel) {
     var sWebp = doc.createElement('source');
     sWebp.setAttribute('type', 'image/webp');
     sWebp.setAttribute('srcset', webpRel);
     var sJpg = doc.createElement('source');
     sJpg.setAttribute('type', 'image/jpeg');
     sJpg.setAttribute('srcset', jpgRel);
+    return [sWebp, sJpg];
+  }
 
-    if (img) {
-      pic.insertBefore(sWebp, img);
-      pic.insertBefore(sJpg, img);
-      /* cache-bust the live view so the new file shows immediately */
-      img.setAttribute('src', jpgRel + '?v=' + Date.now());
-      img.removeAttribute('srcset');
-      if (w) img.setAttribute('width', w);
-      if (h) img.setAttribute('height', h);
-      /* strip the cache-buster on the stored src so saved HTML is clean */
-      img._cleanSrc = jpgRel;
-    } else {
-      pic.appendChild(sWebp);
-      pic.appendChild(sJpg);
+  function updatePictureSources(slot, webpRel, jpgRel, w, h) {
+    var bust = '?v=' + Date.now();
+
+    if (slot.tagName === 'PICTURE') {
+      /* Existing image — swap sources + img in place. */
+      qsa('source', slot).forEach(function (s) { s.parentNode.removeChild(s); });
+      var img = slot.querySelector('img');
+      var src = makeSources(webpRel, jpgRel);
+      if (img) {
+        slot.insertBefore(src[0], img);
+        slot.insertBefore(src[1], img);
+        img.setAttribute('src', jpgRel + bust);
+        img.removeAttribute('srcset');
+        if (w) img.setAttribute('width', w);
+        if (h) img.setAttribute('height', h);
+      } else {
+        slot.appendChild(src[0]); slot.appendChild(src[1]);
+      }
+      return;
     }
+
+    /* Placeholder container — inject a fresh <picture>, drop the gradient. */
+    var pic = doc.createElement('picture');
+    pic.className = 'responsive-image';
+    var s = makeSources(webpRel, jpgRel);
+    var newImg = doc.createElement('img');
+    newImg.setAttribute('src', jpgRel + bust);
+    newImg.setAttribute('alt', '');
+    newImg.setAttribute('loading', 'lazy');
+    newImg.setAttribute('decoding', 'async');
+    if (w) newImg.setAttribute('width', w);
+    if (h) newImg.setAttribute('height', h);
+    pic.appendChild(s[0]); pic.appendChild(s[1]); pic.appendChild(newImg);
+
+    slot.innerHTML = '';                       /* drop gradient div + note */
+    slot.appendChild(pic);
+    slot.style.background = '';
+    /* strip any *--placeholder classes so the slot styles as a real image */
+    slot.className = (slot.className || '').split(/\s+/)
+      .filter(function (c) { return c && c.indexOf('--placeholder') === -1; }).join(' ');
+
+    /* Hand identity to the new <picture> so it stays selectable as an image */
+    pic.dataset.iid         = slot.dataset.iid;
+    pic.dataset.iidSelector = slot.dataset.iidSelector;
+    pic.dataset.iidSection  = slot.dataset.iidSection;
+    pic.dataset.iidSlide    = slot.dataset.iidSlide;
+    pic.dataset.iidTab      = slot.dataset.iidTab;
+    ['iid','iidSelector','iidSection','iidSlide','iidTab','iidPlaceholder'].forEach(function (k) {
+      delete slot.dataset[k];
+    });
+    slot.classList.remove('editor-img-selected');
+    pic.classList.add('editor-img-selected');
+    activeImg = pic;
   }
 
   function exportBrief() {
@@ -689,8 +755,8 @@
   function buildCleanHTML() {
     var clone = doc.documentElement.cloneNode(true);
     /* Keep [data-editor-remove] tags so the working file stays editable. */
-    var attrs = ['eid','iid','iidSelector','iidSection','iidSlide','iidTab'];
-    clone.querySelectorAll('[data-eid],[data-iid]').forEach(function (el) {
+    var attrs = ['eid','iid','iidSelector','iidSection','iidSlide','iidTab','iidPlaceholder'];
+    clone.querySelectorAll('[data-eid],[data-iid],[data-iid-placeholder]').forEach(function (el) {
       attrs.forEach(function (k) { delete el.dataset[k]; });
     });
     clone.querySelectorAll('.editor-selected,.editor-in-selection,.editor-typing,.editor-img-selected').forEach(function (el) {
@@ -1114,7 +1180,10 @@
       var imgNote     = qs('#etb-img-note');
       var imgAdd      = qs('#etb-img-add');
       var imgRemove   = qs('#etb-img-remove');
-      if (imgFilename) imgFilename.textContent = getImgSrc(activeImg).split('/').pop();
+      if (imgFilename) {
+        var isrc = getImgSrc(activeImg);
+        imgFilename.textContent = isrc ? isrc.split('/').pop() : '(empty placeholder)';
+      }
       var inBrief = isInBrief(activeImg);
       if (imgAdd)    imgAdd.textContent = inBrief ? 'Update Note' : 'Add to Brief';
       if (imgRemove) imgRemove.hidden   = !inBrief;
@@ -1231,7 +1300,7 @@
     if (!isOn) return;
     if (panel && panel.contains(e.target)) return;
 
-    var pic = e.target.closest('picture[data-iid]');
+    var pic = e.target.closest('picture[data-iid], [data-iid-placeholder]');
     if (pic && !e.target.dataset.eid) { deactivateAll(); selectImage(pic); return; }
 
     if (activeImg && !activeImg.contains(e.target)) deselectImage();
