@@ -461,6 +461,13 @@
     if (activeImg) activeImg.classList.remove('editor-img-selected');
     activeImg = pic;
     pic.classList.add('editor-img-selected');
+    /* Reset the note field to THIS image's brief note (or empty) so each
+     * image starts clean instead of carrying the previous one's text. */
+    var note = qs('#etb-img-note');
+    if (note) {
+      var ex = briefItems.filter(function (b) { return b.iid === pic.dataset.iid; })[0];
+      note.value = ex ? (ex.note || '') : '';
+    }
     refreshPanel();
     setTimeout(function () { var n = qs('#etb-img-note'); if (n) n.focus(); }, 50);
   }
@@ -483,7 +490,7 @@
         slideNumber: parseInt(activeImg.dataset.iidSlide) || null,
         sectionId:   activeImg.dataset.iidSection || '',
         tabContext:  activeImg.dataset.iidTab || null,
-        currentFile: 'natgeo/' + getImgSrc(activeImg).replace(/^\//, ''),
+        currentFile: 'natgeo/' + getImgSrc(activeImg).replace(/^\//, '').replace(/\?v=\d+$/, ''),
         imgSelector: activeImg.dataset.iidSelector + ' img',
         picSelector: activeImg.dataset.iidSelector,
         sources:     getImgSources(activeImg),
@@ -1039,6 +1046,7 @@
         if (e.key === 'Enter') {
           if (inp.id === 'ep-newbranch-name') createBranch();
           if (inp.id === 'etb-commit-msg')    saveAndCommit();
+          if (inp.id === 'etb-img-note')      addToBrief();
         }
       });
     });
