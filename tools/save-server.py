@@ -20,7 +20,9 @@ Endpoints:
 
 import http.server
 import os
+import re
 import json
+import base64
 import subprocess
 import datetime
 import sys
@@ -150,8 +152,8 @@ def save_and_commit(html: str, message: str) -> dict:
         f.write(html)
     print(f'  Written: {TARGET_HTML}')
 
-    # Stage
-    code, out, err = git(['add', 'natgeo/index.html'])
+    # Stage index.html + any new/changed images from a drop-replace
+    code, out, err = git(['add', 'natgeo/index.html', 'natgeo/assets/images'])
     if code != 0:
         return {'ok': False, 'step': 'git add', 'error': err}
 
@@ -173,6 +175,82 @@ def save_and_commit(html: str, message: str) -> dict:
     print(f'  Pushed.')
 
     return {'ok': True, 'message': 'Saved, committed, and pushed.'}
+
+
+# ---------------------------------------------------------------------------
+# Image replacement — decode upload, convert to WebP + JPG, place in folder
+# ---------------------------------------------------------------------------
+
+IMAGES_SUBDIR = os.path.join('natgeo', 'assets', 'images')
+
+
+def _sanitize_base(name: str) -> str:
+    name = os.path.splitext(name)[0].lower()
+    name = re.sub(r'[^a-z0-9]+', '-', name).strip('-')
+    return name or 'image'
+
+
+def _unique_base(out_dir: str, base: str) -> str:
+    """Ensure neither <base>.webp nor <base>.jpg already exists; else suffix."""
+    candidate = base
+    n = 1
+    while (os.path.exists(os.path.join(out_dir, candidate + '.webp')) or
+           os.path.exists(os.path.join(out_dir, candidate + '.jpg'))):
+        n += 1
+        candidate = f'{base}-{n}'
+    return candidate
+
+
+def replace_image(data_url: str, target_dir_rel: str, base_name: str) -> dict:
+    # Resolve + confine target dir to natgeo/assets/images
+    if not data_url or ',' not in data_url:
+        return {'ok': False, 'error': 'No image data received.'}
+
+    target_dir_rel = (target_dir_rel or IMAGES_SUBDIR).replace('\\', '/').strip('/')
+    out_dir = os.path.abspath(os.path.join(ROOT, target_dir_rel))
+    allowed = os.path.abspath(os.path.join(ROOT, IMAGES_SUBDIR))
+    if os.path.commonpath([out_dir, allowed]) != allowed:
+        return {'ok': False, 'error': 'Target folder outside the images directory.'}
+    os.makedirs(out_dir, exist_ok=True)
+
+    # Decode data URL payload
+    try:
+        header, b64 = data_url.split(',', 1)
+        raw = base64.b64decode(b64)
+    except Exception as e:
+        return {'ok': False, 'error': 'Could not decode image: ' + str(e)}
+
+    base = _unique_base(out_dir, _sanitize_base(base_name))
+
+    # Write to a temp source file, convert, clean up
+    tmp = os.path.join(out_dir, '.tmp-upload')
+    try:
+        with open(tmp, 'wb') as f:
+            f.write(raw)
+        proc = subprocess.run(
+            ['node', os.path.join('tools', 'convert-image.js'), tmp, out_dir, base],
+            cwd=ROOT, capture_output=True, text=True
+        )
+        if proc.returncode != 0:
+            return {'ok': False, 'error': 'Conversion failed: ' + (proc.stderr or proc.stdout)}
+        info = json.loads(proc.stdout.strip().splitlines()[-1])
+        if not info.get('ok'):
+            return {'ok': False, 'error': info.get('error', 'Conversion failed.')}
+    finally:
+        if os.path.exists(tmp):
+            os.remove(tmp)
+
+    # Paths relative to the deck HTML (natgeo/index.html) for src/srcset
+    html_dir = target_dir_rel[len('natgeo/'):] if target_dir_rel.startswith('natgeo/') else target_dir_rel
+    webp_rel = f'{html_dir}/{base}.webp'
+    jpg_rel  = f'{html_dir}/{base}.jpg'
+
+    # Stage the new files so Save & Commit captures them
+    git(['add', f'{target_dir_rel}/{base}.webp', f'{target_dir_rel}/{base}.jpg'])
+
+    print(f'  Replaced image -> {base}.webp / {base}.jpg  ({info.get("width")}x{info.get("height")})')
+    return {'ok': True, 'base': base, 'webp': webp_rel, 'jpg': jpg_rel,
+            'width': info.get('width'), 'height': info.get('height')}
 
 
 # ---------------------------------------------------------------------------
@@ -210,6 +288,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._handle_save()
         elif path == '/brief':
             self._handle_brief()
+        elif path == '/replace-image':
+            self._handle_replace_image()
         elif path == '/git/switch':
             self._handle_git('switch')
         elif path == '/git/branch':
@@ -261,6 +341,19 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         except Exception as e:
             self._json_response({'ok': False, 'error': str(e)}, 500)
 
+    def _handle_replace_image(self):
+        try:
+            data = self._read_json()
+            print(f'\n/replace-image  ->  base "{data.get("baseName", "")}"')
+            result = replace_image(
+                data.get('dataUrl', ''),
+                data.get('targetDir', ''),
+                data.get('baseName', 'image')
+            )
+            self._json_response(result)
+        except Exception as e:
+            self._json_response({'ok': False, 'error': str(e)}, 500)
+
     def _handle_git(self, action):
         try:
             data = self._read_json()
@@ -275,7 +368,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
     # Silence request logs for cleaner output (remove to debug)
     def log_message(self, fmt, *args):
-        if self.command == 'OPTIONS' or self.path.startswith(('/save', '/brief', '/git')):
+        if self.command == 'OPTIONS' or self.path.startswith(('/save', '/brief', '/git', '/replace-image')):
             super().log_message(fmt, *args)
 
 

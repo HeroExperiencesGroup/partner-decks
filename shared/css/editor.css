@@ -315,6 +315,81 @@ body[data-editor-pin="true"] [data-eid] { cursor: crosshair !important; }
 #ep-branch-new-btn { flex: 0 0 auto; padding: 0.2rem 0.5rem; }
 
 /* ==================================================
+ * Image drop zone
+ * ================================================== */
+
+.ep-dropzone {
+  border: 1.5px dashed rgba(210, 140, 60, 0.5);
+  border-radius: 6px;
+  padding: 0.7rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  text-align: center;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+.ep-dropzone:hover { background: rgba(210, 140, 60, 0.08); }
+.ep-dropzone.is-dragover {
+  background: rgba(210, 140, 60, 0.18);
+  border-color: rgba(210, 140, 60, 0.9);
+}
+.ep-dropzone.is-busy {
+  opacity: 0.5;
+  pointer-events: none;
+  border-style: solid;
+}
+.ep-dropzone__label { font-size: 0.72rem; color: rgba(244, 239, 230, 0.9); }
+.ep-dropzone__hint  { font-size: 0.58rem; opacity: 0.5; }
+
+.ep-or {
+  text-align: center;
+  font-size: 0.58rem;
+  opacity: 0.4;
+  letter-spacing: 0.04em;
+}
+
+/* ==================================================
+ * Brief list
+ * ================================================== */
+
+.ep-brief-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.ep-brief-item {
+  background: rgba(244, 239, 230, 0.06);
+  border: 1px solid rgba(244, 239, 230, 0.12);
+  border-radius: 4px;
+  padding: 0.35rem 0.45rem;
+}
+.ep-brief-item__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+.ep-brief-item__meta {
+  font-size: 0.6rem;
+  opacity: 0.7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ep-brief-item__actions { display: flex; gap: 0.25rem; flex: 0 0 auto; }
+.ep-brief-item__actions button { padding: 0.05rem 0.35rem; font-size: 0.65rem; }
+.ep-brief-item__note {
+  font-size: 0.65rem;
+  opacity: 0.85;
+  margin-top: 0.25rem;
+  line-height: 1.35;
+  word-break: break-word;
+}
+.ep-brief-item__note em { opacity: 0.4; }
+
+/* ==================================================
  * Coords + status
  * ================================================== */
 

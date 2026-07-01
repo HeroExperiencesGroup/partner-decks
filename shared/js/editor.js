@@ -31,6 +31,7 @@
   /* Same-origin relative endpoints — work on whatever port save-server uses */
   var SAVE_URL     = '/save';
   var BRIEF_URL    = '/brief';
+  var REPLACE_URL  = '/replace-image';
   var BRANCHES_URL = '/git/branches';
   var SWITCH_URL   = '/git/switch';
   var NEWBR_URL    = '/git/branch';
@@ -483,6 +484,147 @@
     if (badge) { badge.hidden = !briefItems.length; badge.textContent = briefItems.length; }
     var btn = qs('#etb-export-brief');
     if (btn) btn.classList.toggle('etb-has-items', briefItems.length > 0);
+    renderBriefList();
+  }
+
+  function renderBriefList() {
+    var sec  = qs('#ep-sec-brief');
+    var list = qs('#ep-brief-list');
+    var cnt  = qs('#ep-brief-count');
+    if (!sec || !list) return;
+    sec.hidden = briefItems.length === 0;
+    if (cnt) cnt.textContent = briefItems.length;
+    list.innerHTML = '';
+    briefItems.forEach(function (b) {
+      var row = doc.createElement('div');
+      row.className = 'ep-brief-item';
+      var meta = 'S' + (b.slideNumber || '?') +
+                 (b.tabContext ? ' · ' + b.tabContext : '') +
+                 ' · ' + (b.currentFile || '').split('/').pop();
+      row.innerHTML =
+        '<div class="ep-brief-item__head">' +
+          '<span class="ep-brief-item__meta">' + escapeHtml(meta) + '</span>' +
+          '<span class="ep-brief-item__actions">' +
+            '<button data-brief-revise="' + b.iid + '" title="Revise (select this image)">✎</button>' +
+            '<button data-brief-del="' + b.iid + '" title="Delete from brief" class="etb-btn-danger">✕</button>' +
+          '</span>' +
+        '</div>' +
+        '<div class="ep-brief-item__note">' + (escapeHtml(b.note) || '<em>(no note)</em>') + '</div>';
+      list.appendChild(row);
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+
+  function reviseBriefItem(iid) {
+    var pic = qs('[data-iid="' + iid + '"]');
+    if (!pic) { setStatus('That image is no longer on the page', 'error'); return; }
+    selectImage(pic);
+    pic.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    var note = qs('#etb-img-note');
+    var item = briefItems.filter(function (b) { return b.iid === iid; })[0];
+    if (note && item) note.value = item.note || '';
+  }
+
+  /* ================================================
+   * Drop-to-replace — convert + place via save-server,
+   * then swap the live <picture> sources for THIS image only.
+   * ================================================ */
+
+  function initDropzone(p) {
+    var dz = qs('#ep-dropzone', p);
+    var fi = qs('#ep-file-input', p);
+    if (!dz || !fi) return;
+
+    dz.addEventListener('click', function () { fi.click(); });
+    fi.addEventListener('change', function () {
+      if (fi.files && fi.files[0]) replaceImageFromFile(fi.files[0]);
+      fi.value = '';
+    });
+
+    ['dragenter', 'dragover'].forEach(function (evt) {
+      dz.addEventListener(evt, function (e) {
+        e.preventDefault(); e.stopPropagation();
+        dz.classList.add('is-dragover');
+      });
+    });
+    ['dragleave', 'dragend'].forEach(function (evt) {
+      dz.addEventListener(evt, function (e) {
+        e.preventDefault(); e.stopPropagation();
+        dz.classList.remove('is-dragover');
+      });
+    });
+    dz.addEventListener('drop', function (e) {
+      e.preventDefault(); e.stopPropagation();
+      dz.classList.remove('is-dragover');
+      var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (f) replaceImageFromFile(f);
+    });
+  }
+
+  function replaceImageFromFile(file) {
+    if (!activeImg) { setStatus('Select an image first', 'error'); return; }
+    if (!/^image\//.test(file.type)) { setStatus('Not an image file', 'error'); return; }
+
+    var targetPic = activeImg;                 /* lock the target now */
+    var currentFile = 'natgeo/' + getImgSrc(targetPic).replace(/^\//, '');
+    var targetDir   = currentFile.substring(0, currentFile.lastIndexOf('/'));
+
+    setStatus('Converting ' + file.name + '…', 'pending');
+    var dz = qs('#ep-dropzone'); if (dz) dz.classList.add('is-busy');
+
+    var reader = new FileReader();
+    reader.onload = function () {
+      fetch(REPLACE_URL, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dataUrl: reader.result, targetDir: targetDir, baseName: file.name })
+      })
+      .then(function (r) { return r.json(); })
+      .then(function (r) {
+        if (dz) dz.classList.remove('is-busy');
+        if (!r.ok) { setStatus('✗ ' + (r.error || 'Replace failed'), 'error'); return; }
+        updatePictureSources(targetPic, r.webp, r.jpg, r.width, r.height);
+        setStatus('✓ Replaced → ' + r.base + '.webp (Save & Commit to keep)', 'ok');
+        if (targetPic === activeImg) refreshPanel();
+      })
+      .catch(function () {
+        if (dz) dz.classList.remove('is-busy');
+        setStatus('✗ Server unreachable — run save-server.py', 'error');
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function updatePictureSources(pic, webpRel, jpgRel, w, h) {
+    /* Replace ALL sources with a clean webp + jpeg pair; update img. */
+    qsa('source', pic).forEach(function (s) { s.parentNode.removeChild(s); });
+    var img = pic.querySelector('img');
+
+    var sWebp = doc.createElement('source');
+    sWebp.setAttribute('type', 'image/webp');
+    sWebp.setAttribute('srcset', webpRel);
+    var sJpg = doc.createElement('source');
+    sJpg.setAttribute('type', 'image/jpeg');
+    sJpg.setAttribute('srcset', jpgRel);
+
+    if (img) {
+      pic.insertBefore(sWebp, img);
+      pic.insertBefore(sJpg, img);
+      /* cache-bust the live view so the new file shows immediately */
+      img.setAttribute('src', jpgRel + '?v=' + Date.now());
+      img.removeAttribute('srcset');
+      if (w) img.setAttribute('width', w);
+      if (h) img.setAttribute('height', h);
+      /* strip the cache-buster on the stored src so saved HTML is clean */
+      img._cleanSrc = jpgRel;
+    } else {
+      pic.appendChild(sWebp);
+      pic.appendChild(sJpg);
+    }
   }
 
   function exportBrief() {
@@ -556,6 +698,10 @@
     });
     clone.querySelectorAll('.editor-pin,#editor-panel,#editor-banner').forEach(function (el) {
       el.parentNode && el.parentNode.removeChild(el);
+    });
+    /* Strip live-view cache-busters from any drop-replaced images */
+    clone.querySelectorAll('img[src*="?v="]').forEach(function (img) {
+      img.setAttribute('src', img.getAttribute('src').replace(/\?v=\d+$/, ''));
     });
     clone.removeAttribute('data-editor');
     clone.removeAttribute('data-editor-pin');
@@ -739,12 +885,24 @@
         '<div class="ep-section" id="ep-sec-image" hidden>' +
           '<div class="ep-section-title">🖼 <span id="etb-img-filename">image</span></div>' +
           '<div class="ep-section-body">' +
+            '<div class="ep-dropzone" id="ep-dropzone">' +
+              '<span class="ep-dropzone__label">⬇ Drop image to replace</span>' +
+              '<span class="ep-dropzone__hint">converts to WebP + JPG · this image only</span>' +
+              '<input type="file" id="ep-file-input" accept="image/*" hidden>' +
+            '</div>' +
+            '<div class="ep-or">— or brief it for Claude —</div>' +
             '<input id="etb-img-note" type="text" placeholder="describe the replacement…" autocomplete="off">' +
             '<div class="etb-row">' +
               '<button id="etb-img-add" data-ea="img-add" class="ep-wide">Add to Brief</button>' +
               '<button id="etb-img-remove" data-ea="img-remove" class="etb-btn-danger" hidden>Remove</button>' +
             '</div>' +
           '</div>' +
+        '</div>' +
+
+        /* Brief list (note-based requests) */
+        '<div class="ep-section" id="ep-sec-brief" hidden>' +
+          '<div class="ep-section-title">Brief · <span id="ep-brief-count">0</span> to source</div>' +
+          '<div class="ep-brief-list" id="ep-brief-list"></div>' +
         '</div>' +
 
         /* Pins + coords */
@@ -774,6 +932,12 @@
     });
 
     p.addEventListener('click', function (e) {
+      /* Brief-list row actions (revise / delete) */
+      var del = e.target.closest('[data-brief-del]');
+      if (del) { removeFromBrief(del.getAttribute('data-brief-del')); return; }
+      var rev = e.target.closest('[data-brief-revise]');
+      if (rev) { reviseBriefItem(rev.getAttribute('data-brief-revise')); return; }
+
       var btn = e.target.closest('[data-ea]');
       if (!btn) return;
       var step = e.shiftKey ? 10 : 2;
@@ -814,6 +978,8 @@
     });
     var branchSel = p.querySelector('#ep-branch');
     if (branchSel) branchSel.addEventListener('change', onBranchPick);
+
+    initDropzone(p);
 
     doc.body.appendChild(p);
     initDrag(p);
