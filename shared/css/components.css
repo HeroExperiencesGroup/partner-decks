@@ -2783,6 +2783,17 @@ html[data-deck-layout="locked"] .landscape-tab {
   padding-left: var(--space-3);
 }
 
+/* Slide 12 (Expedition) — tighter ruled-list rows per brief:
+ * "reduce the spacing of the horizontal lines and its content" */
+#sec-expedition .list--ruled {
+  line-height: var(--leading-tight, 1.15);
+}
+#sec-expedition .list--ruled > li {
+  padding: var(--space-2) 0;
+}
+#sec-expedition .list--ruled > li:first-child { padding-top: 0; }
+#sec-expedition .list--ruled > li:last-child  { padding-bottom: 0; }
+
 /* =========================================================
  * Photo credit — small clickable attribution line
  * Used below tab captions when image has a CC licence.

@@ -902,8 +902,30 @@
     clone.querySelectorAll('img[src*="?v="]').forEach(function (img) {
       img.setAttribute('src', img.getAttribute('src').replace(/\?v=\d+$/, ''));
     });
+
+    /* --- Remove deck.js runtime artifacts so the saved source stays clean ---
+     * deck.js wraps each .section in a .slide-viewport, applies inline
+     * transforms for letterbox scaling, tags loaded images .is-loaded, and
+     * leaves contenteditable="false" behind. None of that belongs on disk;
+     * deck.js re-creates it on load. Unwrap + strip it all. */
+    clone.querySelectorAll('.slide-viewport').forEach(function (vp) {
+      var parent = vp.parentNode;
+      if (!parent) return;
+      while (vp.firstChild) parent.insertBefore(vp.firstChild, vp);
+      parent.removeChild(vp);
+    });
+    clone.querySelectorAll('.section').forEach(function (s) {
+      s.style.removeProperty('transform');
+      s.style.removeProperty('transition');
+      if (!s.getAttribute('style') || !s.getAttribute('style').trim()) s.removeAttribute('style');
+      ['userZoom', 'userTx', 'userTy'].forEach(function (k) { delete s.dataset[k]; });
+    });
+    clone.querySelectorAll('img.is-loaded').forEach(function (i) { i.classList.remove('is-loaded'); });
+    clone.querySelectorAll('[contenteditable]').forEach(function (el) { el.removeAttribute('contenteditable'); });
+
     clone.removeAttribute('data-editor');
     clone.removeAttribute('data-editor-pin');
+    clone.removeAttribute('data-editor-region');
     return '<!doctype html>\n' + clone.outerHTML;
   }
 
