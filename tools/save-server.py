@@ -152,8 +152,15 @@ def save_and_commit(html: str, message: str) -> dict:
         f.write(html)
     print(f'  Written: {TARGET_HTML}')
 
-    # Stage index.html + any new/changed images from a drop-replace
-    code, out, err = git(['add', 'natgeo/index.html', 'natgeo/assets/images'])
+    # Stage index.html + only the images the HTML actually references.
+    # This captures drop-replaced images while leaving orphan drops untracked.
+    refs = set(re.findall(r'assets/images/[A-Za-z0-9._-]+\.(?:webp|jpg|jpeg|png|svg)', html))
+    ref_paths = []
+    for r in refs:
+        p = os.path.join('natgeo', r)
+        if os.path.exists(os.path.join(ROOT, p)):
+            ref_paths.append(p)
+    code, out, err = git(['add', 'natgeo/index.html'] + ref_paths)
     if code != 0:
         return {'ok': False, 'step': 'git add', 'error': err}
 
@@ -245,8 +252,8 @@ def replace_image(data_url: str, target_dir_rel: str, base_name: str) -> dict:
     webp_rel = f'{html_dir}/{base}.webp'
     jpg_rel  = f'{html_dir}/{base}.jpg'
 
-    # Stage the new files so Save & Commit captures them
-    git(['add', f'{target_dir_rel}/{base}.webp', f'{target_dir_rel}/{base}.jpg'])
+    # Do NOT git-add here — Save & Commit stages only images the HTML actually
+    # references, so dropped-but-unused files never pollute a commit.
 
     print(f'  Replaced image -> {base}.webp / {base}.jpg  ({info.get("width")}x{info.get("height")})')
     return {'ok': True, 'base': base, 'webp': webp_rel, 'jpg': jpg_rel,
