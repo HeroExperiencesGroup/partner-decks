@@ -474,3 +474,77 @@ body[data-editor-pin="true"] [data-eid] { cursor: crosshair !important; }
 .editor-pin:hover .editor-pin__cross::before,
 .editor-pin:hover .editor-pin__cross::after { background: rgba(255, 50, 50, 1); }
 .editor-pin:hover .editor-pin__label::after { content: ' ✕'; opacity: 0.6; }
+
+/* ==================================================
+ * Region briefs — rectangle + note
+ * ================================================== */
+
+body[data-editor-region="true"] .section { cursor: crosshair !important; }
+body[data-editor-region="true"] [data-eid],
+body[data-editor-region="true"] picture[data-iid],
+body[data-editor-region="true"] [data-iid-placeholder] { cursor: crosshair !important; }
+
+.editor-region {
+  position: absolute;
+  z-index: 8500;
+  box-sizing: border-box;
+  border: 2px solid rgba(120, 170, 255, 0.95);
+  background: rgba(120, 170, 255, 0.14);
+  cursor: pointer;
+}
+.editor-region--drawing { pointer-events: none; }
+
+.editor-region__num {
+  position: absolute;
+  top: -1px; left: -1px;
+  background: rgba(120, 170, 255, 0.95);
+  color: rgba(20, 20, 30, 1);
+  font-family: ui-monospace, 'SF Mono', monospace;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 1px 5px;
+}
+.editor-region__del {
+  position: absolute;
+  top: 2px; right: 2px;
+  width: 18px; height: 18px;
+  padding: 0;
+  line-height: 1;
+  border: none;
+  border-radius: 3px;
+  background: rgba(28, 28, 26, 0.6);
+  color: rgba(255, 180, 160, 0.95);
+  font-size: 11px;
+  cursor: pointer;
+}
+.editor-region__del:hover { background: rgba(200, 60, 50, 0.85); color: #fff; }
+.editor-region__note {
+  position: absolute;
+  left: 0; bottom: -1.4em;
+  max-width: 22ch;
+  font-family: ui-monospace, 'SF Mono', monospace;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.95);
+  background: rgba(28, 28, 26, 0.8);
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+.editor-region__input {
+  position: absolute;
+  left: 0; bottom: -2em;
+  width: 16rem;
+  max-width: 60vw;
+  font-family: ui-monospace, 'SF Mono', monospace;
+  font-size: 12px;
+  padding: 3px 6px;
+  border: 1px solid rgba(120, 170, 255, 0.9);
+  border-radius: 3px;
+  background: rgba(20, 20, 26, 0.96);
+  color: #fff;
+  outline: none;
+  z-index: 8600;
+}

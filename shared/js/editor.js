@@ -238,7 +238,115 @@
 
   function updatePinBtn() {
     var btn = qs('#etb-pin-clear');
-    if (btn) { btn.hidden = !pins.length; btn.textContent = 'Clear (' + pins.length + ')'; }
+    if (btn) { btn.hidden = !pins.length; btn.textContent = 'Clear pins (' + pins.length + ')'; }
+  }
+
+  /* ================================================
+   * Region briefs — draw a rectangle + note anywhere,
+   * independent of any image element.
+   * ================================================ */
+
+  var regionMode  = false;
+  var regionCount = 0;
+  var regionDraw  = null;   /* { section, x0, y0, el } while dragging */
+
+  function setRegionMode(on) {
+    regionMode = on;
+    body.setAttribute('data-editor-region', on ? 'true' : 'false');
+    var btn = qs('#etb-region-toggle');
+    if (btn) {
+      btn.textContent = on ? '📐 Draw a box…' : '📐 Region brief';
+      btn.classList.toggle('etb-btn-active', on);
+    }
+    if (on) { setPinMode(false); deactivateAll(); deselectImage(); }
+  }
+
+  function initRegionDraw(section) {
+    section.addEventListener('mousedown', function (e) {
+      if (!isOn || !regionMode) return;
+      if (e.target.closest('#editor-panel,#editor-banner,.editor-region,.editor-pin')) return;
+      e.preventDefault();
+      var c  = screenToCanvas(section, e.clientX, e.clientY);
+      var el = doc.createElement('div');
+      el.className = 'editor-region editor-region--drawing';
+      el.style.left = c.x + 'px'; el.style.top = c.y + 'px';
+      el.style.width = '0px';     el.style.height = '0px';
+      section.appendChild(el);
+      regionDraw = { section: section, x0: c.x, y0: c.y, el: el };
+    });
+  }
+
+  function onRegionMove(e) {
+    if (!regionDraw) return;
+    var c = screenToCanvas(regionDraw.section, e.clientX, e.clientY);
+    var x = Math.min(c.x, regionDraw.x0), y = Math.min(c.y, regionDraw.y0);
+    var w = Math.abs(c.x - regionDraw.x0), h = Math.abs(c.y - regionDraw.y0);
+    regionDraw.el.style.left = x + 'px'; regionDraw.el.style.top = y + 'px';
+    regionDraw.el.style.width = w + 'px'; regionDraw.el.style.height = h + 'px';
+  }
+
+  function onRegionUp() {
+    if (!regionDraw) return;
+    var d = regionDraw; regionDraw = null;
+    var x = parseFloat(d.el.style.left), y = parseFloat(d.el.style.top);
+    var w = parseFloat(d.el.style.width), h = parseFloat(d.el.style.height);
+    if (w < 12 || h < 12) { d.el.parentNode && d.el.parentNode.removeChild(d.el); return; }
+
+    var n  = ++regionCount;
+    var id = 'region:' + n;
+    d.el.className = 'editor-region';
+    d.el.dataset.regionId = id;
+    d.el.innerHTML =
+      '<span class="editor-region__num">' + n + '</span>' +
+      '<button class="editor-region__del" title="Delete region">✕</button>' +
+      '<span class="editor-region__note"></span>';
+
+    briefItems.push({
+      type: 'region', iid: id, num: n,
+      slideNumber: parseInt(d.section.dataset.slide) || null,
+      sectionId: d.section.id || '',
+      rect: { x: Math.round(x), y: Math.round(y), w: Math.round(w), h: Math.round(h) },
+      note: ''
+    });
+    wireRegionEl(d.el, id);
+    refreshBriefBadge();
+    openRegionNote(id);
+  }
+
+  function wireRegionEl(el, id) {
+    el.addEventListener('click', function (e) {
+      if (e.target.closest('.editor-region__del')) { e.stopPropagation(); removeFromBrief(id); return; }
+      if (!regionMode) { e.stopPropagation(); openRegionNote(id); }
+    });
+  }
+
+  function openRegionNote(id) {
+    var el   = qs('.editor-region[data-region-id="' + id + '"]');
+    var item = briefItems.filter(function (b) { return b.iid === id; })[0];
+    if (!el || !item) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    var old = el.querySelector('.editor-region__input');
+    if (old) old.parentNode.removeChild(old);
+    var inp = doc.createElement('input');
+    inp.type = 'text';
+    inp.className = 'editor-region__input';
+    inp.value = item.note || '';
+    inp.placeholder = 'note for this region…';
+    el.appendChild(inp);
+    setTimeout(function () { inp.focus(); }, 30);
+    function commit() {
+      item.note = inp.value.trim();
+      var lbl = el.querySelector('.editor-region__note');
+      if (lbl) lbl.textContent = item.note;
+      if (inp.parentNode) inp.parentNode.removeChild(inp);
+      refreshBriefBadge();
+    }
+    inp.addEventListener('keydown', function (e) {
+      e.stopPropagation();
+      if (e.key === 'Enter') commit();
+      if (e.key === 'Escape') { if (inp.parentNode) inp.parentNode.removeChild(inp); }
+    });
+    inp.addEventListener('blur', commit);
   }
 
   /* ================================================
@@ -486,6 +594,7 @@
       found.note = note.trim();
     } else {
       briefItems.push({
+        type:        'image',
         iid:         iid,
         slideNumber: parseInt(activeImg.dataset.iidSlide) || null,
         sectionId:   activeImg.dataset.iidSection || '',
@@ -507,7 +616,12 @@
   }
 
   function removeFromBrief(iid) {
+    var item = briefItems.filter(function (b) { return b.iid === iid; })[0];
     briefItems = briefItems.filter(function (b) { return b.iid !== iid; });
+    if (item && item.type === 'region') {
+      var box = qs('.editor-region[data-region-id="' + iid + '"]');
+      if (box) box.parentNode.removeChild(box);
+    }
     refreshBriefBadge(); refreshPanel();
   }
   function isInBrief(pic) {
@@ -532,14 +646,21 @@
     briefItems.forEach(function (b) {
       var row = doc.createElement('div');
       row.className = 'ep-brief-item';
-      var meta = 'S' + (b.slideNumber || '?') +
-                 (b.tabContext ? ' · ' + b.tabContext : '') +
-                 ' · ' + (b.currentFile || '').split('/').pop();
+      var meta;
+      if (b.type === 'region') {
+        meta = '📐 S' + (b.slideNumber || '?') + ' · region ' + b.num +
+               ' (' + b.rect.w + '×' + b.rect.h + ')';
+      } else {
+        meta = '🖼 S' + (b.slideNumber || '?') +
+               (b.tabContext ? ' · ' + b.tabContext : '') +
+               ' · ' + (b.currentFile || '').split('/').pop();
+      }
+      var reviseTitle = b.type === 'region' ? 'Edit note' : 'Revise (select this image)';
       row.innerHTML =
         '<div class="ep-brief-item__head">' +
           '<span class="ep-brief-item__meta">' + escapeHtml(meta) + '</span>' +
           '<span class="ep-brief-item__actions">' +
-            '<button data-brief-revise="' + b.iid + '" title="Revise (select this image)">✎</button>' +
+            '<button data-brief-revise="' + b.iid + '" title="' + reviseTitle + '">✎</button>' +
             '<button data-brief-del="' + b.iid + '" title="Delete from brief" class="etb-btn-danger">✕</button>' +
           '</span>' +
         '</div>' +
@@ -555,12 +676,13 @@
   }
 
   function reviseBriefItem(iid) {
+    var item = briefItems.filter(function (b) { return b.iid === iid; })[0];
+    if (item && item.type === 'region') { openRegionNote(iid); return; }
     var pic = qs('[data-iid="' + iid + '"]');
     if (!pic) { setStatus('That image is no longer on the page', 'error'); return; }
     selectImage(pic);
     pic.scrollIntoView({ behavior: 'smooth', block: 'center' });
     var note = qs('#etb-img-note');
-    var item = briefItems.filter(function (b) { return b.iid === iid; })[0];
     if (note && item) note.value = item.note || '';
   }
 
@@ -710,7 +832,11 @@
           'imgSelector src and picSelector source srcsets in index.html,',
           'then commit + push. Use pin canvasX/canvasY as position refs.'
         ] },
-      imageReplacements: briefItems,
+      imageReplacements: briefItems.filter(function (b) { return b.type !== 'region'; }),
+      regionBriefs: briefItems.filter(function (b) { return b.type === 'region'; }).map(function (b) {
+        return { num: b.num, slideNumber: b.slideNumber, sectionId: b.sectionId,
+                 rect: b.rect, note: b.note };
+      }),
       pins: pins.map(function (p) {
         return { num: p.num, sectionId: p.sectionId, slideNumber: p.slide, canvasX: p.cx, canvasY: p.cy };
       }),
@@ -769,7 +895,7 @@
     clone.querySelectorAll('.editor-selected,.editor-in-selection,.editor-typing,.editor-img-selected').forEach(function (el) {
       el.classList.remove('editor-selected','editor-in-selection','editor-typing','editor-img-selected');
     });
-    clone.querySelectorAll('.editor-pin,#editor-panel,#editor-banner').forEach(function (el) {
+    clone.querySelectorAll('.editor-pin,.editor-region,#editor-panel,#editor-banner').forEach(function (el) {
       el.parentNode && el.parentNode.removeChild(el);
     });
     /* Strip live-view cache-busters from any drop-replaced images */
@@ -978,13 +1104,16 @@
           '<div class="ep-brief-list" id="ep-brief-list"></div>' +
         '</div>' +
 
-        /* Pins + coords */
+        /* Pins + regions + coords */
         '<div class="ep-section" id="ep-sec-pins">' +
-          '<div class="ep-section-title">Pins · <span id="etb-coords" class="etb-coords">— —</span></div>' +
+          '<div class="ep-section-title">Mark up · <span id="etb-coords" class="etb-coords">— —</span></div>' +
           '<div class="ep-section-body">' +
             '<div class="etb-row">' +
+              '<button id="etb-region-toggle" data-ea="region-toggle" class="ep-wide">📐 Region brief</button>' +
+            '</div>' +
+            '<div class="etb-row">' +
               '<button id="etb-pin-toggle" data-ea="pin-toggle">📍 Pin</button>' +
-              '<button id="etb-pin-clear" data-ea="pin-clear" hidden>Clear</button>' +
+              '<button id="etb-pin-clear" data-ea="pin-clear" hidden>Clear pins</button>' +
             '</div>' +
           '</div>' +
         '</div>' +
@@ -1031,6 +1160,7 @@
         case 'export-brief':  exportBrief(); break;
         case 'pin-toggle':    setPinMode(!pinMode); break;
         case 'pin-clear':     clearAllPins(); break;
+        case 'region-toggle': setRegionMode(!regionMode); break;
         case 'img-add':       addToBrief(); break;
         case 'img-remove':    if (activeImg) removeFromBrief(activeImg.dataset.iid); break;
         case 'branch-new':    toggleNewBranchRow(); break;
@@ -1218,7 +1348,7 @@
     b.innerHTML =
       '<span>✏ <strong>Edit mode</strong> — ' +
       'click text / image &nbsp;|&nbsp; <kbd>Shift+click</kbd> multi &nbsp;|&nbsp; ' +
-      '<kbd>Alt+↑↓←→</kbd> nudge &nbsp;|&nbsp; <kbd>P</kbd> pin &nbsp;|&nbsp; ' +
+      '<kbd>Alt+↑↓←→</kbd> nudge &nbsp;|&nbsp; <kbd>P</kbd> pin &nbsp;|&nbsp; <kbd>B</kbd> region &nbsp;|&nbsp; ' +
       '<kbd>Ctrl+Z</kbd> undo &nbsp;|&nbsp; <kbd>Esc</kbd> back &nbsp;|&nbsp; ' +
       '<kbd>E</kbd> exit &nbsp;·&nbsp; drag panel header to move</span>';
     doc.body.appendChild(b);
@@ -1244,7 +1374,11 @@
         if (e.target.closest('#editor-panel,#editor-banner,.editor-pin')) return;
         dropPin(section, e.clientX, e.clientY);
       });
+      initRegionDraw(section);
     });
+    /* Region drag tracking is global so it keeps up outside the start section */
+    window.addEventListener('mousemove', onRegionMove);
+    window.addEventListener('mouseup', onRegionUp);
   }
 
   /* ================================================
@@ -1270,11 +1404,16 @@
       if (!inField && !isTyping) { setPinMode(!pinMode); return; }
     }
 
+    if ((e.key === 'b' || e.key === 'B') && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      if (!inField && !isTyping) { setRegionMode(!regionMode); return; }
+    }
+
     if (e.key === 'Escape') {
       e.preventDefault();
-      if (pinMode)   { setPinMode(false);  return; }
-      if (isTyping)  { exitTyping();       return; }
-      if (activeImg) { deselectImage();    return; }
+      if (regionMode) { setRegionMode(false); return; }
+      if (pinMode)    { setPinMode(false);    return; }
+      if (isTyping)   { exitTyping();         return; }
+      if (activeImg)  { deselectImage();      return; }
       deactivateAll(); return;
     }
 
@@ -1294,7 +1433,7 @@
    * ================================================ */
 
   function onEditableClick(el, e) {
-    if (!isOn || pinMode) return;
+    if (!isOn || pinMode || regionMode) return;
     if (e.shiftKey) {
       if (!activeEl) { selectPrimary(el); return; }
       if (el === activeEl) return;
@@ -1305,8 +1444,9 @@
   }
 
   function onDocClick(e) {
-    if (!isOn) return;
+    if (!isOn || regionMode) return;
     if (panel && panel.contains(e.target)) return;
+    if (e.target.closest('.editor-region')) return;
 
     var pic = e.target.closest('picture[data-iid], [data-iid-placeholder]');
     if (pic && !e.target.dataset.eid) { deactivateAll(); selectImage(pic); return; }
