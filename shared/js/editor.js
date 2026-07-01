@@ -1,26 +1,20 @@
 /* editor.js — personal in-browser slide editor
  *
+ * Requires save-server.py running at localhost:8080.
  * Toggle with E key.
  *
- * Selection:
- *   Click text          — select element
- *   Shift+click         — multi-select
- *   "Edit Text" button  — enter typing mode
- *   Click image         — select image, open brief panel
- *   Esc                 — exit typing → deselect
- *   Alt+↑↓←→            — nudge (2px; Shift=10px)
- *   Ctrl+Z / Ctrl+⇧+Z   — undo / redo
+ * Text edits  — edit natgeo/index.html directly in your editor.
+ *               Nudge/size controls here are for visual tweaking only;
+ *               they don't appear in the brief (you apply them manually).
  *
- * Coordinates:
- *   Hover slide         — live x,y readout in toolbar
- *   P / toolbar         — pin mode; click to drop coord marker
- *   Click pin           — remove it
+ * Image brief — click an image → describe the replacement → Add to Brief.
+ *               "Export Brief" downloads editor-brief.json for Claude.
+ *               Claude reads the brief, finds/converts/places images,
+ *               updates index.html, commits, and pushes.
  *
- * Brief (image replacement workflow):
- *   Click any image → type a note → "Add to Brief"
- *   "Export Brief" → downloads editor-brief.json
- *   Hand the JSON to Claude → Claude finds/converts/places the image
- *   and applies any text edits from the brief automatically.
+ * Save & Commit — sends the current DOM (editor artifacts stripped) to
+ *                 save-server.py which overwrites natgeo/index.html,
+ *                 commits, and pushes. Use after visual nudge/size tweaks.
  *
  * TO DISABLE FOR CLIENT: remove the two lines tagged
  * data-editor-remove in natgeo/index.html.
@@ -28,6 +22,9 @@
 
 (function () {
   'use strict';
+
+  var SAVE_URL  = 'http://localhost:8080/save';
+  var BRIEF_URL = 'http://localhost:8080/brief';
 
   var STORE_KEY = 'partner-decks:editor-v1';
   var doc       = document;
@@ -43,16 +40,16 @@
   var isTyping    = false;
   var typingSnap  = null;
 
-  /* Image selection */
-  var activeImg  = null;   /* selected <picture> element */
-  var briefItems = [];     /* accumulated image + note requests */
+  /* Image brief */
+  var activeImg  = null;
+  var briefItems = [];     /* image replacement requests */
 
   /* Pins */
   var pinMode  = false;
   var pins     = [];
   var pinCount = 0;
 
-  /* Undo/redo — entries are ARRAY of { eid, before, after } */
+  /* Undo/redo */
   var undoStack   = [];
   var redoStack   = [];
   var MAX_HISTORY = 60;
@@ -88,16 +85,15 @@
   }
 
   /* ------------------------------------------------
-   * Element identification — text
+   * Element IDs — text
    * ---------------------------------------------- */
 
   function assignIds() {
     qsa('.section').forEach(function (section) {
       var sid = section.id || 'global';
       qsa(EDITABLE, section).forEach(function (el, i) {
-        var eid = sid + ':' + i;
-        el.dataset.eid = eid;
-        originals[eid] = el.innerHTML;
+        el.dataset.eid = sid + ':' + i;
+        originals[el.dataset.eid] = el.innerHTML;
         el.addEventListener('mousedown', function (e) {
           if (isOn && !isTyping && !pinMode) e.preventDefault();
         });
@@ -106,32 +102,29 @@
   }
 
   /* ------------------------------------------------
-   * Image identification
-   * Assign a stable data-iid to every <picture> and
-   * build a unique CSS selector for it.
+   * Element IDs — images
    * ---------------------------------------------- */
 
   function assignImgIds() {
     qsa('.section').forEach(function (section) {
       var sid = section.id || 'global';
       qsa('picture', section).forEach(function (pic, i) {
-        pic.dataset.iid = sid + ':pic:' + i;
+        pic.dataset.iid         = sid + ':pic:' + i;
         pic.dataset.iidSelector = buildPicSelector(pic);
         pic.dataset.iidSection  = sid;
         pic.dataset.iidSlide    = section.dataset.slide || '';
-        var tabPanel = pic.closest('[data-tab]');
-        pic.dataset.iidTab = tabPanel ? tabPanel.getAttribute('data-tab') : '';
+        var tp = pic.closest('[data-tab]');
+        pic.dataset.iidTab = tp ? tp.getAttribute('data-tab') : '';
       });
     });
   }
 
   function buildPicSelector(pic) {
-    var section   = pic.closest('.section');
-    var tabPanel  = pic.closest('[data-tab]');
-    var base      = section && section.id ? '#' + section.id : '';
+    var section  = pic.closest('.section');
+    var tabPanel = pic.closest('[data-tab]');
+    var base     = section && section.id ? '#' + section.id : '';
     if (tabPanel) base += ' [data-tab="' + tabPanel.getAttribute('data-tab') + '"]';
-    /* find pic's index among siblings with same context */
-    var ctx  = tabPanel || (section || doc);
+    var ctx  = tabPanel || section || doc;
     var pics = qsa('picture', ctx);
     var idx  = pics.indexOf(pic);
     base += ' picture' + (idx > 0 ? ':nth-of-type(' + (idx + 1) + ')' : '');
@@ -150,7 +143,7 @@
   }
 
   /* ------------------------------------------------
-   * Coordinate conversion
+   * Coordinates
    * ---------------------------------------------- */
 
   function screenToCanvas(section, sx, sy) {
@@ -184,7 +177,7 @@
     var c  = screenToCanvas(section, sx, sy);
     var n  = ++pinCount;
     var el = doc.createElement('div');
-    el.className = 'editor-pin';
+    el.className  = 'editor-pin';
     el.style.left = c.x + 'px';
     el.style.top  = c.y + 'px';
     el.innerHTML  =
@@ -217,11 +210,11 @@
 
   function updatePinBtn() {
     var btn = qs('#etb-pin-clear');
-    if (btn) { btn.hidden = !pins.length; btn.textContent = 'Clear pins (' + pins.length + ')'; }
+    if (btn) { btn.hidden = !pins.length; btn.textContent = 'Clear (' + pins.length + ')'; }
   }
 
   /* ------------------------------------------------
-   * State snapshot — text elements
+   * State snapshot
    * ---------------------------------------------- */
 
   function snapState(el) {
@@ -231,8 +224,7 @@
   }
 
   function applyState(eid, state) {
-    var el = qs('[data-eid="' + eid + '"]');
-    if (!el) return;
+    var el = qs('[data-eid="' + eid + '"]'); if (!el) return;
     el.innerHTML = state.html;
     el.style.fontSize = state.fontSize || '';
     applyTransform(el, state.nudgeX || 0, state.nudgeY || 0);
@@ -390,10 +382,9 @@
     var before = snapState(el);
     var cur = getSize(el);
     var step = cur >= 48 ? 4 : cur >= 24 ? 2 : 1;
-    var next = Math.max(6, Math.round(cur + dir * step));
-    el.style.fontSize = next + 'px';
+    el.style.fontSize = Math.max(6, Math.round(cur + dir * step)) + 'px';
     var d = store[el.dataset.eid] || {};
-    d.fontSize = next + 'px'; store[el.dataset.eid] = d; save();
+    d.fontSize = el.style.fontSize; store[el.dataset.eid] = d; save();
     pushHistory([{ eid: el.dataset.eid, before: before, after: snapState(el) }]);
     refreshToolbar();
   }
@@ -461,9 +452,7 @@
     activeImg = pic;
     pic.classList.add('editor-img-selected');
     refreshToolbar();
-    /* scroll the brief note into view */
-    var noteEl = qs('#etb-img-note');
-    if (noteEl) setTimeout(function () { noteEl.focus(); }, 50);
+    setTimeout(function () { var n = qs('#etb-img-note'); if (n) n.focus(); }, 50);
   }
 
   function deselectImage() {
@@ -473,45 +462,36 @@
 
   function addToBrief() {
     if (!activeImg) return;
-    var noteEl = qs('#etb-img-note');
-    var note   = noteEl ? noteEl.value.trim() : '';
-    var src    = getImgSrc(activeImg);
-
-    /* Check if already in brief */
-    var existing = briefItems.filter(function (b) { return b.iid === activeImg.dataset.iid; });
-    if (existing.length) {
-      /* Update the note */
-      existing[0].note = note;
+    var note  = (qs('#etb-img-note') || {}).value || '';
+    var iid   = activeImg.dataset.iid;
+    var found = briefItems.filter(function (b) { return b.iid === iid; })[0];
+    if (found) {
+      found.note = note.trim();
     } else {
       briefItems.push({
-        iid:           activeImg.dataset.iid,
-        type:          'image_replacement',
-        slideNumber:   parseInt(activeImg.dataset.iidSlide) || null,
-        sectionId:     activeImg.dataset.iidSection || '',
-        tabContext:    activeImg.dataset.iidTab || null,
-        currentFile:   'natgeo/' + src.replace(/^\//, ''),
-        imgSelector:   activeImg.dataset.iidSelector + ' img',
-        picSelector:   activeImg.dataset.iidSelector,
-        sources:       getImgSources(activeImg),
-        note:          note
+        iid:         iid,
+        slideNumber: parseInt(activeImg.dataset.iidSlide) || null,
+        sectionId:   activeImg.dataset.iidSection || '',
+        tabContext:  activeImg.dataset.iidTab || null,
+        currentFile: 'natgeo/' + getImgSrc(activeImg).replace(/^\//, ''),
+        imgSelector: activeImg.dataset.iidSelector + ' img',
+        picSelector: activeImg.dataset.iidSelector,
+        sources:     getImgSources(activeImg),
+        note:        note.trim()
       });
     }
-
     refreshBriefBadge();
-    /* Flash confirmation */
     var btn = qs('#etb-img-add');
     if (btn) {
       var orig = btn.textContent;
-      btn.textContent = '✓ Added';
-      btn.classList.add('etb-btn-active');
-      setTimeout(function () { btn.textContent = orig; btn.classList.remove('etb-btn-active'); }, 1200);
+      btn.textContent = '✓ Added'; btn.classList.add('etb-btn-active');
+      setTimeout(function () { btn.textContent = orig; btn.classList.remove('etb-btn-active'); }, 1400);
     }
   }
 
   function removeFromBrief(iid) {
     briefItems = briefItems.filter(function (b) { return b.iid !== iid; });
-    refreshBriefBadge();
-    refreshToolbar();
+    refreshBriefBadge(); refreshToolbar();
   }
 
   function isInBrief(pic) {
@@ -521,124 +501,139 @@
 
   function refreshBriefBadge() {
     var badge = qs('#etb-brief-badge');
-    if (badge) {
-      badge.hidden = !briefItems.length;
-      badge.textContent = briefItems.length;
-    }
-    var exportBtn = qs('#etb-export-brief');
-    if (exportBtn) exportBtn.classList.toggle('etb-has-items', briefItems.length > 0);
+    if (badge) { badge.hidden = !briefItems.length; badge.textContent = briefItems.length; }
+    var btn = qs('#etb-export-brief');
+    if (btn) btn.classList.toggle('etb-has-items', briefItems.length > 0);
   }
 
   /* ------------------------------------------------
-   * Export Brief — the JSON Claude reads
+   * Export Brief JSON (for Claude to action)
+   * Contains: image replacements + pins + freeform notes.
+   * Text edits are NOT included — edit index.html directly.
    * ---------------------------------------------- */
 
   function exportBrief() {
-    if (isTyping) exitTyping();
-
-    /* Collect text edits from store */
-    var textEdits = [];
-    Object.keys(store).forEach(function (eid) {
-      var el = qs('[data-eid="' + eid + '"]'); if (!el) return;
-      var d  = store[eid];
-      var section = el.closest('.section');
-      var orig = originals[eid] || '';
-      var hasTextChange = d.html != null && d.html !== orig;
-      var hasSize  = !!d.fontSize;
-      var hasNudge = (d.nudgeX || 0) !== 0 || (d.nudgeY || 0) !== 0;
-      if (!hasTextChange && !hasSize && !hasNudge) return;
-
-      var cls = (el.className || '')
-        .replace(/editor-selected|editor-in-selection|editor-typing/g, '').trim()
-        .split(/\s+/)[0];
-
-      textEdits.push({
-        type:         'text_edit',
-        eid:           eid,
-        sectionId:     section ? section.id : '',
-        slideNumber:   section ? (parseInt(section.dataset.slide) || null) : null,
-        elementTag:    el.tagName,
-        elementClass:  cls,
-        htmlSelector:  buildTextSelector(el),
-        originalHtml:  orig,
-        newHtml:       d.html || orig,
-        fontSize:      d.fontSize || null,
-        nudge:         { x: d.nudgeX || 0, y: d.nudgeY || 0 }
-      });
-    });
-
-    /* Collect pins */
-    var pinData = pins.map(function (p) {
-      return { type: 'pin', num: p.num, sectionId: p.sectionId,
-               slideNumber: p.slide, canvasX: p.cx, canvasY: p.cy };
-    });
-
+    var notes = (qs('#etb-brief-notes') || {}).value || '';
     var brief = {
       meta: {
-        generated:  new Date().toISOString(),
-        deck:       'natgeo/index.html',
-        note:       'Hand this file to Claude. Claude will apply image replacements (download, convert to WebP, update HTML) and any text edits listed below.'
+        generated: new Date().toISOString(),
+        deck:      'natgeo/index.html',
+        guide: [
+          'For each imageReplacement: find/download the image described in "note",',
+          'compress to .jpg + .webp, place in the same folder as currentFile (or a',
+          'descriptive new name), update imgSelector src and picSelector source srcsets',
+          'in natgeo/index.html, then commit + push.',
+          'Use pin canvasX/canvasY as position references when mentioned in notes.'
+        ]
       },
       imageReplacements: briefItems,
-      textEdits:         textEdits,
-      pins:              pinData,
-      instructions: {
-        forImageReplacements: [
-          '1. For each imageReplacement entry: find or download the image described in "note".',
-          '2. Compress and save as both .jpg and .webp in the same folder as currentFile.',
-          '3. Name the new files to match currentFile (replace the old ones), or use a descriptive new name.',
-          '4. Update imgSelector src and picSelector source srcsets in natgeo/index.html.',
-          '5. Run: git add + git commit + git push.'
-        ],
-        forTextEdits: [
-          '1. For each textEdit entry: locate the element via htmlSelector or eid.',
-          '2. Apply newHtml, fontSize, and nudge values directly to natgeo/index.html.',
-          '3. Commit with a descriptive message.'
-        ]
-      }
+      pins: pins.map(function (p) {
+        return { num: p.num, sectionId: p.sectionId, slideNumber: p.slide,
+                 canvasX: p.cx, canvasY: p.cy };
+      }),
+      notes: notes.trim() || null
     };
 
     var json = JSON.stringify(brief, null, 2);
-    var blob = new Blob([json], { type: 'application/json' });
-    var a    = doc.createElement('a');
-    a.href   = URL.createObjectURL(blob);
-    a.download = 'editor-brief.json';
-    doc.body.appendChild(a); a.click(); doc.body.removeChild(a);
-    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+
+    /* Try posting to save-server first; fall back to download */
+    fetch(BRIEF_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: json
+    }).then(function (res) { return res.json(); })
+      .then(function (r) {
+        if (r.ok) setStatus('Brief saved to editor-brief.json', 'ok');
+        else      downloadJSON(json, 'editor-brief.json');
+      })
+      .catch(function () { downloadJSON(json, 'editor-brief.json'); });
   }
 
-  function buildTextSelector(el) {
-    var section = el.closest('.section');
-    var base    = section && section.id ? '#' + section.id + ' ' : '';
-    var cls     = (el.className || '')
-      .replace(/editor-selected|editor-in-selection|editor-typing/g, '').trim()
-      .split(/\s+/)[0];
-    return base + (cls ? '.' + cls : el.tagName.toLowerCase());
+  function downloadJSON(text, filename) {
+    var blob = new Blob([text], { type: 'application/json' });
+    var a = doc.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = filename;
+    doc.body.appendChild(a); a.click(); doc.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+    setStatus('Brief downloaded ↓', 'ok');
   }
 
   /* ------------------------------------------------
-   * Export HTML (existing, kept for completeness)
+   * Save & Commit — sends DOM to save-server.py
    * ---------------------------------------------- */
 
-  function exportHTML() {
+  function saveAndCommit() {
     if (isTyping) exitTyping();
-    var clone = doc.documentElement.cloneNode(true);
-    clone.querySelectorAll('[data-editor-remove]').forEach(function (el) { el.parentNode && el.parentNode.removeChild(el); });
-    clone.querySelectorAll('[contenteditable]').forEach(function (el) { el.removeAttribute('contenteditable'); });
-    clone.querySelectorAll('[data-eid],[data-iid],[data-iid-selector],[data-iid-section],[data-iid-slide],[data-iid-tab]').forEach(function (el) {
-      ['eid','iid','iidSelector','iidSection','iidSlide','iidTab'].forEach(function (k) { delete el.dataset[k]; });
+
+    var msgInput = qs('#etb-commit-msg');
+    var message  = msgInput ? msgInput.value.trim() : '';
+    if (!message) {
+      var ts = new Date().toISOString().slice(0, 16).replace('T', ' ');
+      message = 'Editor: visual save ' + ts;
+    }
+
+    var html = buildCleanHTML();
+
+    setStatus('Saving…', 'pending');
+
+    fetch(SAVE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ html: html, message: message })
+    })
+    .then(function (res) { return res.json(); })
+    .then(function (r) {
+      if (r.ok) {
+        setStatus('✓ Saved & committed', 'ok');
+        if (msgInput) msgInput.value = '';
+      } else {
+        setStatus('✗ ' + (r.error || r.step || 'Error'), 'error');
+      }
+    })
+    .catch(function (err) {
+      setStatus('✗ Server unreachable — run save-server.py', 'error');
     });
+  }
+
+  function buildCleanHTML() {
+    var clone = doc.documentElement.cloneNode(true);
+    /* NOTE: we deliberately KEEP the [data-editor-remove] script + link
+     * tags so the working file stays editable after save. They are only
+     * removed manually for final client delivery. */
+    /* Strip editor-specific runtime attributes */
+    var editorAttrs = ['eid','iid','iidSelector','iidSection','iidSlide','iidTab'];
+    clone.querySelectorAll('[data-eid],[data-iid]').forEach(function (el) {
+      editorAttrs.forEach(function (k) { delete el.dataset[k]; });
+    });
+    /* Strip editor classes */
     clone.querySelectorAll('.editor-selected,.editor-in-selection,.editor-typing,.editor-img-selected').forEach(function (el) {
       el.classList.remove('editor-selected','editor-in-selection','editor-typing','editor-img-selected');
     });
-    clone.querySelectorAll('.editor-pin,#editor-toolbar,#editor-banner').forEach(function (el) { el.parentNode && el.parentNode.removeChild(el); });
-    clone.removeAttribute('data-editor'); clone.removeAttribute('data-editor-pin');
-    var html = '<!doctype html>\n' + clone.outerHTML;
-    var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-    var a = doc.createElement('a');
-    a.href = URL.createObjectURL(blob); a.download = 'natgeo-edited.html';
-    doc.body.appendChild(a); a.click(); doc.body.removeChild(a);
-    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+    /* Remove injected UI */
+    clone.querySelectorAll('.editor-pin,#editor-toolbar,#editor-banner').forEach(function (el) {
+      el.parentNode && el.parentNode.removeChild(el);
+    });
+    clone.removeAttribute('data-editor');
+    clone.removeAttribute('data-editor-pin');
+    return '<!doctype html>\n' + clone.outerHTML;
+  }
+
+  /* ------------------------------------------------
+   * Status display
+   * ---------------------------------------------- */
+
+  var statusTimer = null;
+
+  function setStatus(msg, state) {
+    var el = qs('#etb-status');
+    if (!el) return;
+    el.textContent = msg;
+    el.className   = 'etb-status etb-status--' + (state || 'ok');
+    el.hidden      = false;
+    clearTimeout(statusTimer);
+    if (state !== 'pending') {
+      statusTimer = setTimeout(function () { el.hidden = true; }, 4000);
+    }
   }
 
   /* ------------------------------------------------
@@ -659,7 +654,7 @@
       '</div>' +
 
       /* Text element controls */
-      '<div class="etb-group" id="etb-text-group">' +
+      '<div class="etb-group">' +
         '<span class="etb-hint" id="etb-hint">click text or image</span>' +
         '<span class="etb-el-name" id="etb-el-name" hidden></span>' +
         '<button id="etb-edit-text" data-ea="edit-text" hidden>Edit Text</button>' +
@@ -671,16 +666,16 @@
         '</div>' +
         '<div class="etb-row" id="etb-nudge-row" hidden>' +
           '<span class="etb-section-label">Nudge</span>' +
-          '<button data-ea="nudge-left" title="Alt+←">←</button>' +
-          '<button data-ea="nudge-up"   title="Alt+↑">↑</button>' +
-          '<button data-ea="nudge-down" title="Alt+↓">↓</button>' +
+          '<button data-ea="nudge-left"  title="Alt+←">←</button>' +
+          '<button data-ea="nudge-up"    title="Alt+↑">↑</button>' +
+          '<button data-ea="nudge-down"  title="Alt+↓">↓</button>' +
           '<button data-ea="nudge-right" title="Alt+→">→</button>' +
           '<span id="etb-nudge-val">0, 0</span>' +
         '</div>' +
         '<button class="etb-btn-danger" data-ea="reset" id="etb-reset" hidden>Reset</button>' +
       '</div>' +
 
-      /* Image brief panel */
+      /* Image brief */
       '<div class="etb-group etb-group--img" id="etb-img-group" hidden>' +
         '<span class="etb-section-label">🖼</span>' +
         '<span id="etb-img-filename" class="etb-img-filename"></span>' +
@@ -690,23 +685,35 @@
         '<button id="etb-img-remove" data-ea="img-remove" hidden class="etb-btn-danger">Remove</button>' +
       '</div>' +
 
-      /* Coordinate + pins */
+      /* Coords + pins */
       '<div class="etb-group">' +
         '<span id="etb-coords" class="etb-coords">— —</span>' +
         '<button id="etb-pin-toggle" data-ea="pin-toggle">📍 Pin</button>' +
-        '<button id="etb-pin-clear"  data-ea="pin-clear"  hidden>Clear pins</button>' +
+        '<button id="etb-pin-clear"  data-ea="pin-clear" hidden>Clear</button>' +
       '</div>' +
 
-      /* Global */
+      /* Save & Commit */
+      '<div class="etb-group etb-group--save">' +
+        '<input id="etb-commit-msg" class="etb-commit-msg" type="text" ' +
+          'placeholder="commit message (optional)" autocomplete="off">' +
+        '<button id="etb-save" data-ea="save" class="etb-btn-save">Save &amp; Commit</button>' +
+        '<span id="etb-status" class="etb-status" hidden></span>' +
+      '</div>' +
+
+      /* Brief + reset */
       '<div class="etb-group">' +
         '<button class="etb-btn-danger" data-ea="reset-all">Reset all</button>' +
-        '<button data-ea="export-html">Export HTML</button>' +
         '<button id="etb-export-brief" data-ea="export-brief" class="etb-btn-brief">' +
           'Export Brief <span id="etb-brief-badge" class="etb-badge" hidden>0</span>' +
         '</button>' +
       '</div>';
 
-    t.addEventListener('mousedown', function (e) { e.preventDefault(); });
+    t.addEventListener('mousedown', function (e) {
+      /* Allow typing in text inputs without stealing focus */
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      e.preventDefault();
+    });
+
     t.addEventListener('click', function (e) {
       var btn = e.target.closest('[data-ea]');
       if (!btn) return;
@@ -723,7 +730,7 @@
         case 'nudge-down':   nudgeAll(0,  step); break;
         case 'reset':        resetSelection(); break;
         case 'reset-all':    resetAll(); break;
-        case 'export-html':  exportHTML(); break;
+        case 'save':         saveAndCommit(); break;
         case 'export-brief': exportBrief(); break;
         case 'pin-toggle':   setPinMode(!pinMode); break;
         case 'pin-clear':    clearAllPins(); break;
@@ -732,11 +739,10 @@
       }
     });
 
-    /* Allow typing in the note input without triggering editor shortcuts */
-    var noteInput = t.querySelector('#etb-img-note');
-    if (noteInput) {
-      noteInput.addEventListener('keydown', function (e) { e.stopPropagation(); });
-    }
+    /* Prevent editor shortcuts while typing in inputs */
+    t.querySelectorAll('input').forEach(function (inp) {
+      inp.addEventListener('keydown', function (e) { e.stopPropagation(); });
+    });
 
     doc.body.appendChild(t);
     return t;
@@ -750,7 +756,6 @@
     var multi  = count > 1;
     var hasImg = !!activeImg;
 
-    /* Text controls */
     var hint        = qs('#etb-hint');
     var elName      = qs('#etb-el-name');
     var editTextBtn = qs('#etb-edit-text');
@@ -760,8 +765,7 @@
     var sizeVal     = qs('#etb-size-val');
     var nudgeVal    = qs('#etb-nudge-val');
 
-    var showHint = !hasEl && !hasImg;
-    if (hint)        hint.hidden        = !showHint;
+    if (hint)        hint.hidden        = hasEl || hasImg;
     if (elName)      elName.hidden      = !hasEl;
     if (editTextBtn) editTextBtn.hidden = !hasEl || multi;
     if (sizeRow)     sizeRow.hidden     = !hasEl || multi || isTyping;
@@ -798,19 +802,15 @@
 
     if (imgGroup) imgGroup.hidden = !hasImg;
     if (hasImg) {
-      var src = getImgSrc(activeImg);
-      var fname = src.split('/').pop();
+      var fname = getImgSrc(activeImg).split('/').pop();
       if (imgFilename) imgFilename.textContent = fname;
-
       var inBrief = isInBrief(activeImg);
-      if (imgAdd)    { imgAdd.textContent = inBrief ? 'Update Note' : 'Add to Brief'; }
-      if (imgRemove) { imgRemove.hidden = !inBrief; }
-
-      /* Pre-fill note if already in brief */
-      if (imgNote && inBrief) {
-        var existing = briefItems.find(function (b) { return b.iid === activeImg.dataset.iid; });
-        if (existing && !imgNote.value) imgNote.value = existing.note || '';
-      } else if (imgNote && !inBrief) {
+      if (imgAdd)    imgAdd.textContent = inBrief ? 'Update' : 'Add to Brief';
+      if (imgRemove) imgRemove.hidden   = !inBrief;
+      if (imgNote && inBrief && !imgNote.value) {
+        var ex = briefItems.filter(function (b) { return b.iid === activeImg.dataset.iid; })[0];
+        if (ex) imgNote.value = ex.note || '';
+      } else if (imgNote && !inBrief && !imgNote.value) {
         imgNote.value = '';
       }
     }
@@ -839,7 +839,7 @@
   }
 
   /* ------------------------------------------------
-   * Coordinate tracking
+   * Coordinate tracking + pin drops
    * ---------------------------------------------- */
 
   function initCoordTracking() {
@@ -886,11 +886,10 @@
 
     if (e.key === 'Escape') {
       e.preventDefault();
-      if (pinMode)  { setPinMode(false); return; }
-      if (isTyping) { exitTyping();      return; }
-      if (activeImg){ deselectImage();   return; }
-      deactivateAll();
-      return;
+      if (pinMode)  { setPinMode(false);  return; }
+      if (isTyping) { exitTyping();       return; }
+      if (activeImg){ deselectImage();    return; }
+      deactivateAll(); return;
     }
 
     if (!isTyping && selectedEls.length && e.altKey && !e.ctrlKey && !e.metaKey) {
@@ -923,22 +922,16 @@
     if (!isOn) return;
     if (toolbar && toolbar.contains(e.target)) return;
 
-    /* Image click */
     var pic = e.target.closest('picture[data-iid]');
     if (pic && !e.target.dataset.eid) {
-      deactivateAll();
-      selectImage(pic);
-      return;
+      deactivateAll(); selectImage(pic); return;
     }
 
-    /* Deselect image if clicked outside */
     if (activeImg && !activeImg.contains(e.target)) deselectImage();
 
-    /* Deselect text if clicked outside */
     if (selectedEls.length) {
       if (isTyping && activeEl && activeEl.contains(e.target)) return;
-      var inAny = selectedEls.some(function (el) { return el.contains(e.target); });
-      if (!inAny) deactivateAll();
+      if (!selectedEls.some(function (el) { return el.contains(e.target); })) deactivateAll();
     }
   }
 
@@ -970,7 +963,7 @@
 
     window.__editor = {
       undo: undo, redo: redo, resetAll: resetAll,
-      exportHTML: exportHTML, exportBrief: exportBrief,
+      saveAndCommit: saveAndCommit, exportBrief: exportBrief,
       store: store, brief: briefItems, pins: pins
     };
   });

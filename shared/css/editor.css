@@ -404,3 +404,71 @@ picture.editor-img-selected {
   margin-left: 0.3em;
   vertical-align: middle;
 }
+
+/* --------------------------------------------------
+ * Save & Commit group
+ * -------------------------------------------------- */
+
+.etb-group--save {
+  gap: 0.4rem;
+}
+
+.etb-commit-msg {
+  background: rgba(244, 239, 230, 0.08);
+  border: 1px solid rgba(244, 239, 230, 0.2);
+  border-radius: 3px;
+  color: rgba(244, 239, 230, 0.9);
+  font-family: ui-monospace, 'SF Mono', monospace;
+  font-size: 0.68rem;
+  padding: 0.2rem 0.5rem;
+  width: 14rem;
+  outline: none;
+}
+
+.etb-commit-msg:focus {
+  border-color: rgba(130, 200, 130, 0.7);
+  background: rgba(244, 239, 230, 0.12);
+}
+
+.etb-commit-msg::placeholder {
+  opacity: 0.35;
+}
+
+.etb-btn-save {
+  border-color: rgba(130, 200, 130, 0.6) !important;
+  color: rgba(150, 220, 160, 0.95) !important;
+  font-weight: bold;
+}
+
+.etb-btn-save:hover {
+  background: rgba(130, 200, 130, 0.18) !important;
+}
+
+/* --------------------------------------------------
+ * Status readout
+ * -------------------------------------------------- */
+
+.etb-status {
+  font-size: 0.65rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 3px;
+  white-space: nowrap;
+  max-width: 18rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.etb-status--pending {
+  color: rgba(230, 200, 120, 0.95);
+  background: rgba(230, 200, 120, 0.12);
+}
+
+.etb-status--ok {
+  color: rgba(150, 220, 160, 0.95);
+  background: rgba(130, 200, 130, 0.15);
+}
+
+.etb-status--error {
+  color: rgba(230, 130, 110, 0.95);
+  background: rgba(200, 90, 70, 0.18);
+}
