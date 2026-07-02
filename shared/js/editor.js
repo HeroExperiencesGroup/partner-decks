@@ -903,17 +903,18 @@
       img.setAttribute('src', img.getAttribute('src').replace(/\?v=\d+$/, ''));
     });
 
-    /* --- Remove deck.js runtime artifacts so the saved source stays clean ---
-     * deck.js wraps each .section in a .slide-viewport, applies inline
-     * transforms for letterbox scaling, tags loaded images .is-loaded, and
-     * leaves contenteditable="false" behind. None of that belongs on disk;
-     * deck.js re-creates it on load. Unwrap + strip it all. */
-    clone.querySelectorAll('.slide-viewport').forEach(function (vp) {
-      var parent = vp.parentNode;
-      if (!parent) return;
-      while (vp.firstChild) parent.insertBefore(vp.firstChild, vp);
-      parent.removeChild(vp);
-    });
+    /* --- Remove presentation.js runtime artifacts so saved source is clean.
+     * The .slide-viewport wrappers ARE the intended slide layers now — keep
+     * them. Strip only runtime state the engine re-creates on load. */
+    clone.querySelectorAll('.slide.active').forEach(function (s) { s.classList.remove('active'); });
+    clone.querySelectorAll('#stage').forEach(function (st) { st.removeAttribute('style'); });
+    clone.querySelectorAll('#dots, #slideRail').forEach(function (el) { el.replaceChildren(); });
+    var prog = clone.querySelector('#progress'); if (prog) prog.removeAttribute('style');
+    var cnt  = clone.querySelector('#counter');  if (cnt)  cnt.textContent = '1 / 1';
+    var xfs  = clone.querySelector('#exitFs');   if (xfs)  xfs.removeAttribute('style');
+    var spl  = clone.querySelector('#splash');
+    if (spl) { spl.classList.remove('out'); spl.removeAttribute('style'); }
+
     clone.querySelectorAll('.section').forEach(function (s) {
       s.style.removeProperty('transform');
       s.style.removeProperty('transition');
@@ -923,9 +924,15 @@
     clone.querySelectorAll('img.is-loaded').forEach(function (i) { i.classList.remove('is-loaded'); });
     clone.querySelectorAll('[contenteditable]').forEach(function (el) { el.removeAttribute('contenteditable'); });
 
+    /* Runtime body classes from the presentation engine */
+    ['mobile-presenting','mobile-portrait','mobile-zooming','mobile-zoomed','data-review']
+      .forEach(function (c) { clone.querySelector('body') && clone.querySelector('body').classList.remove(c); });
+
     clone.removeAttribute('data-editor');
     clone.removeAttribute('data-editor-pin');
     clone.removeAttribute('data-editor-region');
+    var b = clone.querySelector('body');
+    if (b) { b.removeAttribute('data-review'); }
     return '<!doctype html>\n' + clone.outerHTML;
   }
 

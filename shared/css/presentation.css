@@ -1,0 +1,137 @@
+/* presentation.css — click-through presentation shell
+ *
+ * Adapted from the reusable splash + navigation kit. Adopts: splash,
+ * stacked-slide navigation, HUD (progress / dots / counter / rail),
+ * fullscreen, and mobile pinch-zoom. Splash restyled to the deck's
+ * bone / ink / deep-sand / rust palette.
+ *
+ * Structure it expects:
+ *   #splash
+ *   #deck > #stage > .slide-viewport.slide[data-slide] > section.section
+ *   #deck > #hud, #progress, #dots, #counter, #slideRail, #exitFs
+ *
+ * The .slide-viewport wrappers double as the kit's .slide layers, so the
+ * existing `.slide-viewport > .section` layout rules keep working.
+ */
+
+:root{
+  --pz-bone:#f4efe6;
+  --pz-bone-dim:rgba(244,239,230,.62);
+  --pz-ink:#1c1c1a;
+  --pz-sand:#b89968;
+  --pz-sand-hi:#d8bd8a;
+  --pz-rust:#8b4a2b;
+  --pz-stone:#a99e8c;
+  --pz-line:rgba(244,239,230,.14);
+  --pz-line-sand:rgba(184,153,104,.34);
+  --deck-width:1920px;
+  --deck-height:1080px;
+}
+
+html,body{height:100%}
+body{overflow:hidden;background:var(--pz-ink)}
+
+/* ---------- Splash ---------- */
+#splash{
+  position:fixed;inset:0;z-index:1000;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:5vh 6vw;
+  background:
+    radial-gradient(ellipse at 50% 38%,rgba(139,74,43,.22) 0%,transparent 60%),
+    linear-gradient(160deg,#211d17 0%,#2c2820 48%,#15120d 100%);
+  transition:opacity .6s ease;
+}
+#splash.out{opacity:0;pointer-events:none}
+.sp-label{font-family:var(--font-meta,sans-serif);font-weight:500;font-size:clamp(9px,.78vw,13px);letter-spacing:.42em;text-transform:uppercase;color:var(--pz-sand);opacity:.9;margin-bottom:clamp(26px,5vh,54px)}
+.sp-rule{width:44px;height:1px;background:var(--pz-line-sand);margin-bottom:clamp(22px,3.4vh,40px)}
+.sp-title{font-family:var(--font-display,serif);font-weight:400;font-size:clamp(34px,5.4vw,88px);line-height:1.02;letter-spacing:.01em;color:var(--pz-bone);margin-bottom:clamp(14px,2vh,22px);max-width:20ch}
+.sp-sub{font-family:var(--font-meta,sans-serif);font-weight:400;font-size:clamp(10px,1vw,15px);line-height:1.5;letter-spacing:.24em;text-transform:uppercase;color:var(--pz-bone-dim);max-width:680px;margin:0 auto clamp(34px,5vh,58px)}
+.sp-toggle{display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:clamp(30px,4.6vh,52px)}
+.sp-toggle-row{display:flex;align-items:center;gap:16px}
+.sp-toggle-label{font-family:var(--font-meta,sans-serif);font-weight:600;font-size:clamp(9px,.72vw,12px);letter-spacing:.26em;text-transform:uppercase;color:var(--pz-bone)}
+.switch{position:relative;width:54px;height:26px;flex-shrink:0;cursor:pointer}
+.switch input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:2}
+.switch .track{position:absolute;inset:0;border-radius:13px;background:rgba(244,239,230,.12);border:1px solid var(--pz-line);transition:.25s}
+.switch .thumb{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--pz-stone);transition:.25s}
+.switch input:checked ~ .track{background:rgba(184,153,104,.3);border-color:var(--pz-line-sand)}
+.switch input:checked ~ .thumb{left:33px;background:var(--pz-sand-hi)}
+.sp-toggle-state{font-family:var(--font-meta,sans-serif);font-weight:500;font-size:clamp(8px,.62vw,11px);letter-spacing:.18em;text-transform:uppercase;color:var(--pz-sand);min-width:34px;text-align:left}
+.sp-toggle-desc{font-family:var(--font-meta,sans-serif);font-weight:300;font-size:clamp(9px,.68vw,12.5px);line-height:1.6;letter-spacing:.03em;color:var(--pz-bone-dim);max-width:540px}
+.sp-btn{
+  font-family:var(--font-meta,sans-serif);
+  background:none;border:1px solid var(--pz-line-sand);border-radius:2px;
+  color:var(--pz-sand-hi);cursor:pointer;font-weight:600;
+  font-size:clamp(9px,.72vw,12px);letter-spacing:.3em;text-transform:uppercase;
+  padding:clamp(14px,1.9vh,22px) clamp(34px,3.2vw,56px);transition:all .22s;
+}
+.sp-btn:hover{background:rgba(184,153,104,.14);border-color:var(--pz-sand);color:#fff}
+.sp-hint{font-family:var(--font-meta,sans-serif);font-weight:300;font-size:clamp(8px,.6vw,11px);letter-spacing:.16em;text-transform:uppercase;color:var(--pz-stone);opacity:.75;margin-top:clamp(18px,2.6vh,30px)}
+.sp-device-note{font-family:var(--font-meta,sans-serif);font-weight:300;font-size:clamp(8px,.62vw,11px);line-height:1.55;letter-spacing:.1em;text-transform:uppercase;color:var(--pz-bone-dim);max-width:560px;margin-top:14px;opacity:.72}
+
+/* ---------- Deck + fixed design stage ---------- */
+#deck{position:fixed;inset:0;display:none;background:var(--pz-ink);touch-action:manipulation;overscroll-behavior:none}
+#deck.active{display:block}
+#stage{
+  position:absolute;left:0;top:0;
+  width:var(--deck-width);height:var(--deck-height);
+  transform:
+    translate(var(--stage-x,0px),var(--stage-y,0px))
+    rotate(var(--stage-rotate,0deg))
+    scale(var(--stage-scale,1));
+  transform-origin:0 0;will-change:transform;
+}
+
+/* The .slide-viewport wrappers become the stacked, cross-faded slide layers.
+ * Override their previous scroll-snap sizing. The inner .section keeps all
+ * its existing `.slide-viewport > .section` layout rules. */
+#stage > .slide-viewport.slide{
+  position:absolute;inset:0;
+  display:block;
+  width:var(--deck-width);height:var(--deck-height);
+  min-height:0;
+  overflow:hidden;
+  opacity:0;pointer-events:none;
+  scroll-snap-align:none;
+  transition:opacity .55s ease;
+  background:var(--pz-ink);
+}
+#stage > .slide-viewport.slide.active{opacity:1;pointer-events:auto}
+
+/* Progressive reveal (unused unless slides add data-step, but kept for parity) */
+[data-step]{opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform .55s ease}
+[data-step].shown{opacity:1;transform:none}
+
+/* ---------- HUD ---------- */
+#hud{position:fixed;inset:0;z-index:900;pointer-events:none}
+#progress{position:fixed;top:0;left:0;height:2px;background:var(--pz-sand);width:0;transition:width .4s ease;z-index:902}
+#dots{position:fixed;bottom:18px;left:0;right:0;display:flex;justify-content:center;gap:7px;z-index:901;pointer-events:none}
+.dot{width:6px;height:6px;border-radius:50%;background:rgba(184,153,104,.24);transition:all .3s}
+.dot.cur{background:var(--pz-sand);transform:scale(1.5)}
+.dot.done{background:rgba(184,153,104,.5)}
+#counter{position:fixed;bottom:22px;right:30px;z-index:901;font-family:var(--font-meta,sans-serif);font-weight:500;font-size:11px;letter-spacing:.24em;color:var(--pz-stone)}
+#exitFs{position:fixed;bottom:18px;left:26px;z-index:903;display:none;background:none;border:none;color:var(--pz-stone);cursor:pointer;font:500 10px/1 sans-serif;letter-spacing:.2em;text-transform:uppercase;padding:6px;pointer-events:auto;opacity:.7;transition:opacity .2s}
+#exitFs:hover{opacity:1}
+
+/* ---------- Slide rail (right-edge scrubber) ---------- */
+#slideRail{position:fixed;top:50%;right:0;width:132px;height:34vh;min-height:220px;max-height:360px;z-index:904;pointer-events:none;transform:translateY(-50%)}
+.rail-item{position:absolute;right:18px;top:var(--rail-y);width:94px;height:18px;display:flex;align-items:center;justify-content:flex-end;gap:10px;border:0;background:none;color:var(--pz-stone);font:500 11px/1 sans-serif;cursor:pointer;opacity:var(--rail-opacity,0);pointer-events:none;transform:translateY(-50%) translateX(var(--rail-shift,10px));transition:opacity .08s linear,transform .08s linear}
+.rail-item:focus-visible{outline:1px solid var(--pz-sand-hi);outline-offset:3px;opacity:1;pointer-events:auto;transform:translateY(-50%) translateX(-3px)}
+.rail-item.is-visible{pointer-events:auto}
+.rail-num{width:30px;text-align:right;font-weight:700;font-size:11px;line-height:1;letter-spacing:.18em;color:rgba(244,239,230,.84);text-shadow:0 1px 8px rgba(0,0,0,.7)}
+.rail-tick{display:block;width:40px;height:2px;border-radius:2px;background:rgba(244,239,230,.68);box-shadow:0 0 10px rgba(184,153,104,.18);transform:scaleX(var(--rail-scale,.4));transform-origin:right center}
+.rail-item.is-hot .rail-num{color:#fff8df;text-shadow:0 1px 10px rgba(0,0,0,.9),0 0 12px rgba(216,189,138,.45)}
+.rail-item.is-hot .rail-tick{height:3px;background:#fff0bd;box-shadow:0 0 18px rgba(216,189,138,.52)}
+.rail-item.cur .rail-num{color:var(--pz-sand-hi)}
+.rail-item.cur .rail-tick{height:3px;background:var(--pz-sand-hi);box-shadow:0 0 14px rgba(216,189,138,.34)}
+.rail-item:hover{opacity:1;transform:translateY(-50%) translateX(-4px)}
+
+/* ---------- Mobile zoom ---------- */
+body.mobile-presenting{overscroll-behavior:none;touch-action:none}
+body.mobile-presenting #deck{touch-action:none}
+body.mobile-presenting #stage{transition:transform .16s ease-out}
+body.mobile-presenting.mobile-zooming #stage,
+body.mobile-presenting.mobile-zoomed #stage{transition:none}
+
+@media (prefers-reduced-motion:reduce){
+  #stage > .slide-viewport.slide,[data-step]{transition-duration:.15s}
+}
